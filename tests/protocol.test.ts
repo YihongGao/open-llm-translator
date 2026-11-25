@@ -53,11 +53,13 @@ describe("buildUserMessage", () => {
 });
 
 describe("buildSystemPrompt", () => {
-  // Coarse tripwire only: Sonnet 5.5 caches prefixes of >= 512 tokens, and
-  // char-to-token ratios vary by language. The exact check is
-  // `await llmtMeasurePrompts()` in the service worker console (count_tokens).
-  it.each(TARGET_LANGUAGES.map((l) => l.tag))("is not drastically shortened for %s", (tag) => {
-    expect(buildSystemPrompt(tag).length).toBeGreaterThan(2000);
+  // Tripwire for the 512-token minimum cacheable prefix on Sonnet 5.5.
+  // Calibrated with count_tokens (2026-11-26): en prompt 1,753 chars = ~595
+  // tokens, so 512 tokens ≈ 1,510 chars; 1,600 leaves a small margin. The
+  // exact check is `node scripts/e2e.mjs measure` (or llmtMeasurePrompts()
+  // in the service worker console).
+  it.each(TARGET_LANGUAGES.map((l) => l.tag))("stays above the cacheable size for %s", (tag) => {
+    expect(buildSystemPrompt(tag).length).toBeGreaterThan(1600);
   });
 
   it("is deterministic (byte-identical prefix for caching)", () => {
