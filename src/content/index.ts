@@ -48,6 +48,10 @@ interface SegState {
   /** Translation equals the source (proper noun, code): nothing is shown. */
   hidden: boolean;
   retries: number;
+  /** Provenance, exposed as data-llmt-* attributes for inspection. */
+  source?: "cache" | "api";
+  model?: string;
+  fallback?: boolean;
 }
 
 if (!window.__llmtLoaded) {
@@ -177,6 +181,7 @@ function main(): void {
     if (seg.status === "done") {
       node.textContent = seg.translation ?? "";
       node.removeAttribute("title");
+      setProvenance(seg);
     } else if (seg.status === "error") {
       node.textContent = "⚠";
     } else {
@@ -242,12 +247,48 @@ function main(): void {
     return p;
   }
 
+  /**
+   * Which model produced a translation, inspectable with right-click → Inspect:
+   * data-llmt-model, data-llmt-source (api | cache), data-llmt-fallback.
+   */
+  function setProvenance(seg: SegState): void {
+    const node = seg.node;
+    if (!node) return;
+    if (seg.source) node.setAttribute("data-llmt-source", seg.source);
+    if (seg.model) node.setAttribute("data-llmt-model", seg.model);
+    else node.removeAttribute("data-llmt-model");
+    if (seg.fallback) node.setAttribute("data-llmt-fallback", "true");
+    else node.removeAttribute("data-llmt-fallback");
+  }
+
+  /** API results waiting for batch-done to learn which model served them. */
+  const awaitingModel = new Map<string, SegState[]>();
+
   function onEvent(ev: TranslateEvent): void {
+    if (ev.type === "batch-done") {
+      const segs = awaitingModel.get(ev.batchId) ?? [];
+      awaitingModel.delete(ev.batchId);
+      if (!ev.servedModel) return;
+      for (const seg of segs) {
+        seg.model = ev.servedModel;
+        seg.fallback = ev.fallback;
+        setProvenance(seg);
+      }
+      return;
+    }
     if (ev.type === "segment") {
       const seg = byId.get(ev.id);
       if (!seg) return;
       seg.status = "done";
       seg.translation = ev.text;
+      seg.source = ev.source;
+      seg.model = ev.model;
+      seg.fallback = false;
+      if (ev.source === "api") {
+        const list = awaitingModel.get(ev.batchId);
+        if (list) list.push(seg);
+        else awaitingModel.set(ev.batchId, [seg]);
+      }
       if (isSameText(ev.text, seg.candidate.text)) {
         // e.g. "Kubelet" -> "Kubelet": showing it would just duplicate the heading.
         seg.hidden = true;
@@ -341,6 +382,7 @@ function main(): void {
     byObserved.clear();
     byAnchor = new WeakMap();
     queue.length = 0;
+    awaitingModel.clear();
     // Replies to batches already in flight carry ids no longer in byId and are ignored.
     shownPageErrors.clear();
     hideToast();

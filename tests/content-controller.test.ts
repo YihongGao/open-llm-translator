@@ -76,13 +76,22 @@ describe("content controller", () => {
 
   it("renders a translation", () => {
     const seg = posted[0]!.segments[0]!;
-    toPage({ type: "segment", batchId: posted[0]!.batchId, id: seg.id, text: "你好世界，這是第一段。" });
+    toPage({ type: "segment", batchId: posted[0]!.batchId, id: seg.id, text: "你好世界，這是第一段。", source: "api" });
     expect(document.querySelector("p llmt-translation")!.textContent).toBe("你好世界，這是第一段。");
+  });
+
+  it("labels API translations with the served model once the batch completes", () => {
+    const node = document.querySelector("p llmt-translation")!;
+    expect(node.getAttribute("data-llmt-source")).toBe("api");
+    expect(node.hasAttribute("data-llmt-model")).toBe(false); // not known until batch-done
+    toPage({ type: "batch-done", batchId: posted[0]!.batchId, servedModel: "claude-sonnet-5", fallback: true });
+    expect(node.getAttribute("data-llmt-model")).toBe("claude-sonnet-5");
+    expect(node.getAttribute("data-llmt-fallback")).toBe("true");
   });
 
   it("shows nothing when the model returns the source unchanged (proper nouns)", () => {
     const seg = posted[0]!.segments[2]!;
-    toPage({ type: "segment", batchId: posted[0]!.batchId, id: seg.id, text: "Kubelet" });
+    toPage({ type: "segment", batchId: posted[0]!.batchId, id: seg.id, text: "Kubelet", source: "api" });
     expect(document.querySelector("h4")!.innerHTML).toBe("Kubelet");
   });
 

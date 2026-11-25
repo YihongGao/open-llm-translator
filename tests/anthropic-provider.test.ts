@@ -12,6 +12,8 @@ let lastBody: any;
 let lastHeaders: IncomingHttpHeaders;
 let reply: string[] = [];
 let stopReason = "end_turn";
+let servedModel: string | null = null; // null = echo the requested model
+let iterations: object[] | null = null;
 
 function sse(type: string, data: object): string {
   return `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
@@ -28,7 +30,7 @@ beforeAll(async () => {
       res.write(
         sse("message_start", {
           message: {
-            id: "msg_1", type: "message", role: "assistant", model: lastBody.model, content: [],
+            id: "msg_1", type: "message", role: "assistant", model: servedModel ?? lastBody.model, content: [],
             stop_reason: null, stop_sequence: null, usage: { input_tokens: 10, output_tokens: 0 },
           },
         }),
@@ -36,7 +38,7 @@ beforeAll(async () => {
       res.write(sse("content_block_start", { index: 0, content_block: { type: "text", text: "" } }));
       for (const text of reply) res.write(sse("content_block_delta", { index: 0, delta: { type: "text_delta", text } }));
       res.write(sse("content_block_stop", { index: 0 }));
-      res.write(sse("message_delta", { delta: { stop_reason: stopReason, stop_sequence: null }, usage: { output_tokens: 5 } }));
+      res.write(sse("message_delta", { delta: { stop_reason: stopReason, stop_sequence: null }, usage: { output_tokens: 5, ...(iterations ? { iterations } : {}) } }));
       res.end(sse("message_stop", {}));
     });
   });
@@ -68,7 +70,13 @@ describe("AnthropicProvider", () => {
     expect(events).toEqual([
       { kind: "segment", index: 0, text: "文件" },
       { kind: "segment", index: 1, text: "Kubernetes 部落格" },
-      { kind: "end", reason: "complete", usage: { inputTokens: 10, outputTokens: 5 } },
+      {
+        kind: "end",
+        reason: "complete",
+        usage: { inputTokens: 10, outputTokens: 5 },
+        servedModel: "claude-sonnet-5-5",
+        fallback: false,
+      },
     ]);
     expect(lastBody).toMatchObject({
       model: "claude-sonnet-5-5",
@@ -90,9 +98,29 @@ describe("AnthropicProvider", () => {
     const events = await collect(new AnthropicProvider("sk-test", "claude-haiku-5-5"), ["ok", "bad"]);
     expect(events).toEqual([
       { kind: "segment", index: 0, text: "好" },
-      { kind: "end", reason: "refusal", usage: { inputTokens: 10, outputTokens: 5 } },
+      {
+        kind: "end",
+        reason: "refusal",
+        usage: { inputTokens: 10, outputTokens: 5 },
+        servedModel: "claude-haiku-5-5",
+        fallback: false,
+      },
     ]);
     expect(lastBody.fallbacks).toBeUndefined();
     expect(lastHeaders["anthropic-beta"]).toBeUndefined();
+  });
+
+  it("reports the served model and flags a refusal fallback", async () => {
+    reply = ["[1] 好\n"];
+    stopReason = "end_turn";
+    servedModel = "claude-sonnet-5";
+    iterations = [
+      { type: "message", input_tokens: 10, output_tokens: 0 },
+      { type: "fallback_message", input_tokens: 10, output_tokens: 5 },
+    ];
+    const events = await collect(new AnthropicProvider("sk-test", "claude-sonnet-5-5"), ["ok"]);
+    expect(events.at(-1)).toMatchObject({ kind: "end", servedModel: "claude-sonnet-5", fallback: true });
+    servedModel = null;
+    iterations = null;
   });
 });

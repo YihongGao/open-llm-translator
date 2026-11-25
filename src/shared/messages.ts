@@ -26,7 +26,15 @@ export interface TranslateRequest {
 
 // background -> content (over Port)
 export type TranslateEvent =
-  | { type: "segment"; batchId: string; id: string; text: string }
+  | {
+      type: "segment";
+      batchId: string;
+      id: string;
+      text: string;
+      source: "cache" | "api";
+      /** Set for cache hits; for API results the served model arrives on batch-done. */
+      model?: string;
+    }
   | {
       type: "segment-error";
       batchId: string;
@@ -41,7 +49,13 @@ export type TranslateEvent =
       /** The fix is in the options page (offer an "open settings" action). */
       settings: boolean;
     }
-  | { type: "batch-done"; batchId: string };
+  | {
+      type: "batch-done";
+      batchId: string;
+      /** Present when the batch made an API call that completed. */
+      servedModel?: string;
+      fallback?: boolean;
+    };
 
 // extension -> content (chrome.tabs.sendMessage). Content scripts cannot read
 // chrome.storage (see background setAccessLevel), so the settings they need

@@ -3,11 +3,15 @@
 //
 // Key: SHA-256(model, targetLang, source text). No eviction yet.
 
+import type { CacheEntry } from "./translator";
+
 const DB_NAME = "llmt";
 const STORE = "translations";
 
 interface Entry {
   text: string;
+  /** Model that produced the translation (absent on entries written before it was recorded). */
+  model?: string;
   /** epoch ms; kept for a future eviction policy. */
   at: number;
 }
@@ -33,27 +37,30 @@ export async function cacheKey(model: string, targetLang: string, text: string):
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function cacheGetMany(keys: readonly string[]): Promise<Array<string | undefined>> {
+export async function cacheGetMany(keys: readonly string[]): Promise<Array<CacheEntry | undefined>> {
   const db = await openDb();
   const tx = db.transaction(STORE, "readonly");
   const store = tx.objectStore(STORE);
   return Promise.all(
     keys.map(
       (k) =>
-        new Promise<string | undefined>((resolve, reject) => {
+        new Promise<CacheEntry | undefined>((resolve, reject) => {
           const req = store.get(k);
-          req.onsuccess = () => resolve((req.result as Entry | undefined)?.text);
+          req.onsuccess = () => {
+            const e = req.result as Entry | undefined;
+            resolve(e ? { text: e.text, model: e.model } : undefined);
+          };
           req.onerror = () => reject(req.error);
         }),
     ),
   );
 }
 
-export async function cachePut(key: string, text: string): Promise<void> {
+export async function cachePut(key: string, entry: CacheEntry): Promise<void> {
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).put({ text, at: Date.now() } satisfies Entry, key);
+    tx.objectStore(STORE).put({ ...entry, at: Date.now() } satisfies Entry, key);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });

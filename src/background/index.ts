@@ -84,6 +84,7 @@ async function handleTranslate(
       {
         provider,
         targetLang: settings.targetLang,
+        model: settings.model,
         cache: {
           key: (text) => cacheKey(settings.model, settings.targetLang, text),
           getMany: cacheGetMany,
@@ -102,7 +103,8 @@ async function handleTranslate(
       `[llmt] batch ${req.batchId}: ${stats.segments} segs, ${stats.unique} unique, ` +
         `${stats.cacheHits} cached, ${stats.sent} sent, ${stats.failed} failed, ${stats.ms} ms` +
         (stats.usage ? `, tokens in/out ${stats.usage.inputTokens}/${stats.usage.outputTokens}` : "") +
-        ` (${settings.model})`,
+        ` | requested ${settings.model}` +
+        (stats.servedModel ? ` → served ${stats.servedModel}${stats.fallback ? " (fallback)" : ""}` : ""),
     );
   }
 }

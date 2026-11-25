@@ -10,7 +10,15 @@ export interface ProviderRequest {
 export type ProviderEvent =
   | { kind: "segment"; index: number; text: string }
   /** Always the last event. `reason` explains why some segments may be missing. */
-  | { kind: "end"; reason: "complete" | "max_tokens" | "refusal"; usage?: TokenUsage };
+  | {
+      kind: "end";
+      reason: "complete" | "max_tokens" | "refusal";
+      usage?: TokenUsage;
+      /** Model that actually produced the output, as reported by the API. */
+      servedModel?: string;
+      /** A fallback model took over after the requested one declined. */
+      fallback?: boolean;
+    };
 
 export interface TokenUsage {
   inputTokens: number;

@@ -52,6 +52,9 @@ export class AnthropicProvider implements TranslationProvider {
       kind: "end",
       reason,
       usage: { inputTokens: final.usage.input_tokens, outputTokens: final.usage.output_tokens },
+      servedModel: final.model,
+      // The documented served-by signal: a fallback_message entry in usage.iterations.
+      fallback: (final.usage.iterations ?? []).some((it) => it.type === "fallback_message"),
     };
   }
 }
