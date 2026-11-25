@@ -75,7 +75,7 @@ async function handleTranslate(
   }
 
   const provider = new AnthropicProvider(settings.anthropicApiKey, settings.model);
-  await withSlot(() =>
+  const stats = await withSlot(() =>
     runBatch(
       req,
       {
@@ -93,6 +93,15 @@ async function handleTranslate(
       signal,
     ),
   );
+  // Visible in chrome://extensions -> Service Worker -> Console.
+  if (stats) {
+    console.info(
+      `[llmt] batch ${req.batchId}: ${stats.segments} segs, ${stats.unique} unique, ` +
+        `${stats.cacheHits} cached, ${stats.sent} sent, ${stats.failed} failed, ${stats.ms} ms` +
+        (stats.usage ? `, tokens in/out ${stats.usage.inputTokens}/${stats.usage.outputTokens}` : "") +
+        ` (${settings.model})`,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

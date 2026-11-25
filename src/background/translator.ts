@@ -2,7 +2,20 @@
 // Kept free of chrome.* APIs so it can be unit-tested with fakes.
 
 import type { TranslateEvent, TranslateRequest } from "../shared/messages";
-import type { TranslationProvider } from "./providers/types";
+import type { TokenUsage, TranslationProvider } from "./providers/types";
+
+/** Per-batch numbers for the service worker console. */
+export interface BatchStats {
+  segments: number;
+  /** Distinct source texts after dedupe. */
+  unique: number;
+  cacheHits: number;
+  /** Distinct texts sent to the provider (0 = no API call). */
+  sent: number;
+  failed: number;
+  usage?: TokenUsage;
+  ms: number;
+}
 
 export interface TranslationCache {
   key(text: string): Promise<string>;
@@ -30,8 +43,13 @@ const MISSING_REASON = {
  * `segment-error` event, followed by one `batch-done` — unless `signal` is
  * aborted (the page went away), in which case nothing more is emitted.
  */
-export async function runBatch(req: TranslateRequest, deps: BatchDeps, signal: AbortSignal): Promise<void> {
+export async function runBatch(
+  req: TranslateRequest,
+  deps: BatchDeps,
+  signal: AbortSignal,
+): Promise<BatchStats | null> {
   const { batchId } = req;
+  const started = Date.now();
 
   // Navigation menus and footers repeat the same strings; translate each once.
   const idsByText = new Map<string, string[]>();
@@ -45,9 +63,23 @@ export async function runBatch(req: TranslateRequest, deps: BatchDeps, signal: A
   const emitText = (text: string, translated: string) => {
     for (const id of idsByText.get(text) ?? []) deps.emit({ type: "segment", batchId, id, text: translated });
   };
+  const stats: BatchStats = {
+    segments: req.segments.length,
+    unique: uniqueTexts.length,
+    cacheHits: 0,
+    sent: 0,
+    failed: 0,
+    ms: 0,
+  };
   const emitError = (texts: readonly string[], message: string) => {
     const ids = texts.flatMap((t) => idsByText.get(t) ?? []);
+    stats.failed += texts.length;
     if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message });
+  };
+  const finish = (): BatchStats => {
+    deps.emit({ type: "batch-done", batchId });
+    stats.ms = Date.now() - started;
+    return stats;
   };
 
   const keys = await Promise.all(uniqueTexts.map((t) => deps.cache.key(t)));
@@ -61,12 +93,15 @@ export async function runBatch(req: TranslateRequest, deps: BatchDeps, signal: A
   const misses: number[] = [];
   uniqueTexts.forEach((text, i) => {
     const hit = cached[i];
-    if (hit !== undefined) emitText(text, hit);
-    else misses.push(i);
+    if (hit !== undefined) {
+      stats.cacheHits++;
+      emitText(text, hit);
+    } else misses.push(i);
   });
 
   if (misses.length > 0) {
     const missTexts = misses.map((i) => uniqueTexts[i]!);
+    stats.sent = missTexts.length;
     const done = new Set<number>();
     let reason: keyof typeof MISSING_REASON = "complete";
     try {
@@ -76,6 +111,7 @@ export async function runBatch(req: TranslateRequest, deps: BatchDeps, signal: A
       )) {
         if (ev.kind === "end") {
           reason = ev.reason;
+          stats.usage = ev.usage;
           continue;
         }
         done.add(ev.index);
@@ -84,20 +120,19 @@ export async function runBatch(req: TranslateRequest, deps: BatchDeps, signal: A
         void deps.cache.put(keys[misses[ev.index]!]!, ev.text).catch(() => {});
       }
     } catch (err) {
-      if (signal.aborted || deps.isAbort(err)) return;
+      if (signal.aborted || deps.isAbort(err)) return null;
       emitError(
         missTexts.filter((_, i) => !done.has(i)),
         deps.describeError(err),
       );
-      deps.emit({ type: "batch-done", batchId });
-      return;
+      return finish();
     }
-    if (signal.aborted) return;
+    if (signal.aborted) return null;
     emitError(
       missTexts.filter((_, i) => !done.has(i)),
       MISSING_REASON[reason],
     );
   }
 
-  deps.emit({ type: "batch-done", batchId });
+  return finish();
 }

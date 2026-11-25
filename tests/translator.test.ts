@@ -34,7 +34,7 @@ const req = (texts: string[]): TranslateRequest => ({
 
 async function run(r: TranslateRequest, provider: TranslationProvider, cache = memoryCache()) {
   const events: TranslateEvent[] = [];
-  await runBatch(
+  const stats = await runBatch(
     r,
     {
       provider,
@@ -46,7 +46,7 @@ async function run(r: TranslateRequest, provider: TranslationProvider, cache = m
     },
     new AbortController().signal,
   );
-  return { events, cache };
+  return { events, cache, stats };
 }
 
 const upper = (r: ProviderRequest): ProviderEvent[] => [
@@ -73,6 +73,22 @@ describe("runBatch", () => {
     expect(provider.calls[0]!.texts).toEqual(["blog"]);
     expect(events[0]).toMatchObject({ id: "s0", text: "文件" });
     expect(cache.store.get("k:blog")).toBe("BLOG");
+  });
+
+  it("reports batch stats including token usage", async () => {
+    const provider = new FakeProvider((r) => [
+      ...r.texts.map((t, index) => ({ kind: "segment" as const, index, text: t })),
+      { kind: "end", reason: "complete", usage: { inputTokens: 100, outputTokens: 40 } },
+    ]);
+    const { stats } = await run(req(["docs", "blog", "docs", "faq"]), provider, memoryCache({ "k:faq": "常見問題" }));
+    expect(stats).toMatchObject({
+      segments: 4,
+      unique: 3,
+      cacheHits: 1,
+      sent: 2,
+      failed: 0,
+      usage: { inputTokens: 100, outputTokens: 40 },
+    });
   });
 
   it("skips the provider entirely when everything is cached", async () => {

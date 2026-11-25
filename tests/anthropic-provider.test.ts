@@ -68,7 +68,7 @@ describe("AnthropicProvider", () => {
     expect(events).toEqual([
       { kind: "segment", index: 0, text: "文件" },
       { kind: "segment", index: 1, text: "Kubernetes 部落格" },
-      { kind: "end", reason: "complete" },
+      { kind: "end", reason: "complete", usage: { inputTokens: 10, outputTokens: 5 } },
     ]);
     expect(lastBody).toMatchObject({
       model: "claude-sonnet-5-5",
@@ -90,7 +90,7 @@ describe("AnthropicProvider", () => {
     const events = await collect(new AnthropicProvider("sk-test", "claude-haiku-5-5"), ["ok", "bad"]);
     expect(events).toEqual([
       { kind: "segment", index: 0, text: "好" },
-      { kind: "end", reason: "refusal" },
+      { kind: "end", reason: "refusal", usage: { inputTokens: 10, outputTokens: 5 } },
     ]);
     expect(lastBody.fallbacks).toBeUndefined();
     expect(lastHeaders["anthropic-beta"]).toBeUndefined();

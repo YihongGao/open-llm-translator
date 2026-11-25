@@ -48,7 +48,11 @@ export class AnthropicProvider implements TranslationProvider {
     const final = await stream.finalMessage();
     const reason =
       final.stop_reason === "refusal" ? "refusal" : final.stop_reason === "max_tokens" ? "max_tokens" : "complete";
-    yield { kind: "end", reason };
+    yield {
+      kind: "end",
+      reason,
+      usage: { inputTokens: final.usage.input_tokens, outputTokens: final.usage.output_tokens },
+    };
   }
 }
 

@@ -10,7 +10,12 @@ export interface ProviderRequest {
 export type ProviderEvent =
   | { kind: "segment"; index: number; text: string }
   /** Always the last event. `reason` explains why some segments may be missing. */
-  | { kind: "end"; reason: "complete" | "max_tokens" | "refusal" };
+  | { kind: "end"; reason: "complete" | "max_tokens" | "refusal"; usage?: TokenUsage };
+
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
 
 /**
  * One implementation per backend (Anthropic API now; Gemini API / local CLI
