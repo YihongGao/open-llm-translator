@@ -1,0 +1,30 @@
+/* Translation nodes live inside the original element, so font, color and
+   link styling are inherited. Only spacing and state are styled here. */
+llmt-translation {
+  font: inherit;
+  color: inherit;
+}
+
+llmt-translation.llmt-block {
+  display: block;
+  margin-top: 0.25em;
+}
+
+llmt-translation.llmt-inline {
+  display: inline;
+  margin-left: 0.5em;
+}
+
+llmt-translation.llmt-pending {
+  opacity: 0.45;
+}
+
+llmt-translation.llmt-error {
+  opacity: 0.7;
+  font-size: 0.85em;
+  cursor: help;
+}
+
+html.llmt-hidden llmt-translation {
+  display: none !important;
+}

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "LLM Bilingual Translator",
+  "version": "0.1.0",
+  "description": "在原文下方顯示 LLM 翻譯（雙語對照）",
+  "minimum_chrome_version": "120",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["https://api.anthropic.com/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "翻譯此頁（Alt+A）"
+  },
+  "commands": {
+    "toggle-translation": {
+      "suggested_key": { "default": "Alt+A" },
+      "description": "切換此頁翻譯"
+    }
+  },
+  "options_page": "options.html"
+}
