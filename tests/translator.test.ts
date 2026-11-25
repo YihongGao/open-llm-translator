@@ -97,7 +97,7 @@ describe("runBatch", () => {
       {
         kind: "end",
         reason: "complete",
-        usage: { inputTokens: 100, outputTokens: 40 },
+        usage: { inputTokens: 100, outputTokens: 40, cacheReadTokens: 0, cacheWriteTokens: 0 },
         servedModel: MODEL,
         fallback: false,
       },
@@ -113,7 +113,7 @@ describe("runBatch", () => {
       cacheHits: 1,
       sent: 2,
       failed: 0,
-      usage: { inputTokens: 100, outputTokens: 40 },
+      usage: { inputTokens: 100, outputTokens: 40, cacheReadTokens: 0, cacheWriteTokens: 0 },
       servedModel: MODEL,
       fallback: false,
     });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SegmentLineParser, buildUserMessage } from "../src/background/protocol";
+import { SegmentLineParser, buildSystemPrompt, buildUserMessage } from "../src/background/protocol";
+import { TARGET_LANGUAGES } from "../src/shared/settings";
 
 function feed(parser: SegmentLineParser, chunks: string[]) {
   const out = chunks.flatMap((c) => parser.push(c));
@@ -48,5 +49,24 @@ describe("buildUserMessage", () => {
     const msg = buildUserMessage(["a\nb", "c"], { title: "T", url: "https://x" });
     expect(msg).toContain("[1] a b\n[2] c");
     expect(msg).toContain("Page title: T");
+  });
+});
+
+describe("buildSystemPrompt", () => {
+  // Sonnet 5.5 caches prefixes of >= 512 tokens only. English prose averages
+  // ~4 chars/token, so 2,600 chars keeps a margin; a real check is the
+  // "cache r/w" numbers in the service worker log.
+  it.each(TARGET_LANGUAGES.map((l) => l.tag))("stays above the cache threshold for %s", (tag) => {
+    expect(buildSystemPrompt(tag).length).toBeGreaterThan(2600);
+  });
+
+  it("is deterministic (byte-identical prefix for caching)", () => {
+    expect(buildSystemPrompt("zh-TW")).toBe(buildSystemPrompt("zh-TW"));
+  });
+
+  it("adds Taiwan terminology only for zh-TW", () => {
+    expect(buildSystemPrompt("zh-TW")).toContain("伺服器");
+    expect(buildSystemPrompt("ja")).not.toContain("伺服器");
+    expect(buildSystemPrompt("ja")).toContain("Translate every segment into Japanese");
   });
 });

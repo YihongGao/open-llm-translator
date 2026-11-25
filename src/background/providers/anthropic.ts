@@ -1,5 +1,4 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { languageName } from "../../shared/settings";
 import { SegmentLineParser, buildSystemPrompt, buildUserMessage } from "../protocol";
 import type { ProviderEvent, ProviderRequest, TranslationProvider } from "./types";
 
@@ -31,7 +30,9 @@ export class AnthropicProvider implements TranslationProvider {
         max_tokens: 16000,
         // Translation needs little reasoning; low effort keeps latency down.
         output_config: { effort: "low" },
-        system: buildSystemPrompt(languageName(req.targetLang)),
+        // Explicit breakpoint on the static prefix: every batch of every page
+        // shares it, so after the first request it is read at the cache rate.
+        system: [{ type: "text", text: buildSystemPrompt(req.targetLang), cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: buildUserMessage(req.texts, req.page) }],
         ...(withFallback ? { betas: [FALLBACK_BETA], fallbacks: "default" as const } : {}),
       },
@@ -51,7 +52,12 @@ export class AnthropicProvider implements TranslationProvider {
     yield {
       kind: "end",
       reason,
-      usage: { inputTokens: final.usage.input_tokens, outputTokens: final.usage.output_tokens },
+      usage: {
+        inputTokens: final.usage.input_tokens,
+        outputTokens: final.usage.output_tokens,
+        cacheReadTokens: final.usage.cache_read_input_tokens ?? 0,
+        cacheWriteTokens: final.usage.cache_creation_input_tokens ?? 0,
+      },
       servedModel: final.model,
       // The documented served-by signal: a fallback_message entry in usage.iterations.
       fallback: (final.usage.iterations ?? []).some((it) => it.type === "fallback_message"),

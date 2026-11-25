@@ -21,8 +21,11 @@ export type ProviderEvent =
     };
 
 export interface TokenUsage {
+  /** Uncached input (after the last cache breakpoint). */
   inputTokens: number;
   outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
 }
 
 /**

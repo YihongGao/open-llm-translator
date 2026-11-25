@@ -14,7 +14,8 @@ import { loadSettings } from "../shared/settings";
 import { toggleTab } from "../shared/tab-control";
 import { cacheGetMany, cacheKey, cachePut } from "./cache";
 import { AnthropicProvider, describeAnthropicError, isAbort } from "./providers/anthropic";
-import { runBatch } from "./translator";
+import { estimateCostUsd } from "./pricing";
+import { runBatch, type BatchStats } from "./translator";
 
 // ---------------------------------------------------------------------------
 // Concurrency: cap simultaneous API requests across all tabs.
@@ -98,15 +99,22 @@ async function handleTranslate(
     ),
   );
   // Visible in chrome://extensions -> Service Worker -> Console.
-  if (stats) {
-    console.info(
-      `[llmt] batch ${req.batchId}: ${stats.segments} segs, ${stats.unique} unique, ` +
-        `${stats.cacheHits} cached, ${stats.sent} sent, ${stats.failed} failed, ${stats.ms} ms` +
-        (stats.usage ? `, tokens in/out ${stats.usage.inputTokens}/${stats.usage.outputTokens}` : "") +
-        ` | requested ${settings.model}` +
-        (stats.servedModel ? ` → served ${stats.servedModel}${stats.fallback ? " (fallback)" : ""}` : ""),
-    );
+  if (stats) console.info(formatBatchLog(req.batchId, settings.model, stats));
+}
+
+function formatBatchLog(batchId: string, requested: string, s: BatchStats): string {
+  let line =
+    `[llmt] batch ${batchId}: ${s.segments} segs, ${s.unique} unique, ` +
+    `${s.cacheHits} cached, ${s.sent} sent, ${s.failed} failed, ${s.ms} ms`;
+  if (s.usage) {
+    const u = s.usage;
+    line += `, tokens in/out ${u.inputTokens}/${u.outputTokens}, cache r/w ${u.cacheReadTokens}/${u.cacheWriteTokens}`;
+    const cost = estimateCostUsd(s.servedModel ?? requested, u);
+    if (cost !== undefined) line += `, ≈ $${cost.toFixed(4)}`;
   }
+  line += ` | requested ${requested}`;
+  if (s.servedModel) line += ` → served ${s.servedModel}${s.fallback ? " (fallback)" : ""}`;
+  return line;
 }
 
 // ---------------------------------------------------------------------------

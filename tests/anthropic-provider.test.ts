@@ -73,7 +73,7 @@ describe("AnthropicProvider", () => {
       {
         kind: "end",
         reason: "complete",
-        usage: { inputTokens: 10, outputTokens: 5 },
+        usage: { inputTokens: 10, outputTokens: 5, cacheReadTokens: 0, cacheWriteTokens: 0 },
         servedModel: "claude-sonnet-5-5",
         fallback: false,
       },
@@ -84,7 +84,9 @@ describe("AnthropicProvider", () => {
       output_config: { effort: "low" },
       fallbacks: "default",
     });
-    expect(lastBody.system).toContain("Traditional Chinese as used in Taiwan");
+    expect(lastBody.system).toEqual([
+      { type: "text", text: expect.stringContaining("Traditional Chinese as used in Taiwan"), cache_control: { type: "ephemeral" } },
+    ]);
     expect(lastBody.messages[0].content).toContain("[1] Documentation\n[2] Kubernetes Blog");
     expect(lastHeaders["anthropic-beta"]).toContain("server-side-fallback-2026-07-01");
     // SDK 1.x (API version 2026-10-21) sends the key as a bearer token.
@@ -101,7 +103,7 @@ describe("AnthropicProvider", () => {
       {
         kind: "end",
         reason: "refusal",
-        usage: { inputTokens: 10, outputTokens: 5 },
+        usage: { inputTokens: 10, outputTokens: 5, cacheReadTokens: 0, cacheWriteTokens: 0 },
         servedModel: "claude-haiku-5-5",
         fallback: false,
       },
