@@ -73,6 +73,12 @@ describe("buildUserMessage", () => {
     expect(msg).toContain("Page title: T");
   });
 
+  it("S2-4: caps the page title at 200 characters", () => {
+    const msg = buildUserMessage(["a"], { title: "Docs " + "é".repeat(5000), url: "https://x" });
+    const title = msg.split("\n")[0]!.slice("Page title: ".length);
+    expect([...title]).toHaveLength(200);
+  });
+
   it("S4: sends only origin and path, never query or fragment (tokens live there)", () => {
     const msg = buildUserMessage(["a"], { title: "T", url: "https://a.example/reset?token=secret#access_token=y" });
     expect(msg).toContain("Page URL: https://a.example/reset\n");

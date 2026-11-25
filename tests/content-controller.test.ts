@@ -18,11 +18,15 @@ function tell(msg: unknown): unknown {
 }
 
 class FakeIO {
-  constructor(cb: typeof ioCallback) {
-    ioCallback = cb;
+  private readonly scheduling: boolean;
+  constructor(cb: typeof ioCallback, opts?: { rootMargin?: string }) {
+    // Only the scheduling observer (with a margin) matters here; the
+    // exact-viewport one tracks hidden segments, which these tests do not use.
+    this.scheduling = Boolean(opts?.rootMargin);
+    if (this.scheduling) ioCallback = cb;
   }
   observe(t: Element) {
-    observed.push(t);
+    if (this.scheduling) observed.push(t);
   }
   unobserve() {}
   disconnect() {}

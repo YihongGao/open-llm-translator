@@ -62,9 +62,15 @@ export function buildSystemPrompt(targetLang: string): string {
   ].join("\n");
 }
 
+/** Longest page title included in the prompt (code points). */
+export const MAX_TITLE_CHARS = 200;
+
 export function buildUserMessage(texts: readonly string[], page: PageContext): string {
   const lines = texts.map((t, i) => `[${i + 1}] ${toSingleLine(t)}`);
-  return [`Page title: ${toSingleLine(page.title)}`, `Page URL: ${pageUrlForPrompt(page.url)}`, "", "<segments>", ...lines, "</segments>"].join(
+  // The content script already caps the title; repeated here because the
+  // request comes from a page-controlled context.
+  const title = [...toSingleLine(page.title)].slice(0, MAX_TITLE_CHARS).join("");
+  return [`Page title: ${title}`, `Page URL: ${pageUrlForPrompt(page.url)}`, "", "<segments>", ...lines, "</segments>"].join(
     "\n",
   );
 }

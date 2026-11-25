@@ -76,3 +76,5 @@ npm run typecheck
 - cache 沒有淘汰機制
 - `<button>`、`<pre>`、`[translate=no]`、contenteditable 都不翻譯
 - Shadow DOM 和 iframe 內的內容不會被掃到
+- 隱藏文字過濾是 best-effort：會擋下常見手法，包括 display/visibility/opacity、sr-only clip、零寬或零高的 overflow 容器、小於 2px 的字、透明字，以及不可見的 Unicode 字元。同色字（白字白底）、頁面上方 600px 內的絕對定位文字、`transform` 等手法擋不住。主要防線是 system prompt（把頁面文字當資料，不當指令）和 cache 依 origin 分區；注入最多只能竄改同一頁的譯文。
+- 隱藏的區塊在畫面內時每秒重查一次，捲動揭露（AOS、WOW.js）、下拉選單、手風琴打開後才會翻譯。
