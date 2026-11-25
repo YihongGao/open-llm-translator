@@ -4,6 +4,7 @@ import {
   chooseLayout,
   collectSegments,
   insertionPoint,
+  isSameText,
   isTranslatable,
   type SegmentCandidate,
 } from "../src/content/segmenter";
@@ -84,14 +85,14 @@ describe("collectSegments", () => {
   });
 
   it("treats inline-tagged elements styled as blocks as their own segments", () => {
-    document.body.innerHTML = `<div><a href="#">Docs</a><a href="#">Blog</a></div>`;
+    document.body.innerHTML = `<div><a href="#">Get started</a><a href="#">Read the blog</a></div>`;
     const byDisplay = collectSegments(document.body, {
       targetLang: "zh-TW",
       displayOf: (el) => (el.tagName === "A" ? "block" : "inline"),
     });
-    expect(byDisplay.map((s) => s.text)).toEqual(["Docs", "Blog"]);
+    expect(byDisplay.map((s) => s.text)).toEqual(["Get started", "Read the blog"]);
     const asInline = collectSegments(document.body, { targetLang: "zh-TW", displayOf });
-    expect(asInline.map((s) => s.text)).toEqual(["DocsBlog"]);
+    expect(asInline.map((s) => s.text)).toEqual(["Get startedRead the blog"]);
   });
 });
 
@@ -131,7 +132,29 @@ describe("isTranslatable", () => {
     ["Already English", "en", false],
     ["12345", "zh-TW", false],
     ["a", "zh-TW", false],
+    // identifiers are never sent to the API
+    ["cAdvisor", "zh-TW", false],
+    ["kube-proxy", "zh-TW", false],
+    ["v1.31", "zh-TW", false],
+    ["k8s", "zh-TW", false],
+    ["--kubeconfig", "zh-TW", false],
+    // plain words still go to the model
+    ["kubelet", "zh-TW", true],
+    ["Documentation", "zh-TW", true],
+    ["Get started", "zh-TW", true],
+    ["第3章のテキスト", "zh-TW", true],
   ])("%s (target %s) -> %s", (text, lang, expected) => {
     expect(isTranslatable(text, lang)).toBe(expected);
+  });
+});
+
+describe("isSameText", () => {
+  it.each([
+    ["Kubelet", "Kubelet", true],
+    ["kubelet", " Kubelet ", true],
+    ["Kubernetes  Blog", "Kubernetes Blog", true],
+    ["Kubernetes Blog", "Kubernetes 部落格", false],
+  ])("%s vs %s -> %s", (a, b, expected) => {
+    expect(isSameText(a, b)).toBe(expected);
   });
 });

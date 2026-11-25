@@ -14,6 +14,7 @@ import {
   chooseLayout,
   collectSegments,
   insertionPoint,
+  isSameText,
   type Layout,
   type SegmentCandidate,
 } from "./segmenter";
@@ -42,6 +43,8 @@ interface SegState {
   status: Status;
   node: HTMLElement | null;
   translation?: string;
+  /** Translation equals the source (proper noun, code): nothing is shown. */
+  hidden: boolean;
   retries: number;
 }
 
@@ -98,7 +101,7 @@ function main(): void {
       const existing = byAnchor.get(candidate.anchor);
       if (existing && existing.candidate.text === candidate.text) {
         // The framework re-rendered and dropped our node: put it back.
-        if (existing.node && !existing.node.isConnected) {
+        if (existing.node && !existing.node.isConnected && !existing.hidden) {
           existing.candidate = candidate;
           mountNode(existing);
         }
@@ -115,6 +118,7 @@ function main(): void {
         layout: chooseLayout(candidate.text),
         status: "idle",
         node: null,
+        hidden: false,
         retries: 0,
       };
       byAnchor.set(candidate.anchor, seg);
@@ -242,6 +246,12 @@ function main(): void {
       if (!seg) return;
       seg.status = "done";
       seg.translation = ev.text;
+      if (isSameText(ev.text, seg.candidate.text)) {
+        // e.g. "Kubelet" -> "Kubelet": showing it would just duplicate the heading.
+        seg.hidden = true;
+        seg.node?.remove();
+        return;
+      }
       render(seg);
     } else if (ev.type === "segment-error") {
       for (const id of ev.ids) {

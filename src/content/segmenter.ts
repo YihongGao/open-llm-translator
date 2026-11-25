@@ -119,7 +119,25 @@ const LETTER = /\p{L}/u;
 
 export function isTranslatable(text: string, targetLang: string): boolean {
   if (text.length < 2 || !LETTER.test(text)) return false;
+  if (looksLikeIdentifier(text)) return false;
   return !looksLikeTarget(text, targetLang);
+}
+
+/**
+ * Single ASCII tokens that read as code or a name rather than a word:
+ * camelCase (cAdvisor), digits (v1.31, k8s), or code punctuation
+ * (kube-proxy, kubectl.exe, --flag). Plain words such as "Documentation"
+ * or "kubelet" are not caught here; the model returns those unchanged and
+ * isSameText() hides the duplicate.
+ */
+export function looksLikeIdentifier(text: string): boolean {
+  if (!/^[\x21-\x7e]+$/.test(text)) return false;
+  return /[a-z][A-Z]/.test(text) || /\d/.test(text) || /[-_./:@#=<>{}()[\]\\|~$%^&*+]/.test(text);
+}
+
+/** True when a "translation" is just the source text again (case/whitespace-insensitive). */
+export function isSameText(a: string, b: string): boolean {
+  return normalizeText(a).toLowerCase() === normalizeText(b).toLowerCase();
 }
 
 /** Cheap script-based check so already-translated text isn't sent again. */

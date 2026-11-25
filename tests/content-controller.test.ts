@@ -35,7 +35,7 @@ beforeAll(async () => {
       onMessage: { addListener: (f: typeof toggle) => (toggle = f) },
     },
   };
-  document.body.innerHTML = `<p>Hello world, this is the first paragraph.</p><p>Second paragraph goes here.</p>`;
+  document.body.innerHTML = `<p>Hello world, this is the first paragraph.</p><p>Second paragraph goes here.</p><h4>Kubelet</h4>`;
   await import("../src/content/index");
   toggle({ type: "llmt-toggle", targetLang: "zh-TW" });
   ioCallback(observed.map((target) => ({ target, isIntersecting: true })));
@@ -48,6 +48,7 @@ describe("content controller", () => {
     expect(posted[0]!.segments.map((s) => s.text)).toEqual([
       "Hello world, this is the first paragraph.",
       "Second paragraph goes here.",
+      "Kubelet",
     ]);
   });
 
@@ -60,5 +61,11 @@ describe("content controller", () => {
     expect(nodes[0]!.textContent).toBe("你好世界，這是第一段。");
     expect(nodes[1]!.textContent).toBe("⚠");
     expect(nodes[1]!.getAttribute("title")).toBe("翻譯失敗：尚未設定 Anthropic API key");
+  });
+
+  it("shows nothing when the model returns the source unchanged (proper nouns)", () => {
+    const name = posted[0]!.segments[2]!;
+    toPage({ type: "segment", batchId: posted[0]!.batchId, id: name.id, text: "Kubelet" });
+    expect(document.querySelector("h4")!.innerHTML).toBe("Kubelet");
   });
 });
