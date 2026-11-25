@@ -4,4 +4,5 @@ dist-e2e/
 .DS_Store
 # local secrets (E2E API key)
 .env
+.env.local
 .env.*
