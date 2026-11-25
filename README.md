@@ -25,7 +25,7 @@ npm run build        # 產出 dist/
 | 平衡 | `claude-sonnet-5-5` $2 / $10 | `gpt-6.2-sol` $2 / $10 | `gemini-4-hydrogen` $1.50 / $7.50 |
 | 旗艦 | `claude-opus-5-5` $4 / $20 | `gpt-6.2-astra` $8 / $40 | `gemini-4-carbon` $4 / $20（2026-12-01 起；之前 $2 / $10） |
 
-reasoning／thinking 都設在該 model 允許的最低檔（OpenAI `reasoning.effort`、Gemini `thinking_level`、Claude `effort: low`），因為這些 token 以 output 計價。實測 kube-scheduler 頁面（約 75 段）：Flash-Lite ≈ $0.005、Hydrogen ≈ $0.044（`low` 仍有大量 thinking）、Carbon ≈ $0.051（12 月價格）、Haiku ≈ $0.0013。
+reasoning／thinking 都設在該 model 允許的最低檔（OpenAI `reasoning.effort`、Gemini `thinking_level`、Claude `effort: low`），因為這些 token 以 output 計價。實測 kube-scheduler 頁面（約 75 段）：Haiku ≈ $0.0013、GPT-6 Luna ≈ $0.0015、Flash-Lite ≈ $0.005、GPT-6.2 Sol ≈ $0.026、Hydrogen ≈ $0.044（`low` 仍有大量 thinking）、Carbon ≈ $0.051（12 月價格）。GPT-6.2 Astra 只做過小請求測試。
 
 ## 使用
 

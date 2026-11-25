@@ -98,7 +98,7 @@ describe("OpenAIProvider", () => {
       response: {
         status,
         model: "gpt-6-luna-2026-10-01",
-        usage: { input_tokens: 700, input_tokens_details: { cached_tokens: 600 }, output_tokens: 40 },
+        usage: { input_tokens: 700, input_tokens_details: { cached_tokens: 500, cache_write_tokens: 100 }, output_tokens: 40 },
         ...extra,
       },
     });
@@ -118,7 +118,7 @@ describe("OpenAIProvider", () => {
       {
         kind: "end",
         reason: "complete",
-        usage: { inputTokens: 100, outputTokens: 40, cacheReadTokens: 600, cacheWriteTokens: 0 },
+        usage: { inputTokens: 100, outputTokens: 40, cacheReadTokens: 500, cacheWriteTokens: 100 },
         servedModel: "gpt-6-luna-2026-10-01",
       },
     ]);

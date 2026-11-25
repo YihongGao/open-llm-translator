@@ -32,7 +32,7 @@ const PRICES: Record<string, Price> = {
   "gemini-4-carbon": { input: 4, output: 20, cacheRead: 0.2 },
 };
 
-/** 5-minute cache writes cost 1.25x base input. */
+/** Cache writes cost 1.25x base input (Claude 5-minute TTL, OpenAI 30-minute retention). */
 const CACHE_WRITE_MULTIPLIER = 1.25;
 
 export function estimateCostUsd(model: string, usage: TokenUsage): number | undefined {

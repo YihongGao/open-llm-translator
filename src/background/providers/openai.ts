@@ -25,7 +25,8 @@ interface ResponseObject {
   error?: { message?: string } | null;
   usage?: {
     input_tokens?: number;
-    input_tokens_details?: { cached_tokens?: number };
+    /** cache_write_tokens: observed in live responses (2026-11), billed at 1.25x input. */
+    input_tokens_details?: { cached_tokens?: number; cache_write_tokens?: number };
     output_tokens?: number;
   };
 }
@@ -100,15 +101,17 @@ export class OpenAIProvider implements TranslationProvider {
 
     const u = final.usage ?? {};
     const cached = u.input_tokens_details?.cached_tokens ?? 0;
+    const written = u.input_tokens_details?.cache_write_tokens ?? 0;
     yield {
       kind: "end",
       reason,
       usage: {
-        inputTokens: (u.input_tokens ?? 0) - cached,
+        // input_tokens counts the whole prompt, cache reads and writes included.
+        inputTokens: Math.max(0, (u.input_tokens ?? 0) - cached - written),
         // Includes reasoning tokens, which are billed as output.
         outputTokens: u.output_tokens ?? 0,
         cacheReadTokens: cached,
-        cacheWriteTokens: 0,
+        cacheWriteTokens: written,
       },
       servedModel: final.model,
     };
