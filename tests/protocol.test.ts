@@ -67,6 +67,17 @@ describe("buildUserMessage", () => {
     expect(msg).toContain("[1] a b\n[2] c");
     expect(msg).toContain("Page title: T");
   });
+
+  it("S4: sends only origin and path, never query or fragment (tokens live there)", () => {
+    const msg = buildUserMessage(["a"], { title: "T", url: "https://a.example/reset?token=secret#access_token=y" });
+    expect(msg).toContain("Page URL: https://a.example/reset\n");
+    expect(msg).not.toContain("secret");
+    expect(msg).not.toContain("access_token");
+  });
+
+  it("S4: drops an unparseable URL instead of sending it", () => {
+    expect(buildUserMessage(["a"], { title: "T", url: "not a url?x=1" })).toContain("Page URL: (unknown)");
+  });
 });
 
 describe("buildSystemPrompt", () => {

@@ -63,9 +63,22 @@ export function buildSystemPrompt(targetLang: string): string {
 
 export function buildUserMessage(texts: readonly string[], page: PageContext): string {
   const lines = texts.map((t, i) => `[${i + 1}] ${toSingleLine(t)}`);
-  return [`Page title: ${toSingleLine(page.title)}`, `Page URL: ${page.url}`, "", "<segments>", ...lines, "</segments>"].join(
+  return [`Page title: ${toSingleLine(page.title)}`, `Page URL: ${pageUrlForPrompt(page.url)}`, "", "<segments>", ...lines, "</segments>"].join(
     "\n",
   );
+}
+
+/**
+ * Origin + path only: query strings and fragments often carry secrets (reset
+ * tokens, OAuth access tokens, signed URLs) and add nothing to translation.
+ */
+function pageUrlForPrompt(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return "(unknown)";
+  }
 }
 
 function toSingleLine(s: string): string {
