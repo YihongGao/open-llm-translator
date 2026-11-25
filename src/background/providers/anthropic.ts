@@ -45,9 +45,14 @@ export class AnthropicProvider implements TranslationProvider {
         for (const seg of parser.push(event.delta.text)) yield { kind: "segment", ...seg };
       }
     }
-    for (const seg of parser.end()) yield { kind: "segment", ...seg };
-
     const final = await stream.finalMessage();
+    // Segments are emitted when the next marker arrives, so everything before
+    // this point is complete. What end() flushes is the last line, which is
+    // only whole if the model finished normally; after a refusal or max_tokens
+    // it may stop mid-sentence and must not be shown or cached as a translation.
+    const finishedNormally = final.stop_reason === "end_turn" || final.stop_reason === "stop_sequence";
+    const tail = parser.end();
+    if (finishedNormally) for (const seg of tail) yield { kind: "segment", ...seg };
     const reason =
       final.stop_reason === "refusal" ? "refusal" : final.stop_reason === "max_tokens" ? "max_tokens" : "complete";
     yield {

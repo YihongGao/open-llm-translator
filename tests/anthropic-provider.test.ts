@@ -125,4 +125,20 @@ describe("AnthropicProvider", () => {
     servedModel = null;
     iterations = null;
   });
+
+  it.each(["refusal", "max_tokens"])("C5: drops the cut-off last segment when the response stops with %s", async (reason) => {
+    reply = ["[1] 第一段完整譯文\n[2] 第二段只翻了一"];
+    stopReason = reason;
+    const events = await collect(new AnthropicProvider("sk-test", "claude-haiku-5-5"), ["First.", "Second, cut off."]);
+    expect(events.filter((e) => e.kind === "segment")).toEqual([{ kind: "segment", index: 0, text: "第一段完整譯文" }]);
+    expect(events.at(-1)).toMatchObject({ kind: "end", reason });
+    stopReason = "end_turn";
+  });
+
+  it("C5: keeps the last segment when the response ends normally without a trailing newline", async () => {
+    reply = ["[1] 一\n[2] 二"];
+    stopReason = "end_turn";
+    const events = await collect(new AnthropicProvider("sk-test", "claude-haiku-5-5"), ["a", "b"]);
+    expect(events.filter((e) => e.kind === "segment").map((e) => (e as { text: string }).text)).toEqual(["一", "二"]);
+  });
 });
