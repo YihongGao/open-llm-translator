@@ -7,6 +7,8 @@
 // of the run — which stays stable across rescans because our own inserted
 // nodes are ignored when runs are computed.
 
+import { normalizeText } from "../shared/text";
+
 export const TRANSLATION_TAG = "LLMT-TRANSLATION";
 
 /** Excluded entirely: neither a segment nor part of a parent's text. */
@@ -65,15 +67,67 @@ export function isExcludedByAncestor(el: Element): boolean {
   return false;
 }
 
+/** The computed-style properties isVisuallyHidden() reads. */
+export type StyleLike = Pick<
+  CSSStyleDeclaration,
+  "display" | "visibility" | "opacity" | "fontSize" | "color" | "clip" | "clipPath" | "width" | "height" | "overflow"
+> & { backgroundClip?: string; webkitBackgroundClip?: string };
+
+const TRANSPARENT = /^(transparent|rgba\([^)]*,\s*0(\.0+)?\))$/;
+const ZERO_CLIP = /^rect\(\s*0(px)?\s*,?\s*0(px)?\s*,?\s*0(px)?\s*,?\s*0(px)?\s*\)$/;
+const ZERO_CLIP_PATH = /^(inset\(\s*(50|100)%\s*\)|circle\(\s*0(px|%)?\s*.*\))$/;
+
+/**
+ * Text a reader cannot see but the DOM still contains: the usual way to hide
+ * prompt-injection instructions on a page. Covers display/visibility, zero
+ * opacity, sub-2px fonts, transparent text (unless it is gradient text drawn
+ * with background-clip: text), and "screen-reader only" clipping.
+ */
+export function isVisuallyHidden(s: StyleLike): boolean {
+  if (s.display === "none" || s.visibility === "hidden" || s.visibility === "collapse") return true;
+  if (s.opacity !== "" && Number.parseFloat(s.opacity) < 0.05) return true;
+  if (s.fontSize !== "" && Number.parseFloat(s.fontSize) < 2) return true;
+  const clippedText = s.backgroundClip === "text" || s.webkitBackgroundClip === "text";
+  if (TRANSPARENT.test(s.color.trim()) && !clippedText) return true;
+  if (ZERO_CLIP.test(s.clip.trim()) || ZERO_CLIP_PATH.test(s.clipPath.trim())) return true;
+  const w = Number.parseFloat(s.width);
+  const h = Number.parseFloat(s.height);
+  return w <= 1 && h <= 1 && s.overflow === "hidden";
+}
+
+/**
+ * Whether a segment is hidden from the reader at the moment it would be sent:
+ * its own element and container are checked fully, ancestors for the
+ * non-inherited ways to hide a subtree (display, opacity, clipping).
+ */
+export function isHiddenForReader(el: Element, container: Element): boolean {
+  if (isVisuallyHidden(getComputedStyle(el)) || isVisuallyHidden(getComputedStyle(container))) return true;
+  for (let cur = container.parentElement; cur && cur !== document.body; cur = cur.parentElement) {
+    const s = getComputedStyle(cur);
+    if (s.display === "none" || (s.opacity !== "" && Number.parseFloat(s.opacity) < 0.05)) return true;
+    if (ZERO_CLIP.test(s.clip.trim()) || ZERO_CLIP_PATH.test(s.clipPath.trim())) return true;
+  }
+  return false;
+}
+
 export interface CollectOptions {
   targetLang: string;
   /** Injected for tests; defaults to getComputedStyle. */
   displayOf?: (el: Element) => string;
+  /** Injected for tests; defaults to isVisuallyHidden(getComputedStyle(el)). */
+  hiddenOf?: (el: Element) => boolean;
 }
 
 export function collectSegments(root: Element, opts: CollectOptions): SegmentCandidate[] {
   const displayOf = opts.displayOf ?? ((el: Element) => getComputedStyle(el).display);
+  const hiddenOf = opts.hiddenOf ?? ((el: Element) => isVisuallyHidden(getComputedStyle(el)));
   const out: SegmentCandidate[] = [];
+
+  // Hidden text inside an otherwise visible run (an opacity:0 or display:none
+  // span in a paragraph) is dropped from the run, so it is never sent. Hidden
+  // *blocks* are left to the content script's send-time check, because pages
+  // often fade blocks in from opacity:0 or reveal collapsed sections later.
+  const isHiddenInline = (el: Element): boolean => INLINE_TAGS.has(el.tagName.toUpperCase()) && hiddenOf(el);
 
   // An inline-tagged element counts as inline unless CSS makes it a box
   // (e.g. nav links styled display:block) or it wraps block content (card links).
@@ -96,7 +150,7 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
     if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
     const el = node as Element;
-    if (isSkipped(el)) return "";
+    if (isSkipped(el) || isHiddenInline(el)) return "";
     if (el.tagName.toUpperCase() === "BR") return " ";
     let s = "";
     for (const child of el.childNodes) s += textOf(child);
@@ -111,7 +165,7 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
         run.push(child);
       } else if (child.nodeType === Node.ELEMENT_NODE) {
         const c = child as Element;
-        if (isSkipped(c)) continue;
+        if (isSkipped(c) || isHiddenInline(c)) continue;
         if (isInline(c)) {
           run.push(c);
         } else {
@@ -128,9 +182,8 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
   return out;
 }
 
-export function normalizeText(s: string): string {
-  return s.replace(/\s+/g, " ").trim();
-}
+// Invisible characters are stripped here so hidden instructions never reach the model.
+export { normalizeText };
 
 const LETTER = /\p{L}/u;
 

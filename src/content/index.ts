@@ -16,6 +16,7 @@ import {
   collectSegments,
   insertionPoint,
   isExcludedByAncestor,
+  isHiddenForReader,
   isSameText,
   isSkipped,
   type Layout,
@@ -48,6 +49,10 @@ type Status = "idle" | "queued" | "pending" | "done" | "error" | "retired";
  */
 const MAX_RETRANSLATIONS = 3;
 
+/** Re-checks for a segment that is in the viewport but invisible (covers fade-in animations). */
+const HIDDEN_RECHECKS = 4;
+const HIDDEN_RECHECK_MS = 800;
+
 interface SegState {
   id: string;
   candidate: SegmentCandidate;
@@ -58,6 +63,8 @@ interface SegState {
   /** Translation equals the source (proper noun, code): nothing is shown. */
   hidden: boolean;
   retries: number;
+  /** Times the segment was found invisible when it entered the viewport. */
+  hiddenChecks: number;
   /** Provenance, exposed as data-llmt-* attributes for inspection. */
   source?: "cache" | "api";
   model?: string;
@@ -92,11 +99,30 @@ function main(): void {
         const segs = byObserved.get(entry.target) ?? [];
         byObserved.delete(entry.target);
         io.unobserve(entry.target);
-        for (const seg of segs) if (seg.status === "idle") enqueue(seg);
+        for (const seg of segs) {
+          if (seg.status !== "idle") continue;
+          if (isHiddenForReader(entry.target, seg.candidate.container)) deferHidden(seg);
+          else enqueue(seg);
+        }
       }
     },
     { rootMargin: VIEWPORT_MARGIN },
   );
+
+  /**
+   * In the viewport but invisible (opacity 0, visibility hidden, clipped...).
+   * Hidden text is a common carrier for prompt injection, so it is not sent;
+   * but pages also fade content in from opacity 0, so check again a few times
+   * before giving up. A segment given up on stays registered and is checked
+   * again on the next activation.
+   */
+  function deferHidden(seg: SegState): void {
+    if (seg.hiddenChecks >= HIDDEN_RECHECKS) return;
+    seg.hiddenChecks++;
+    window.setTimeout(() => {
+      if (seg.status === "idle" && byId.get(seg.id) === seg && active) observe(seg);
+    }, HIDDEN_RECHECK_MS);
+  }
 
   function observe(seg: SegState): void {
     // Observe the run's first element (text nodes cannot be observed).
@@ -169,6 +195,7 @@ function main(): void {
         node: null,
         hidden: false,
         retries: 0,
+        hiddenChecks: 0,
       };
       byAnchor.set(candidate.anchor, seg);
       byId.set(seg.id, seg);
@@ -407,6 +434,12 @@ function main(): void {
     for (const target of byObserved.keys()) {
       io.unobserve(target);
       io.observe(target);
+    }
+    // Segments given up on as hidden get another chance (the page may have revealed them).
+    for (const seg of byId.values()) {
+      if (seg.status !== "idle" || seg.hiddenChecks < HIDDEN_RECHECKS) continue;
+      seg.hiddenChecks = 0;
+      observe(seg);
     }
     // Retry failures (e.g. the user just fixed the API key).
     shownPageErrors.clear();
