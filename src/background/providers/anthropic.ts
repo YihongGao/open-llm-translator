@@ -72,6 +72,29 @@ export interface ErrorInfo {
   settings: boolean;
 }
 
+/**
+ * Exact token count of the cached prefix (system prompt) per target language,
+ * via the free count_tokens endpoint. The count includes a one-word user
+ * message, so it overstates the prefix by a few tokens.
+ */
+export async function countSystemPromptTokens(
+  apiKey: string,
+  model: string,
+  targetLangs: readonly string[],
+): Promise<Array<{ targetLang: string; tokens: number }>> {
+  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  return Promise.all(
+    targetLangs.map(async (targetLang) => {
+      const res = await client.messages.countTokens({
+        model,
+        system: [{ type: "text", text: buildSystemPrompt(targetLang) }],
+        messages: [{ role: "user", content: "x" }],
+      });
+      return { targetLang, tokens: res.input_tokens };
+    }),
+  );
+}
+
 /** Maps SDK errors to a short user-facing message. */
 export function describeAnthropicError(err: unknown): ErrorInfo {
   if (err instanceof Anthropic.AuthenticationError)

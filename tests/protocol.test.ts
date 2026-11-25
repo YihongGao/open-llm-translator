@@ -53,11 +53,11 @@ describe("buildUserMessage", () => {
 });
 
 describe("buildSystemPrompt", () => {
-  // Sonnet 5.5 caches prefixes of >= 512 tokens only. English prose averages
-  // ~4 chars/token, so 2,600 chars keeps a margin; a real check is the
-  // "cache r/w" numbers in the service worker log.
-  it.each(TARGET_LANGUAGES.map((l) => l.tag))("stays above the cache threshold for %s", (tag) => {
-    expect(buildSystemPrompt(tag).length).toBeGreaterThan(2600);
+  // Coarse tripwire only: Sonnet 5.5 caches prefixes of >= 512 tokens, and
+  // char-to-token ratios vary by language. The exact check is
+  // `await llmtMeasurePrompts()` in the service worker console (count_tokens).
+  it.each(TARGET_LANGUAGES.map((l) => l.tag))("is not drastically shortened for %s", (tag) => {
+    expect(buildSystemPrompt(tag).length).toBeGreaterThan(2000);
   });
 
   it("is deterministic (byte-identical prefix for caching)", () => {

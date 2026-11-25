@@ -10,10 +10,10 @@ import {
   type TranslateEvent,
   type TranslateRequest,
 } from "../shared/messages";
-import { loadSettings } from "../shared/settings";
+import { TARGET_LANGUAGES, loadSettings } from "../shared/settings";
 import { toggleTab } from "../shared/tab-control";
 import { cacheGetMany, cacheKey, cachePut } from "./cache";
-import { AnthropicProvider, describeAnthropicError, isAbort } from "./providers/anthropic";
+import { AnthropicProvider, countSystemPromptTokens, describeAnthropicError, isAbort } from "./providers/anthropic";
 import { CacheWarmupGate, withWarmup } from "./cache-warmup";
 import { estimateCostUsd } from "./pricing";
 
@@ -124,6 +124,26 @@ function formatBatchLog(batchId: string, requested: string, s: BatchStats): stri
   if (s.servedModel) line += ` → served ${s.servedModel}${s.fallback ? " (fallback)" : ""}`;
   return line;
 }
+
+// ---------------------------------------------------------------------------
+// Debug helper, run from chrome://extensions -> Service Worker -> Console:
+//   await llmtMeasurePrompts()
+// Prints the system prompt's token count per target language (free API call),
+// to check it stays above the model's minimum cacheable prefix.
+
+(globalThis as { llmtMeasurePrompts?: () => Promise<void> }).llmtMeasurePrompts = async () => {
+  const settings = await loadSettings();
+  if (!settings.anthropicApiKey) {
+    console.warn("[llmt] 尚未設定 API key");
+    return;
+  }
+  const rows = await countSystemPromptTokens(
+    settings.anthropicApiKey,
+    settings.model,
+    TARGET_LANGUAGES.map((l) => l.tag),
+  );
+  console.table(rows.map((r) => ({ ...r, model: settings.model, cacheable: r.tokens >= 512 })));
+};
 
 // ---------------------------------------------------------------------------
 // Keyboard shortcut.
