@@ -1,6 +1,6 @@
 // Toolbar popup: quick settings + translate/restore for the current tab.
 
-import { MODELS, TARGET_LANGUAGES, loadSettings, saveSettings } from "../shared/settings";
+import { TARGET_LANGUAGES, apiKeyFor, fillModelSelect, loadSettings, providerOf, saveSettings } from "../shared/settings";
 import { getTabState, isRestrictedUrl, setTabLanguage, toggleTab } from "../shared/tab-control";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -10,9 +10,10 @@ const targetLang = $<HTMLSelectElement>("targetLang");
 const model = $<HTMLSelectElement>("model");
 const toggleBtn = $<HTMLButtonElement>("toggle");
 const note = $<HTMLParagraphElement>("note");
+const warnText = $<HTMLSpanElement>("warnText");
 
 for (const l of TARGET_LANGUAGES) targetLang.add(new Option(l.label, l.tag));
-for (const m of MODELS) model.add(new Option(m.label, m.id));
+fillModelSelect(model);
 $<HTMLSpanElement>("version").textContent = `v${chrome.runtime.getManifest().version}`;
 
 const openSettings = () => {
@@ -40,7 +41,12 @@ async function init(): Promise<void> {
   ]);
   targetLang.value = settings.targetLang;
   model.value = settings.model;
-  warn.classList.toggle("show", !settings.anthropicApiKey);
+  const updateWarn = () => {
+    const missing = !apiKeyFor(settings, model.value);
+    warn.classList.toggle("show", missing);
+    if (missing) warnText.textContent = `尚未設定 ${providerOf(model.value).label} 的 API key。`;
+  };
+  updateWarn();
 
   const tabId = tab?.id;
   const suffix = shortcut ? `（${shortcut}）` : "";
@@ -74,6 +80,7 @@ async function init(): Promise<void> {
   });
   model.addEventListener("change", () => {
     void saveSettings({ model: model.value });
+    updateWarn();
     note.textContent = "新的 model 會用在之後翻譯的段落。";
   });
 }

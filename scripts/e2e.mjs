@@ -12,10 +12,12 @@
 // to save the viewport at the end, LLMT_DUMP=<file.json> to save every
 // source/translation pair (for comparing models).
 //
-// API key, first found: ANTHROPIC_API_KEY from the environment or .env.local
-// (gitignored; the environment wins), then the first line of LLMT_KEY_FILE
-// (default ~/.config/llmt/anthropic-key). The key is only passed to the
-// extension's storage inside the throwaway profile; it is never printed.
+// API key for the model's provider, first found: ANTHROPIC_API_KEY /
+// OPENAI_API_KEY / GEMINI_API_KEY from the environment or .env.local
+// (gitignored; the environment wins), then, for Anthropic only, the first line
+// of LLMT_KEY_FILE (default ~/.config/llmt/anthropic-key). The key is only
+// passed to the extension's storage inside the throwaway profile; it is never
+// printed.
 
 import { chromium } from "playwright";
 import { existsSync } from "node:fs";
@@ -32,8 +34,17 @@ const DEFAULT_URL = "https://kubernetes.io/docs/concepts/scheduling-eviction/kub
 // Does not override variables already set in the environment.
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
+/** Provider by model id prefix: [env var, extension setting]. */
+function keySource() {
+  if (MODEL.startsWith("gpt-")) return ["OPENAI_API_KEY", "openaiApiKey"];
+  if (MODEL.startsWith("gemini-")) return ["GEMINI_API_KEY", "geminiApiKey"];
+  return ["ANTHROPIC_API_KEY", "anthropicApiKey"];
+}
+
 async function loadKey() {
-  if (process.env.ANTHROPIC_API_KEY) return process.env.ANTHROPIC_API_KEY.trim();
+  const [envVar] = keySource();
+  if (process.env[envVar]) return process.env[envVar].trim();
+  if (envVar !== "ANTHROPIC_API_KEY") throw new Error(`No API key: put ${envVar}=... in .env.local or export it.`);
   const file = process.env.LLMT_KEY_FILE ?? path.join(homedir(), ".config/llmt/anthropic-key");
   try {
     return (await readFile(file, "utf8")).split("\n")[0].trim();
@@ -72,7 +83,7 @@ async function launch() {
 async function configure(sw, apiKey) {
   await sw.evaluate(
     (s) => chrome.storage.local.set(s),
-    { anthropicApiKey: apiKey, model: MODEL, targetLang: LANG },
+    { [keySource()[1]]: apiKey, model: MODEL, targetLang: LANG },
   );
 }
 

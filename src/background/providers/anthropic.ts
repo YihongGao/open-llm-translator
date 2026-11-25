@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SegmentLineParser, buildSystemPrompt, buildUserMessage } from "../protocol";
-import type { ProviderEvent, ProviderRequest, TranslationProvider } from "./types";
+import type { ErrorInfo, ProviderEvent, ProviderRequest, TranslationProvider } from "./types";
 
 // Server-side refusal fallback: on a safety decline the API re-runs the request
 // on a fallback model within the same call. Claude Haiku 5.5 has no server-side
@@ -66,12 +66,6 @@ export class AnthropicProvider implements TranslationProvider {
       fallback: (final.usage.iterations ?? []).some((it) => it.type === "fallback_message"),
     };
   }
-}
-
-export interface ErrorInfo {
-  message: string;
-  /** Fixable in the options page (key or model). */
-  settings: boolean;
 }
 
 /**

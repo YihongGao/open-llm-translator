@@ -52,18 +52,30 @@
       .err {
         color: #c62828;
       }
+      label.active::after {
+        content: "（目前使用）";
+        font-weight: 400;
+        opacity: 0.7;
+      }
     </style>
   </head>
   <body>
     <h1>LLM Translator 設定</h1>
 
     <form id="form">
-      <label for="apiKey">Anthropic API key</label>
-      <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." />
-      <p class="hint">只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。</p>
-
       <label for="model">Model</label>
       <select id="model"></select>
+      <p class="hint">只需要填所選 model 那一家的 API key。</p>
+
+      <label for="anthropicApiKey">Anthropic API key</label>
+      <input id="anthropicApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." />
+
+      <label for="openaiApiKey">OpenAI API key</label>
+      <input id="openaiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-..." />
+
+      <label for="geminiApiKey">Gemini API key</label>
+      <input id="geminiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." />
+      <p class="hint">API key 只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。</p>
 
       <label for="targetLang">目標語言</label>
       <select id="targetLang"></select>

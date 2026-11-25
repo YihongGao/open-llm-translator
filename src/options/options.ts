@@ -1,16 +1,25 @@
 import type { TestConnectionResult } from "../shared/messages";
-import { MODELS, TARGET_LANGUAGES, loadSettings, saveSettings } from "../shared/settings";
+import {
+  PROVIDERS,
+  TARGET_LANGUAGES,
+  fillModelSelect,
+  loadSettings,
+  providerOf,
+  saveSettings,
+  type Settings,
+} from "../shared/settings";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const form = $<HTMLFormElement>("form");
-const apiKey = $<HTMLInputElement>("apiKey");
 const model = $<HTMLSelectElement>("model");
 const targetLang = $<HTMLSelectElement>("targetLang");
 const status = $<HTMLSpanElement>("status");
 const testBtn = $<HTMLButtonElement>("test");
+/** One password field per provider, id = its settings key. */
+const keyInputs = PROVIDERS.map((p) => ({ provider: p, input: $<HTMLInputElement>(p.keySetting) }));
 
-for (const m of MODELS) model.add(new Option(m.label, m.id));
+fillModelSelect(model);
 for (const l of TARGET_LANGUAGES) targetLang.add(new Option(l.label, l.tag));
 
 function show(message: string, kind: "ok" | "err" | "" = ""): void {
@@ -18,15 +27,27 @@ function show(message: string, kind: "ok" | "err" | "" = ""): void {
   status.className = kind;
 }
 
+/** Marks the key field the selected model uses. */
+function markActiveKey(): void {
+  const active = providerOf(model.value).id;
+  for (const { provider, input } of keyInputs)
+    document.querySelector(`label[for="${input.id}"]`)?.classList.toggle("active", provider.id === active);
+}
+
 async function save(): Promise<void> {
-  await saveSettings({ anthropicApiKey: apiKey.value.trim(), model: model.value, targetLang: targetLang.value });
+  const patch: Partial<Settings> = { model: model.value, targetLang: targetLang.value };
+  for (const { provider, input } of keyInputs) (patch as Record<string, string>)[provider.keySetting] = input.value.trim();
+  await saveSettings(patch);
 }
 
 void loadSettings().then((s) => {
-  apiKey.value = s.anthropicApiKey;
+  for (const { provider, input } of keyInputs) input.value = String(s[provider.keySetting]);
   model.value = s.model;
   targetLang.value = s.targetLang;
+  markActiveKey();
 });
+
+model.addEventListener("change", markActiveKey);
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();

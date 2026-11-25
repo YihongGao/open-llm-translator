@@ -13,7 +13,8 @@ import {
 import { TARGET_LANGUAGES, loadSettings } from "../shared/settings";
 import { toggleTab } from "../shared/tab-control";
 import { cacheGetMany, cacheKey, cachePut } from "./cache";
-import { AnthropicProvider, countSystemPromptTokens, describeAnthropicError, isAbort } from "./providers/anthropic";
+import { countSystemPromptTokens } from "./providers/anthropic";
+import { createProvider, isAbort, missingKeyMessage } from "./providers/registry";
 import { CacheWarmupGate, withWarmup } from "./cache-warmup";
 import { estimateCostUsd } from "./pricing";
 
@@ -86,12 +87,13 @@ async function handleTranslate(
   // The language travels with the request; only accept known tags, since the
   // name ends up in the system prompt.
   const targetLang = TARGET_LANGUAGES.some((l) => l.tag === req.targetLang) ? req.targetLang : settings.targetLang;
-  if (!settings.anthropicApiKey) {
+  const setup = createProvider(settings);
+  if (!setup) {
     emit({
       type: "segment-error",
       batchId: req.batchId,
       ids: req.segments.map((s) => s.id),
-      message: "尚未設定 Anthropic API key",
+      message: missingKeyMessage(settings),
       scope: "page",
       settings: true,
     });
@@ -100,11 +102,10 @@ async function handleTranslate(
   }
 
   // The cached prefix (system prompt) depends on model and target language.
-  const provider = withWarmup(
-    new AnthropicProvider(settings.anthropicApiKey, settings.model),
-    warmupGate,
-    `${settings.model}\u0000${targetLang}`,
-  );
+  // OpenAI and Gemini cache prompts implicitly, with nothing to warm up.
+  const provider = setup.explicitPromptCache
+    ? withWarmup(setup.provider, warmupGate, `${settings.model}\u0000${targetLang}`)
+    : setup.provider;
   const stats = await withSlot(() =>
     runBatch(
       req,
@@ -118,7 +119,7 @@ async function handleTranslate(
           put: cachePut,
         },
         emit,
-        describeError: describeAnthropicError,
+        describeError: setup.describeError,
         isAbort,
       },
       signal,
@@ -151,8 +152,8 @@ function formatBatchLog(batchId: string, requested: string, s: BatchStats): stri
 
 (globalThis as { llmtMeasurePrompts?: () => Promise<void> }).llmtMeasurePrompts = async () => {
   const settings = await loadSettings();
-  if (!settings.anthropicApiKey) {
-    console.warn("[llmt] 尚未設定 API key");
+  if (!settings.anthropicApiKey || !settings.model.startsWith("claude-")) {
+    console.warn("[llmt] 只支援 Claude model，且需要 Anthropic API key");
     return;
   }
   const rows = await countSystemPromptTokens(
@@ -197,10 +198,10 @@ chrome.runtime.onMessage.addListener(
 
 async function testConnection(): Promise<TestConnectionResult> {
   const settings = await loadSettings();
-  if (!settings.anthropicApiKey) return { ok: false, message: "尚未填入 API key" };
-  const provider = new AnthropicProvider(settings.anthropicApiKey, settings.model);
+  const setup = createProvider(settings);
+  if (!setup) return { ok: false, message: missingKeyMessage(settings) };
   try {
-    for await (const ev of provider.translate(
+    for await (const ev of setup.provider.translate(
       {
         texts: ["Kubernetes is an open source container orchestration engine."],
         targetLang: settings.targetLang,
@@ -212,6 +213,6 @@ async function testConnection(): Promise<TestConnectionResult> {
     }
     return { ok: false, message: "API 有回應，但沒有解析到譯文" };
   } catch (err) {
-    return { ok: false, message: describeAnthropicError(err).message };
+    return { ok: false, message: setup.describeError(err).message };
   }
 }
