@@ -44,6 +44,23 @@ describe("SegmentLineParser", () => {
   });
 });
 
+describe("SegmentLineParser.end({ truncated })", () => {
+  const run = (text: string) => {
+    const p = new SegmentLineParser(3);
+    return [...p.push(text), ...p.end({ truncated: true })].map((s) => s.text);
+  };
+  it("keeps a last segment that ended with a newline", () => {
+    expect(run("[1] 一\n[2] 二\n")).toEqual(["一", "二"]);
+  });
+  it("drops a new segment cut off mid-line but keeps the previous one", () => {
+    expect(run("[1] 一\n[2] 二只翻了")).toEqual(["一"]);
+    expect(run("[1] 一\n[2")).toEqual(["一"]);
+  });
+  it("drops the current segment when its continuation line was cut off", () => {
+    expect(run("[1] 一\n[2] 二的第一行\n第二行只到這")).toEqual(["一"]);
+  });
+});
+
 describe("buildUserMessage", () => {
   it("numbers segments from 1 and forces single lines", () => {
     const msg = buildUserMessage(["a\nb", "c"], { title: "T", url: "https://x" });

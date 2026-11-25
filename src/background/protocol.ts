@@ -106,10 +106,19 @@ export class SegmentLineParser {
     return out;
   }
 
-  end(): ParsedSegment[] {
+  /**
+   * Flushes what is left. With `truncated` (the response stopped on refusal or
+   * max_tokens) an unterminated last line may be cut mid-sentence, so:
+   * - output ended with a newline: the last segment is whole, keep it;
+   * - a new "[n" line was cut off: keep the previous segment, drop that line;
+   * - a continuation line was cut off: the current segment is incomplete, drop it.
+   */
+  end(opts: { truncated?: boolean } = {}): ParsedSegment[] {
     const out: ParsedSegment[] = [];
     if (this.buffer) {
-      this.consumeLine(this.buffer, out);
+      if (!opts.truncated) this.consumeLine(this.buffer, out);
+      else if (/^\s*\[/.test(this.buffer)) this.flushCurrent(out);
+      else this.current = null;
       this.buffer = "";
     }
     this.flushCurrent(out);

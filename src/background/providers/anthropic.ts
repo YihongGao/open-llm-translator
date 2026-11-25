@@ -46,13 +46,10 @@ export class AnthropicProvider implements TranslationProvider {
       }
     }
     const final = await stream.finalMessage();
-    // Segments are emitted when the next marker arrives, so everything before
-    // this point is complete. What end() flushes is the last line, which is
-    // only whole if the model finished normally; after a refusal or max_tokens
-    // it may stop mid-sentence and must not be shown or cached as a translation.
-    const finishedNormally = final.stop_reason === "end_turn" || final.stop_reason === "stop_sequence";
-    const tail = parser.end();
-    if (finishedNormally) for (const seg of tail) yield { kind: "segment", ...seg };
+    // After a refusal or max_tokens the last line may stop mid-sentence; it
+    // must not be shown or cached as a translation (see SegmentLineParser.end).
+    const truncated = final.stop_reason !== "end_turn" && final.stop_reason !== "stop_sequence";
+    for (const seg of parser.end({ truncated })) yield { kind: "segment", ...seg };
     const reason =
       final.stop_reason === "refusal" ? "refusal" : final.stop_reason === "max_tokens" ? "max_tokens" : "complete";
     yield {
