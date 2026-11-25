@@ -43,12 +43,24 @@ export type TranslateEvent =
     }
   | { type: "batch-done"; batchId: string };
 
-// background -> content (chrome.tabs.sendMessage)
-// Content scripts cannot read chrome.storage (see background setAccessLevel),
-// so the settings they need travel with this message.
+// extension -> content (chrome.tabs.sendMessage). Content scripts cannot read
+// chrome.storage (see background setAccessLevel), so the settings they need
+// travel with these messages. Each one is answered with a TabState.
 export interface ToggleMessage {
   type: "llmt-toggle";
   targetLang: string;
+}
+export interface StatusMessage {
+  type: "llmt-status";
+}
+/** Target language changed in the popup: re-translate the page if active. */
+export interface SetLanguageMessage {
+  type: "llmt-set-lang";
+  targetLang: string;
+}
+export type ContentMessage = ToggleMessage | StatusMessage | SetLanguageMessage;
+export interface TabState {
+  active: boolean;
 }
 
 // content -> background: content scripts cannot call openOptionsPage() themselves.

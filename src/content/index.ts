@@ -4,8 +4,9 @@
 
 import {
   PORT_NAME,
+  type ContentMessage,
   type Segment,
-  type ToggleMessage,
+  type TabState,
   type TranslateEvent,
   type TranslateRequest,
 } from "../shared/messages";
@@ -60,7 +61,7 @@ function main(): void {
   let nextId = 0;
   let nextBatch = 0;
 
-  const byAnchor = new WeakMap<Node, SegState>();
+  let byAnchor = new WeakMap<Node, SegState>();
   const byId = new Map<string, SegState>();
   const byObserved = new Map<Element, SegState[]>();
   const queue: SegState[] = [];
@@ -331,11 +332,39 @@ function main(): void {
     // rescans and IntersectionObserver keeps working on them.
   }
 
-  // The background worker sends the first toggle right after injecting us.
-  chrome.runtime.onMessage.addListener((msg: ToggleMessage) => {
-    if (msg?.type !== "llmt-toggle") return;
-    if (active) deactivate();
-    else activate(msg.targetLang);
+  /** Drop every translation and start over in `lang` (popup language change). */
+  function retranslateAll(lang: string): void {
+    targetLang = lang;
+    for (const seg of byId.values()) seg.node?.remove();
+    for (const target of byObserved.keys()) io.unobserve(target);
+    byId.clear();
+    byObserved.clear();
+    byAnchor = new WeakMap();
+    queue.length = 0;
+    // Replies to batches already in flight carry ids no longer in byId and are ignored.
+    shownPageErrors.clear();
+    hideToast();
+    scan(document.body);
+  }
+
+  // Whoever injected us sends the first toggle right after injection.
+  chrome.runtime.onMessage.addListener((msg: ContentMessage, _sender, sendResponse) => {
+    switch (msg?.type) {
+      case "llmt-toggle":
+        if (active) deactivate();
+        else activate(msg.targetLang);
+        break;
+      case "llmt-set-lang":
+        if (active && msg.targetLang !== targetLang) retranslateAll(msg.targetLang);
+        else targetLang = msg.targetLang;
+        break;
+      case "llmt-status":
+        break;
+      default:
+        return false;
+    }
+    sendResponse({ active } satisfies TabState);
+    return false;
   });
 }
 

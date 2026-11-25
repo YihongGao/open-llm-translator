@@ -17,7 +17,10 @@ npm run build        # 產出 dist/
 
 ## 使用
 
-在網頁上點擴充功能圖示，或按 `Alt+A`，切換翻譯開關。快捷鍵可以在 `chrome://extensions/shortcuts` 修改。
+- 點擴充功能圖示開啟選單：切換目標語言或 model、翻譯此頁或顯示原文、進入設定。換語言時，已翻譯的頁面會立即用新語言重翻。
+- 也可以直接按快捷鍵切換翻譯，預設是 `Alt+A`（macOS 為 `⌥A`）。快捷鍵可以在 `chrome://extensions/shortcuts` 修改，選單上的按鈕會顯示目前實際綁定的鍵。
+- 翻譯失敗時，右上角會出現提示框，例如 API key 沒設定或無效時附「開啟設定」按鈕。點段落旁的 ⚠ 可以看該段失敗的原因；修正後關閉再開啟翻譯，就會重試失敗的段落。
+- 每批翻譯會在 `chrome://extensions` →「Service Worker」→ Console 印出統計：段數、命中 cache 的數量、送出 API 的數量、耗時、token 用量。
 
 ## 架構
 
@@ -36,6 +39,9 @@ content script (按下時才注入)            background service worker
 | `src/background/translator.ts` | 每批的處理流程；保證每段一定會收到譯文或錯誤 |
 | `src/background/protocol.ts` | prompt，以及 streaming 輸出的 parser |
 | `src/background/providers/` | `TranslationProvider` 介面；之後的 Gemini 或 CLI bridge 從這裡接上 |
+| `src/popup/popup.ts` | 工具列選單 |
+| `src/shared/tab-control.ts` | 分頁的注入、切換與狀態查詢（選單與快捷鍵共用） |
+| `src/content/toast.ts` | 錯誤提示框（Shadow DOM） |
 
 設計決策：
 

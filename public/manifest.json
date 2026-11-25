@@ -11,7 +11,8 @@
     "type": "module"
   },
   "action": {
-    "default_title": "翻譯此頁（Alt+A）"
+    "default_title": "LLM Translator",
+    "default_popup": "popup.html"
   },
   "commands": {
     "toggle-translation": {

@@ -9,7 +9,13 @@ let observed: Element[] = [];
 const posted: TranslateRequest[] = [];
 const sentToBackground: unknown[] = [];
 let toPage: (ev: TranslateEvent) => void;
-let toggle: (msg: unknown) => void;
+let onContentMessage: (msg: unknown, sender: unknown, sendResponse: (r: unknown) => void) => void;
+/** Sends a message to the content script and returns its synchronous reply. */
+function tell(msg: unknown): unknown {
+  let reply: unknown;
+  onContentMessage(msg, {}, (r) => (reply = r));
+  return reply;
+}
 
 class FakeIO {
   constructor(cb: typeof ioCallback) {
@@ -43,7 +49,7 @@ beforeAll(async () => {
         onMessage: { addListener: (f: typeof toPage) => (toPage = f) },
         onDisconnect: { addListener() {} },
       }),
-      onMessage: { addListener: (f: typeof toggle) => (toggle = f) },
+      onMessage: { addListener: (f: typeof onContentMessage) => (onContentMessage = f) },
       sendMessage: async (m: unknown) => void sentToBackground.push(m),
     },
   };
@@ -53,7 +59,7 @@ beforeAll(async () => {
     <h4>Kubelet</h4>
     <p><a href="#nav">A paragraph that is entirely a link.</a></p>`;
   await import("../src/content/index");
-  toggle({ type: "llmt-toggle", targetLang: "zh-TW" });
+  expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: true });
   await scrollAllIntoView();
 });
 
@@ -112,13 +118,27 @@ describe("content controller", () => {
   });
 
   it("retries failed segments when translation is switched off and on again", async () => {
-    toggle({ type: "llmt-toggle", targetLang: "zh-TW" }); // off
-    toggle({ type: "llmt-toggle", targetLang: "zh-TW" }); // on
+    expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: false });
+    expect(tell({ type: "llmt-status" })).toEqual({ active: false });
+    expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: true });
     expect(toast()).toBeNull();
     await scrollAllIntoView();
     expect(posted).toHaveLength(2);
     expect(posted[1]!.segments.map((s) => s.text)).toEqual([
       "Second paragraph goes here.",
+      "A paragraph that is entirely a link.",
+    ]);
+  });
+
+  it("re-translates everything when the popup changes the target language", async () => {
+    expect(tell({ type: "llmt-set-lang", targetLang: "ja" })).toEqual({ active: true });
+    expect(document.querySelectorAll("llmt-translation")).toHaveLength(0);
+    await scrollAllIntoView();
+    const last = posted.at(-1)!;
+    expect(last.segments.map((s) => s.text)).toEqual([
+      "Hello world, this is the first paragraph.",
+      "Second paragraph goes here.",
+      "Kubelet",
       "A paragraph that is entirely a link.",
     ]);
   });

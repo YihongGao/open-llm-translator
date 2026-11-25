@@ -24,6 +24,7 @@ const builds = [
   // Content scripts and extension pages are classic scripts.
   { ...common, entryPoints: { content: "src/content/index.ts" }, format: "iife", outdir },
   { ...common, entryPoints: { options: "src/options/options.ts" }, format: "iife", outdir },
+  { ...common, entryPoints: { popup: "src/popup/popup.ts" }, format: "iife", outdir },
 ];
 
 if (watch) {

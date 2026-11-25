@@ -7,11 +7,11 @@ import {
   type OpenOptionsMessage,
   type TestConnectionMessage,
   type TestConnectionResult,
-  type ToggleMessage,
   type TranslateEvent,
   type TranslateRequest,
 } from "../shared/messages";
 import { loadSettings } from "../shared/settings";
+import { toggleTab } from "../shared/tab-control";
 import { cacheGetMany, cacheKey, cachePut } from "./cache";
 import { AnthropicProvider, describeAnthropicError, isAbort } from "./providers/anthropic";
 import { runBatch } from "./translator";
@@ -108,35 +108,20 @@ async function handleTranslate(
 }
 
 // ---------------------------------------------------------------------------
-// Toggle: toolbar button and keyboard shortcut.
+// Keyboard shortcut.
 
 // Keep the API key out of content scripts: by default chrome.storage.local is
 // readable from them. Runs on every worker start; the call is idempotent.
 void chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
 
-async function toggleTab(tab: chrome.tabs.Tab | undefined): Promise<void> {
-  const tabId = tab?.id;
-  if (tabId === undefined) return;
-  const msg: ToggleMessage = { type: "llmt-toggle", targetLang: (await loadSettings()).targetLang };
-  try {
-    await chrome.tabs.sendMessage(tabId, msg);
-    return; // content script already present
-  } catch {
-    // No receiver yet: inject on demand (activeTab grants access after the user gesture).
-  }
-  try {
-    await chrome.scripting.insertCSS({ target: { tabId }, files: ["content.css"] });
-    await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
-    await chrome.tabs.sendMessage(tabId, msg);
-  } catch (err) {
-    // chrome://, the Web Store and similar pages cannot be scripted.
-    console.warn("[llmt] cannot inject into this tab:", err);
-  }
-}
-
-chrome.action.onClicked.addListener((tab) => void toggleTab(tab));
+// The toolbar icon opens the popup (manifest default_popup); the keyboard
+// shortcut toggles directly.
 chrome.commands.onCommand.addListener((command, tab) => {
-  if (command === "toggle-translation") void toggleTab(tab);
+  if (command !== "toggle-translation" || tab?.id === undefined) return;
+  void toggleTab(tab.id).then((res) => {
+    // chrome://, the Web Store and similar pages cannot be scripted.
+    if (!res.ok) console.info("[llmt] this tab cannot be translated:", tab.url ?? "(unknown url)");
+  });
 });
 
 // ---------------------------------------------------------------------------
