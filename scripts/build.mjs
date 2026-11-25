@@ -1,14 +1,26 @@
-// Bundles the three extension entry points and copies static files into dist/.
-// Usage: node scripts/build.mjs [--watch]
+// Bundles the extension entry points and copies static files.
+// Usage: node scripts/build.mjs [--watch] [--e2e]
+//   --e2e  writes dist-e2e/ with host access to all sites, so the Playwright
+//          harness can inject the content script without a user gesture
+//          (activeTab is only granted by a real click). Never ship this build.
 import * as esbuild from "esbuild";
-import { cp, mkdir, rm } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 
 const watch = process.argv.includes("--watch");
-const outdir = "dist";
+const e2e = process.argv.includes("--e2e");
+const outdir = e2e ? "dist-e2e" : "dist";
 
 await rm(outdir, { recursive: true, force: true });
 await mkdir(outdir, { recursive: true });
 await cp("public", outdir, { recursive: true });
+
+if (e2e) {
+  const manifestPath = `${outdir}/manifest.json`;
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.name += " (E2E)";
+  manifest.host_permissions = [...manifest.host_permissions, "<all_urls>"];
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+}
 
 const common = {
   bundle: true,

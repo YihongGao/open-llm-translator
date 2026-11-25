@@ -1,0 +1,195 @@
+// End-to-end harness: loads dist-e2e/ into Playwright's Chromium with a fresh
+// profile (empty translation cache) and drives the extension through its
+// service worker. Build first: `npm run build:e2e`.
+//
+// Usage:
+//   node scripts/e2e.mjs no-key  [url]   # missing-key notice; no API calls, free
+//   node scripts/e2e.mjs measure         # system prompt tokens per language; free (count_tokens)
+//   node scripts/e2e.mjs translate <url> # translate the whole page and report cost; SPENDS MONEY
+//
+// Options (env): LLMT_MODEL (default claude-sonnet-5-5), LLMT_LANG (default zh-TW),
+// LLMT_EXT_DIR (default dist-e2e), HEADED=1 to watch, LLMT_SCREENSHOT=<file.png>
+// to save the viewport at the end.
+//
+// API key: ANTHROPIC_API_KEY, or the first line of the file at LLMT_KEY_FILE
+// (default ~/.config/llmt/anthropic-key). The key is only passed to the
+// extension's storage inside the throwaway profile; it is never printed.
+
+import { chromium } from "playwright";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
+import path from "node:path";
+
+const [scenario = "", urlArg] = process.argv.slice(2);
+const MODEL = process.env.LLMT_MODEL ?? "claude-sonnet-5-5";
+const LANG = process.env.LLMT_LANG ?? "zh-TW";
+const EXT_DIR = path.resolve(process.env.LLMT_EXT_DIR ?? "dist-e2e");
+const DEFAULT_URL = "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/";
+
+async function loadKey() {
+  if (process.env.ANTHROPIC_API_KEY) return process.env.ANTHROPIC_API_KEY.trim();
+  const file = process.env.LLMT_KEY_FILE ?? path.join(homedir(), ".config/llmt/anthropic-key");
+  try {
+    return (await readFile(file, "utf8")).split("\n")[0].trim();
+  } catch {
+    throw new Error(`No API key: set ANTHROPIC_API_KEY or create ${file} (one line, the key only).`);
+  }
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function launch() {
+  const profile = await mkdtemp(path.join(tmpdir(), "llmt-e2e-"));
+  const context = await chromium.launchPersistentContext(profile, {
+    channel: "chromium",
+    headless: !process.env.HEADED,
+    viewport: { width: 1280, height: 900 },
+    args: [`--disable-extensions-except=${EXT_DIR}`, `--load-extension=${EXT_DIR}`],
+  });
+  const sw = context.serviceWorkers()[0] ?? (await context.waitForEvent("serviceworker"));
+  // Capture the batch log lines the worker prints.
+  await sw.evaluate(() => {
+    globalThis.__llmtLogs = [];
+    const info = console.info.bind(console);
+    console.info = (...args) => {
+      globalThis.__llmtLogs.push(args.join(" "));
+      info(...args);
+    };
+  });
+  const close = async () => {
+    await context.close();
+    await rm(profile, { recursive: true, force: true });
+  };
+  return { context, sw, close };
+}
+
+async function configure(sw, apiKey) {
+  await sw.evaluate(
+    (s) => chrome.storage.local.set(s),
+    { anthropicApiKey: apiKey, model: MODEL, targetLang: LANG },
+  );
+}
+
+/** Same steps as the popup's toggle (inject + toggle message), done from the worker. */
+async function startTranslation(sw, url) {
+  return sw.evaluate(async ({ url, lang }) => {
+    const tabs = await chrome.tabs.query({});
+    const tab = tabs.find((t) => t.url === url) ?? tabs.find((t) => t.url?.startsWith(url));
+    if (!tab?.id) throw new Error(`tab not found for ${url}`);
+    await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+    return chrome.tabs.sendMessage(tab.id, { type: "llmt-toggle", targetLang: lang });
+  }, { url, lang: LANG });
+}
+
+async function domStats(page) {
+  return page.evaluate(() => {
+    const nodes = [...document.querySelectorAll("llmt-translation")];
+    const count = (sel) => nodes.filter((n) => n.matches(sel)).length;
+    const by = (attr) =>
+      nodes.reduce((acc, n) => {
+        const v = n.getAttribute(attr);
+        if (v) acc[v] = (acc[v] ?? 0) + 1;
+        return acc;
+      }, {});
+    const toast = document.querySelector("llmt-toast")?.shadowRoot?.querySelector(".msg")?.textContent ?? null;
+    return {
+      translations: count(":not(.llmt-pending):not(.llmt-error)"),
+      pending: count(".llmt-pending"),
+      errors: count(".llmt-error"),
+      model: by("data-llmt-model"),
+      source: by("data-llmt-source"),
+      toast,
+    };
+  });
+}
+
+/** Scroll to the bottom in viewport steps, then wait until nothing is pending. */
+async function scrollThrough(page) {
+  for (let i = 0; i < 200; i++) {
+    const done = await page.evaluate(() => {
+      window.scrollBy(0, window.innerHeight * 0.8);
+      return window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    });
+    await sleep(700);
+    if (done) break;
+  }
+  for (let i = 0; i < 60; i++) {
+    const { pending } = await domStats(page);
+    if (pending === 0) break;
+    await sleep(1000);
+  }
+}
+
+function summarize(logs) {
+  const cost = logs.reduce((sum, l) => sum + Number(/≈ \$([\d.]+)/.exec(l)?.[1] ?? 0), 0);
+  const field = (re) => logs.reduce((sum, l) => sum + Number(re.exec(l)?.[1] ?? 0), 0);
+  return {
+    batches: logs.length,
+    apiRequests: logs.filter((l) => /tokens in\/out/.test(l)).length,
+    inputTokens: field(/tokens in\/out (\d+)\//),
+    outputTokens: field(/tokens in\/out \d+\/(\d+)/),
+    cacheRead: field(/cache r\/w (\d+)\//),
+    cacheWrite: field(/cache r\/w \d+\/(\d+)/),
+    estimatedUsd: Number(cost.toFixed(4)),
+  };
+}
+
+async function main() {
+  if (!["no-key", "measure", "translate"].includes(scenario)) {
+    console.error("usage: node scripts/e2e.mjs <no-key|measure|translate> [url]");
+    process.exit(2);
+  }
+  const { context, sw, close } = await launch();
+  try {
+    if (scenario === "measure") {
+      await configure(sw, await loadKey());
+      const rows = await sw.evaluate(async () => {
+        let captured = null;
+        const table = console.table;
+        console.table = (rows) => (captured = rows);
+        try {
+          await globalThis.llmtMeasurePrompts();
+        } finally {
+          console.table = table;
+        }
+        return captured;
+      });
+      console.table(rows);
+      return;
+    }
+
+    const url = urlArg ?? DEFAULT_URL;
+    await configure(sw, scenario === "no-key" ? "" : await loadKey());
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+    await sleep(500);
+    const state = await startTranslation(sw, page.url());
+    console.log("toggle →", state);
+
+    if (scenario === "no-key") {
+      await sleep(1500);
+      console.log(await domStats(page));
+      if (process.env.LLMT_SCREENSHOT) await page.screenshot({ path: process.env.LLMT_SCREENSHOT });
+      return;
+    }
+
+    await scrollThrough(page);
+    if (process.env.LLMT_SCREENSHOT) {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await sleep(500);
+      await page.screenshot({ path: process.env.LLMT_SCREENSHOT });
+    }
+    const logs = await sw.evaluate(() => globalThis.__llmtLogs);
+    for (const l of logs) console.log(l);
+    console.log("\nDOM:", await domStats(page));
+    console.log("Summary:", summarize(logs));
+  } finally {
+    await close();
+  }
+}
+
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : err);
+  process.exit(1);
+});
