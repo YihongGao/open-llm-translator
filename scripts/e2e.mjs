@@ -9,7 +9,8 @@
 //
 // Options (env): LLMT_MODEL (default claude-sonnet-5-5), LLMT_LANG (default zh-TW),
 // LLMT_EXT_DIR (default dist-e2e), HEADED=1 to watch, LLMT_SCREENSHOT=<file.png>
-// to save the viewport at the end.
+// to save the viewport at the end, LLMT_DUMP=<file.json> to save every
+// source/translation pair (for comparing models).
 //
 // API key, first found: ANTHROPIC_API_KEY from the environment or .env.local
 // (gitignored; the environment wins), then the first line of LLMT_KEY_FILE
@@ -18,7 +19,7 @@
 
 import { chromium } from "playwright";
 import { existsSync } from "node:fs";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 
@@ -109,6 +110,33 @@ async function domStats(page) {
   });
 }
 
+/**
+ * Source/translation pairs in document order. The source is reconstructed
+ * from the nodes before each translation node, up to the previous block or
+ * translation — the same run the segmenter sent.
+ */
+async function dumpPairs(page) {
+  return page.evaluate(() => {
+    const isBlock = (n) =>
+      n.nodeType === Node.ELEMENT_NODE &&
+      (n.tagName === "LLMT-TRANSLATION" || !getComputedStyle(n).display.startsWith("inline"));
+    const textOf = (n) => {
+      if (n.nodeType === Node.TEXT_NODE) return n.textContent;
+      if (n.nodeType !== Node.ELEMENT_NODE || n.tagName === "LLMT-TRANSLATION") return "";
+      return [...n.childNodes].map(textOf).join("");
+    };
+    return [...document.querySelectorAll("llmt-translation:not(.llmt-pending):not(.llmt-error)")].map((node) => {
+      const parts = [];
+      for (let n = node.previousSibling; n && !isBlock(n); n = n.previousSibling) parts.unshift(textOf(n));
+      return {
+        source: parts.join("").replace(/\s+/g, " ").trim(),
+        translation: node.textContent,
+        tag: node.parentElement?.closest("h1,h2,h3,h4,h5,h6,p,li,td,th,a,nav")?.tagName.toLowerCase() ?? "",
+      };
+    });
+  });
+}
+
 /** Scroll to the bottom in viewport steps, then wait until nothing is pending. */
 async function scrollThrough(page) {
   for (let i = 0; i < 200; i++) {
@@ -189,6 +217,11 @@ async function main() {
     for (const l of logs) console.log(l);
     console.log("\nDOM:", await domStats(page));
     console.log("Summary:", summarize(logs));
+    if (process.env.LLMT_DUMP) {
+      const pairs = await dumpPairs(page);
+      await writeFile(process.env.LLMT_DUMP, JSON.stringify({ model: MODEL, url, summary: summarize(logs), pairs }, null, 2));
+      console.log(`wrote ${pairs.length} pairs to ${process.env.LLMT_DUMP}`);
+    }
   } finally {
     await close();
   }
