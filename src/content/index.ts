@@ -217,6 +217,7 @@ function main(): void {
     const p = chrome.runtime.connect({ name: PORT_NAME });
     p.onMessage.addListener(onEvent);
     p.onDisconnect.addListener(() => {
+      void chrome.runtime.lastError; // see background onDisconnect
       port = null;
       // The worker was suspended or reloaded mid-request: retry what was in flight.
       for (const seg of byId.values()) {

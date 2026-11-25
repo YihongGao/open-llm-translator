@@ -41,6 +41,9 @@ chrome.runtime.onConnect.addListener((port) => {
   const controller = new AbortController();
   let connected = true;
   port.onDisconnect.addListener(() => {
+    // Set when the page went into back/forward cache; reading it marks the
+    // error as handled (otherwise Chrome logs "Unchecked runtime.lastError").
+    void chrome.runtime.lastError;
     connected = false;
     controller.abort();
   });
