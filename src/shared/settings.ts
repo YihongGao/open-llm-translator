@@ -10,13 +10,15 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   anthropicApiKey: "",
-  model: "claude-sonnet-5-5",
+  // Haiku: ~20x cheaper than Sonnet with comparable quality on docs pages
+  // (kube-scheduler A/B, 2026-11-26); Sonnet stays one click away.
+  model: "claude-haiku-5-5",
   targetLang: "zh-TW",
 };
 
 export const MODELS: ReadonlyArray<{ id: string; label: string }> = [
-  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5（預設）" },
-  { id: "claude-haiku-5-5", label: "Claude Haiku 5.5（便宜、快）" },
+  { id: "claude-haiku-5-5", label: "Claude Haiku 5.5（預設，便宜、快）" },
+  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5（較通順）" },
   { id: "claude-opus-5-5", label: "Claude Opus 5.5（品質最高、最貴）" },
 ];
 

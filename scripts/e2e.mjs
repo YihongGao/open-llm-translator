@@ -7,7 +7,7 @@
 //   node scripts/e2e.mjs measure         # system prompt tokens per language; free (count_tokens)
 //   node scripts/e2e.mjs translate <url> # translate the whole page and report cost; SPENDS MONEY
 //
-// Options (env): LLMT_MODEL (default claude-sonnet-5-5), LLMT_LANG (default zh-TW),
+// Options (env): LLMT_MODEL (default claude-haiku-5-5, same as the extension), LLMT_LANG (default zh-TW),
 // LLMT_EXT_DIR (default dist-e2e), HEADED=1 to watch, LLMT_SCREENSHOT=<file.png>
 // to save the viewport at the end, LLMT_DUMP=<file.json> to save every
 // source/translation pair (for comparing models).
@@ -24,7 +24,7 @@ import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 
 const [scenario = "", urlArg] = process.argv.slice(2);
-const MODEL = process.env.LLMT_MODEL ?? "claude-sonnet-5-5";
+const MODEL = process.env.LLMT_MODEL ?? "claude-haiku-5-5";
 const LANG = process.env.LLMT_LANG ?? "zh-TW";
 const EXT_DIR = path.resolve(process.env.LLMT_EXT_DIR ?? "dist-e2e");
 const DEFAULT_URL = "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/";
