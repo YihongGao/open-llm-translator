@@ -27,7 +27,20 @@ export interface TranslateRequest {
 // background -> content (over Port)
 export type TranslateEvent =
   | { type: "segment"; batchId: string; id: string; text: string }
-  | { type: "segment-error"; batchId: string; ids: string[]; message: string }
+  | {
+      type: "segment-error";
+      batchId: string;
+      ids: string[];
+      message: string;
+      /**
+       * "page": the whole request failed (missing/invalid key, rate limit,
+       * network) and every segment will fail the same way, so the page shows
+       * one notice. "segment": only these segments failed (refusal, cut off).
+       */
+      scope: "page" | "segment";
+      /** The fix is in the options page (offer an "open settings" action). */
+      settings: boolean;
+    }
   | { type: "batch-done"; batchId: string };
 
 // background -> content (chrome.tabs.sendMessage)
@@ -36,6 +49,11 @@ export type TranslateEvent =
 export interface ToggleMessage {
   type: "llmt-toggle";
   targetLang: string;
+}
+
+// content -> background: content scripts cannot call openOptionsPage() themselves.
+export interface OpenOptionsMessage {
+  type: "llmt-open-options";
 }
 
 // any page -> background (chrome.runtime.sendMessage)

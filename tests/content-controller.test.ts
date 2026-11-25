@@ -5,8 +5,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { TranslateEvent, TranslateRequest } from "../src/shared/messages";
 
 let ioCallback: (entries: Array<{ target: Element; isIntersecting: boolean }>) => void;
-const observed: Element[] = [];
+let observed: Element[] = [];
 const posted: TranslateRequest[] = [];
+const sentToBackground: unknown[] = [];
 let toPage: (ev: TranslateEvent) => void;
 let toggle: (msg: unknown) => void;
 
@@ -23,6 +24,16 @@ class FakeIO {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Report everything observed so far as visible, then wait for the batch flush. */
+async function scrollAllIntoView() {
+  const targets = observed;
+  observed = [];
+  ioCallback(targets.map((target) => ({ target, isIntersecting: true })));
+  await sleep(200); // > FLUSH_DELAY_MS
+}
+
+const toast = () => document.querySelector("llmt-toast")?.shadowRoot ?? null;
+
 beforeAll(async () => {
   (globalThis as any).IntersectionObserver = FakeIO;
   (globalThis as any).chrome = {
@@ -33,13 +44,17 @@ beforeAll(async () => {
         onDisconnect: { addListener() {} },
       }),
       onMessage: { addListener: (f: typeof toggle) => (toggle = f) },
+      sendMessage: async (m: unknown) => void sentToBackground.push(m),
     },
   };
-  document.body.innerHTML = `<p>Hello world, this is the first paragraph.</p><p>Second paragraph goes here.</p><h4>Kubelet</h4>`;
+  document.body.innerHTML = `
+    <p>Hello world, this is the first paragraph.</p>
+    <p>Second paragraph goes here.</p>
+    <h4>Kubelet</h4>
+    <p><a href="#nav">A paragraph that is entirely a link.</a></p>`;
   await import("../src/content/index");
   toggle({ type: "llmt-toggle", targetLang: "zh-TW" });
-  ioCallback(observed.map((target) => ({ target, isIntersecting: true })));
-  await sleep(200); // FLUSH_DELAY_MS
+  await scrollAllIntoView();
 });
 
 describe("content controller", () => {
@@ -49,23 +64,62 @@ describe("content controller", () => {
       "Hello world, this is the first paragraph.",
       "Second paragraph goes here.",
       "Kubelet",
+      "A paragraph that is entirely a link.",
     ]);
   });
 
-  it("renders a translation, and an error marker with the reason as tooltip", () => {
-    const [ok, bad] = posted[0]!.segments;
-    toPage({ type: "segment", batchId: posted[0]!.batchId, id: ok!.id, text: "你好世界，這是第一段。" });
-    toPage({ type: "segment-error", batchId: posted[0]!.batchId, ids: [bad!.id], message: "尚未設定 Anthropic API key" });
-
-    const nodes = document.querySelectorAll("llmt-translation");
-    expect(nodes[0]!.textContent).toBe("你好世界，這是第一段。");
-    expect(nodes[1]!.textContent).toBe("⚠");
-    expect(nodes[1]!.getAttribute("title")).toBe("翻譯失敗：尚未設定 Anthropic API key");
+  it("renders a translation", () => {
+    const seg = posted[0]!.segments[0]!;
+    toPage({ type: "segment", batchId: posted[0]!.batchId, id: seg.id, text: "你好世界，這是第一段。" });
+    expect(document.querySelector("p llmt-translation")!.textContent).toBe("你好世界，這是第一段。");
   });
 
   it("shows nothing when the model returns the source unchanged (proper nouns)", () => {
-    const name = posted[0]!.segments[2]!;
-    toPage({ type: "segment", batchId: posted[0]!.batchId, id: name.id, text: "Kubelet" });
+    const seg = posted[0]!.segments[2]!;
+    toPage({ type: "segment", batchId: posted[0]!.batchId, id: seg.id, text: "Kubelet" });
     expect(document.querySelector("h4")!.innerHTML).toBe("Kubelet");
+  });
+
+  it("shows one page-level notice with a settings action for page-scope errors", () => {
+    const [, second, , linked] = posted[0]!.segments;
+    toPage({
+      type: "segment-error",
+      batchId: posted[0]!.batchId,
+      ids: [second!.id, linked!.id],
+      message: "尚未設定 Anthropic API key",
+      scope: "page",
+      settings: true,
+    });
+
+    const markers = document.querySelectorAll("llmt-translation.llmt-error");
+    expect(markers).toHaveLength(2);
+    expect(markers[0]!.textContent).toBe("⚠");
+    expect(document.querySelectorAll("llmt-toast")).toHaveLength(1);
+    expect(toast()!.querySelector(".msg")!.textContent).toBe("翻譯失敗：尚未設定 Anthropic API key");
+
+    (toast()!.querySelector(".action") as HTMLButtonElement).click();
+    expect(sentToBackground).toContainEqual({ type: "llmt-open-options" });
+    expect(toast()).toBeNull();
+  });
+
+  it("clicking a ⚠ inside a link shows the reason instead of navigating", () => {
+    const marker = document.querySelector("a llmt-translation.llmt-error") as HTMLElement;
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+    marker.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(toast()!.querySelector(".msg")!.textContent).toBe("翻譯失敗：尚未設定 Anthropic API key");
+    expect(toast()!.querySelector(".action")).toBeNull();
+  });
+
+  it("retries failed segments when translation is switched off and on again", async () => {
+    toggle({ type: "llmt-toggle", targetLang: "zh-TW" }); // off
+    toggle({ type: "llmt-toggle", targetLang: "zh-TW" }); // on
+    expect(toast()).toBeNull();
+    await scrollAllIntoView();
+    expect(posted).toHaveLength(2);
+    expect(posted[1]!.segments.map((s) => s.text)).toEqual([
+      "Second paragraph goes here.",
+      "A paragraph that is entirely a link.",
+    ]);
   });
 });

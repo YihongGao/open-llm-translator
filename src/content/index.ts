@@ -18,6 +18,7 @@ import {
   type Layout,
   type SegmentCandidate,
 } from "./segmenter";
+import { hideToast, showToast } from "./toast";
 
 declare global {
   interface Window {
@@ -259,10 +260,43 @@ function main(): void {
         if (!seg) continue;
         seg.status = "error";
         render(seg);
-        seg.node?.setAttribute("title", `翻譯失敗：${ev.message}`);
+        seg.node?.setAttribute("title", `翻譯失敗：${ev.message}（點一下看說明）`);
+        seg.node?.setAttribute("data-llmt-error", ev.message);
+      }
+      // Every remaining segment will fail the same way, so say it once per
+      // page instead of relying on a tooltip on each ⚠.
+      if (ev.scope === "page" && !shownPageErrors.has(ev.message)) {
+        shownPageErrors.add(ev.message);
+        showErrorToast(ev.message, ev.settings, false);
       }
     }
   }
+
+  const shownPageErrors = new Set<string>();
+
+  function showErrorToast(message: string, settings: boolean, autoHide: boolean): void {
+    showToast({
+      message: `翻譯失敗：${message}`,
+      detail: "修正後，關閉再開啟翻譯即可重試失敗的段落。",
+      action: settings
+        ? { label: "開啟設定", onClick: () => void chrome.runtime.sendMessage({ type: "llmt-open-options" }) }
+        : undefined,
+      autoHideMs: autoHide ? 8000 : undefined,
+    });
+  }
+
+  // ⚠ markers are often inside links; a click shows the reason instead of navigating.
+  document.addEventListener(
+    "click",
+    (e) => {
+      const marker = (e.target as Element | null)?.closest?.("llmt-translation.llmt-error");
+      if (!marker) return;
+      e.preventDefault();
+      e.stopPropagation();
+      showErrorToast(marker.getAttribute("data-llmt-error") ?? "未知錯誤", false, true);
+    },
+    true,
+  );
 
   // --- activation ---------------------------------------------------------------
 
@@ -275,6 +309,15 @@ function main(): void {
     for (const target of byObserved.keys()) {
       io.unobserve(target);
       io.observe(target);
+    }
+    // Retry failures (e.g. the user just fixed the API key).
+    shownPageErrors.clear();
+    hideToast();
+    for (const seg of byId.values()) {
+      if (seg.status !== "error") continue;
+      seg.status = "idle";
+      seg.retries = 0;
+      observe(seg);
     }
     scan(document.body);
     mo.observe(document.body, { childList: true, subtree: true, characterData: true });

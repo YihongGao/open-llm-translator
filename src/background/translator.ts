@@ -28,7 +28,7 @@ export interface BatchDeps {
   cache: TranslationCache;
   targetLang: string;
   emit(event: TranslateEvent): void;
-  describeError(err: unknown): string;
+  describeError(err: unknown): { message: string; settings: boolean };
   isAbort(err: unknown): boolean;
 }
 
@@ -71,10 +71,10 @@ export async function runBatch(
     failed: 0,
     ms: 0,
   };
-  const emitError = (texts: readonly string[], message: string) => {
+  const emitError = (texts: readonly string[], message: string, scope: "page" | "segment", settings = false) => {
     const ids = texts.flatMap((t) => idsByText.get(t) ?? []);
     stats.failed += texts.length;
-    if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message });
+    if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message, scope, settings });
   };
   const finish = (): BatchStats => {
     deps.emit({ type: "batch-done", batchId });
@@ -121,9 +121,12 @@ export async function runBatch(
       }
     } catch (err) {
       if (signal.aborted || deps.isAbort(err)) return null;
+      const info = deps.describeError(err);
       emitError(
         missTexts.filter((_, i) => !done.has(i)),
-        deps.describeError(err),
+        info.message,
+        "page",
+        info.settings,
       );
       return finish();
     }
@@ -131,6 +134,7 @@ export async function runBatch(
     emitError(
       missTexts.filter((_, i) => !done.has(i)),
       MISSING_REASON[reason],
+      "segment",
     );
   }
 

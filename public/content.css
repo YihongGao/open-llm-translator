@@ -22,7 +22,7 @@ llmt-translation.llmt-pending {
 llmt-translation.llmt-error {
   opacity: 0.7;
   font-size: 0.85em;
-  cursor: help;
+  cursor: pointer;
 }
 
 html.llmt-hidden llmt-translation {

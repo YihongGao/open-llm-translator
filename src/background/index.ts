@@ -4,6 +4,7 @@
 
 import {
   PORT_NAME,
+  type OpenOptionsMessage,
   type TestConnectionMessage,
   type TestConnectionResult,
   type ToggleMessage,
@@ -68,7 +69,9 @@ async function handleTranslate(
       type: "segment-error",
       batchId: req.batchId,
       ids: req.segments.map((s) => s.id),
-      message: "尚未設定 Anthropic API key：右鍵點擴充功能圖示 → 選項",
+      message: "尚未設定 Anthropic API key",
+      scope: "page",
+      settings: true,
     });
     emit({ type: "batch-done", batchId: req.batchId });
     return;
@@ -139,11 +142,17 @@ chrome.commands.onCommand.addListener((command, tab) => {
 // ---------------------------------------------------------------------------
 // Options page "測試連線".
 
-chrome.runtime.onMessage.addListener((msg: TestConnectionMessage, _sender, sendResponse) => {
-  if (msg?.type !== "llmt-test-connection") return false;
-  void testConnection().then(sendResponse);
-  return true; // async response
-});
+chrome.runtime.onMessage.addListener(
+  (msg: TestConnectionMessage | OpenOptionsMessage, _sender, sendResponse) => {
+    if (msg?.type === "llmt-open-options") {
+      void chrome.runtime.openOptionsPage();
+      return false;
+    }
+    if (msg?.type !== "llmt-test-connection") return false;
+    void testConnection().then(sendResponse);
+    return true; // async response
+  },
+);
 
 async function testConnection(): Promise<TestConnectionResult> {
   const settings = await loadSettings();
@@ -162,6 +171,6 @@ async function testConnection(): Promise<TestConnectionResult> {
     }
     return { ok: false, message: "API 有回應，但沒有解析到譯文" };
   } catch (err) {
-    return { ok: false, message: describeAnthropicError(err) };
+    return { ok: false, message: describeAnthropicError(err).message };
   }
 }

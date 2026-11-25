@@ -56,16 +56,26 @@ export class AnthropicProvider implements TranslationProvider {
   }
 }
 
-/** Maps SDK errors to a short message shown next to the failed segment. */
-export function describeAnthropicError(err: unknown): string {
-  if (err instanceof Anthropic.AuthenticationError) return "Anthropic API key 無效（401），請到設定頁確認";
-  if (err instanceof Anthropic.PermissionDeniedError) return "API key 沒有此 model 的權限（403）";
-  if (err instanceof Anthropic.NotFoundError) return "找不到 model（404），請到設定頁確認 model";
-  if (err instanceof Anthropic.RateLimitError) return "超過速率限制（429），稍後再試";
-  if (err instanceof Anthropic.BadRequestError) return `請求被拒（400）：${err.message}`;
-  if (err instanceof Anthropic.APIError && err.status !== undefined) return `API 錯誤 ${err.status}：${err.message}`;
-  if (err instanceof Anthropic.APIConnectionError) return "無法連線到 Anthropic API";
-  return err instanceof Error ? err.message : String(err);
+export interface ErrorInfo {
+  message: string;
+  /** Fixable in the options page (key or model). */
+  settings: boolean;
+}
+
+/** Maps SDK errors to a short user-facing message. */
+export function describeAnthropicError(err: unknown): ErrorInfo {
+  if (err instanceof Anthropic.AuthenticationError)
+    return { message: "Anthropic API key 無效（401），請到設定頁確認", settings: true };
+  if (err instanceof Anthropic.PermissionDeniedError)
+    return { message: "API key 沒有此 model 的權限（403）", settings: true };
+  if (err instanceof Anthropic.NotFoundError)
+    return { message: "找不到 model（404），請到設定頁確認 model", settings: true };
+  if (err instanceof Anthropic.RateLimitError) return { message: "超過速率限制（429），稍後再試", settings: false };
+  if (err instanceof Anthropic.BadRequestError) return { message: `請求被拒（400）：${err.message}`, settings: false };
+  if (err instanceof Anthropic.APIError && err.status !== undefined)
+    return { message: `API 錯誤 ${err.status}：${err.message}`, settings: false };
+  if (err instanceof Anthropic.APIConnectionError) return { message: "無法連線到 Anthropic API", settings: false };
+  return { message: err instanceof Error ? err.message : String(err), settings: false };
 }
 
 export function isAbort(err: unknown): boolean {

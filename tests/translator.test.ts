@@ -41,7 +41,7 @@ async function run(r: TranslateRequest, provider: TranslationProvider, cache = m
       cache,
       targetLang: "zh-TW",
       emit: (e) => events.push(e),
-      describeError: (e) => (e instanceof Error ? e.message : "?"),
+      describeError: (e) => ({ message: e instanceof Error ? e.message : "?", settings: false }),
       isAbort: () => false,
     },
     new AbortController().signal,
@@ -108,6 +108,8 @@ describe("runBatch", () => {
       batchId: "b1",
       ids: ["s1"],
       message: "輸出超過長度上限，這一段被截斷",
+      scope: "segment",
+      settings: false,
     });
     expect(events.at(-1)).toEqual({ type: "batch-done", batchId: "b1" });
   });
@@ -116,7 +118,7 @@ describe("runBatch", () => {
     const provider = new FakeProvider(() => new Error("boom"));
     const { events } = await run(req(["a", "b"]), provider);
     expect(events).toEqual([
-      { type: "segment-error", batchId: "b1", ids: ["s0", "s1"], message: "boom" },
+      { type: "segment-error", batchId: "b1", ids: ["s0", "s1"], message: "boom", scope: "page", settings: false },
       { type: "batch-done", batchId: "b1" },
     ]);
   });
@@ -137,7 +139,7 @@ describe("runBatch", () => {
         cache: memoryCache(),
         targetLang: "zh-TW",
         emit: (e) => events.push(e),
-        describeError: () => "x",
+        describeError: () => ({ message: "x", settings: false }),
         isAbort: () => false,
       },
       controller.signal,
