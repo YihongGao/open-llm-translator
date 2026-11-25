@@ -39,6 +39,32 @@ export interface SegmentCandidate {
   text: string;
 }
 
+/** Elements whose subtree is never translated (and never part of a parent's text). */
+export function isSkipped(el: Element): boolean {
+  return (
+    EXCLUDED_TAGS.has(el.tagName.toUpperCase()) ||
+    el.getAttribute("translate") === "no" ||
+    el.classList.contains("notranslate") ||
+    el.getAttribute("aria-hidden") === "true" ||
+    (el as HTMLElement).hidden === true ||
+    (el as HTMLElement).isContentEditable === true ||
+    el.getAttribute("contenteditable") === "true"
+  );
+}
+
+/**
+ * True when an ancestor of `el` excludes it from translation. collectSegments()
+ * only checks the root and its descendants, so a rescan rooted inside an
+ * excluded region (content added to a code viewer, a button, translate="no")
+ * must be rejected up front.
+ */
+export function isExcludedByAncestor(el: Element): boolean {
+  for (let cur = el.parentElement; cur && cur !== document.body; cur = cur.parentElement) {
+    if (isSkipped(cur) || OPAQUE_BLOCK_TAGS.has(cur.tagName.toUpperCase())) return true;
+  }
+  return false;
+}
+
 export interface CollectOptions {
   targetLang: string;
   /** Injected for tests; defaults to getComputedStyle. */
@@ -48,15 +74,6 @@ export interface CollectOptions {
 export function collectSegments(root: Element, opts: CollectOptions): SegmentCandidate[] {
   const displayOf = opts.displayOf ?? ((el: Element) => getComputedStyle(el).display);
   const out: SegmentCandidate[] = [];
-
-  const isSkipped = (el: Element): boolean =>
-    EXCLUDED_TAGS.has(el.tagName.toUpperCase()) ||
-    el.getAttribute("translate") === "no" ||
-    el.classList.contains("notranslate") ||
-    el.getAttribute("aria-hidden") === "true" ||
-    (el as HTMLElement).hidden === true ||
-    (el as HTMLElement).isContentEditable === true ||
-    el.getAttribute("contenteditable") === "true";
 
   // An inline-tagged element counts as inline unless CSS makes it a box
   // (e.g. nav links styled display:block) or it wraps block content (card links).

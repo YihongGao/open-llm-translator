@@ -15,7 +15,9 @@ import {
   chooseLayout,
   collectSegments,
   insertionPoint,
+  isExcludedByAncestor,
   isSameText,
+  isSkipped,
   type Layout,
   type SegmentCandidate,
 } from "./segmenter";
@@ -36,7 +38,15 @@ const RESCAN_DELAY_MS = 400;
 const VIEWPORT_MARGIN = "600px 0px";
 const MAX_RETRIES = 1;
 
-type Status = "idle" | "queued" | "pending" | "done" | "error";
+/** "retired": replaced by a rescan; ignored everywhere and never sent. */
+type Status = "idle" | "queued" | "pending" | "done" | "error" | "retired";
+
+/**
+ * A container whose text is re-translated more often than this is treated as
+ * volatile (clock, counter, ticker) and left untranslated: each change would
+ * otherwise cost an API call and a cache entry.
+ */
+const MAX_RETRANSLATIONS = 3;
 
 interface SegState {
   id: string;
@@ -102,22 +112,55 @@ function main(): void {
 
   // --- scanning ---------------------------------------------------------------
 
+  /** Remove a segment for good: its node, its registrations, and any future send. */
+  function retire(seg: SegState): void {
+    seg.status = "retired";
+    seg.node?.remove();
+    byId.delete(seg.id);
+    for (const [target, list] of byObserved) {
+      const i = list.indexOf(seg);
+      if (i === -1) continue;
+      list.splice(i, 1);
+      if (list.length === 0) {
+        byObserved.delete(target);
+        io.unobserve(target);
+      }
+      break;
+    }
+  }
+
+  /** Re-translations per container, for MAX_RETRANSLATIONS. */
+  let churn = new WeakMap<Element, number>();
+
+  /**
+   * Reconcile segments under `root` with the DOM: keep segments whose anchor
+   * and text are unchanged, retire every other segment under `root` (text
+   * changed in place, anchor replaced, run extended), and register new ones.
+   */
   function scan(root: Element): void {
-    for (const candidate of collectSegments(root, { targetLang })) {
+    const candidates = collectSegments(root, { targetLang });
+    const kept = new Set<SegState>();
+    for (const c of candidates) {
+      const existing = byAnchor.get(c.anchor);
+      if (existing && existing.status !== "retired" && existing.candidate.text === c.text) kept.add(existing);
+    }
+    for (const seg of [...byId.values()]) {
+      if (kept.has(seg) || !root.contains(seg.candidate.container)) continue;
+      retire(seg);
+      churn.set(seg.candidate.container, (churn.get(seg.candidate.container) ?? 0) + 1);
+    }
+
+    for (const candidate of candidates) {
       const existing = byAnchor.get(candidate.anchor);
-      if (existing && existing.candidate.text === candidate.text) {
+      if (existing && kept.has(existing)) {
         // The framework re-rendered and dropped our node: put it back.
-        if (existing.node && !existing.node.isConnected && !existing.hidden) {
+        if (existing.node && !existing.node.isConnected && !existing.hidden && existing.status !== "idle") {
           existing.candidate = candidate;
           mountNode(existing);
         }
         continue;
       }
-      if (existing) {
-        // Text changed in place (SPA update): retire the old translation.
-        existing.node?.remove();
-        byId.delete(existing.id);
-      }
+      if ((churn.get(candidate.container) ?? 0) > MAX_RETRANSLATIONS) continue; // volatile text
       const seg: SegState = {
         id: String(nextId++),
         candidate,
@@ -154,8 +197,10 @@ function main(): void {
         rescanTimer = undefined;
         const roots = [...pendingRoots].filter((r) => r.isConnected);
         pendingRoots = new Set();
-        // Skip roots nested inside another root being rescanned.
-        for (const r of roots) if (!roots.some((o) => o !== r && o.contains(r))) scan(r);
+        // Skip roots nested inside another root being rescanned, and roots
+        // inside regions the page excludes (translate=no, buttons, code...).
+        for (const r of roots)
+          if (!roots.some((o) => o !== r && o.contains(r)) && !isSkipped(r) && !isExcludedByAncestor(r)) scan(r);
       }, RESCAN_DELAY_MS);
     }
   });
@@ -207,7 +252,8 @@ function main(): void {
         const seg = queue[0]!;
         if (batch.length > 0 && chars + seg.candidate.text.length > MAX_BATCH_CHARS) break;
         queue.shift();
-        if (!seg.candidate.anchor.isConnected) continue; // removed before we got to it
+        // Retired or removed before we got to it.
+        if (seg.status !== "queued" || !seg.candidate.anchor.isConnected) continue;
         seg.status = "pending";
         batch.push({ id: seg.id, text: seg.candidate.text });
         chars += seg.candidate.text.length;
@@ -217,6 +263,7 @@ function main(): void {
         type: "translate",
         batchId: String(nextBatch++),
         segments: batch,
+        targetLang,
         page: { title: document.title, url: location.href },
       };
       getPort().postMessage(req);
@@ -342,10 +389,19 @@ function main(): void {
 
   // --- activation ---------------------------------------------------------------
 
+  /** Language of the segments currently registered (null before the first activation). */
+  let translatedLang: string | null = null;
+
   function activate(lang: string): void {
     active = true;
-    targetLang = lang;
     document.documentElement.classList.remove("llmt-hidden");
+    if (translatedLang !== null && lang !== translatedLang) {
+      // Language changed while translation was off: existing translations are stale.
+      retranslateAll(lang);
+      mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+      return;
+    }
+    targetLang = translatedLang = lang;
     // Re-observe targets that may have scrolled into view while inactive;
     // observe() always delivers an initial entry.
     for (const target of byObserved.keys()) {
@@ -375,7 +431,8 @@ function main(): void {
 
   /** Drop every translation and start over in `lang` (popup language change). */
   function retranslateAll(lang: string): void {
-    targetLang = lang;
+    targetLang = translatedLang = lang;
+    churn = new WeakMap();
     for (const seg of byId.values()) seg.node?.remove();
     for (const target of byObserved.keys()) io.unobserve(target);
     byId.clear();
@@ -397,8 +454,9 @@ function main(): void {
         else activate(msg.targetLang);
         break;
       case "llmt-set-lang":
-        if (active && msg.targetLang !== targetLang) retranslateAll(msg.targetLang);
-        else targetLang = msg.targetLang;
+        // While off, the change is applied by the next activation (which compares
+        // against translatedLang and re-translates).
+        if (active && msg.targetLang !== translatedLang) retranslateAll(msg.targetLang);
         break;
       case "llmt-status":
         break;

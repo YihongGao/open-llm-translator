@@ -21,6 +21,12 @@ export interface TranslateRequest {
   type: "translate";
   batchId: string;
   segments: Segment[];
+  /**
+   * Language the page is being translated into. Carried per request rather
+   * than read from storage, so a change made in another tab cannot switch a
+   * page's language halfway through.
+   */
+  targetLang: string;
   page: PageContext;
 }
 

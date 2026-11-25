@@ -56,18 +56,36 @@ chrome.runtime.onConnect.addListener((port) => {
     if (connected) port.postMessage(ev);
   };
 
+  // Cache entries are partitioned by the page's origin, taken from Chrome's
+  // view of the sender rather than anything the page reports, so a hostile
+  // page cannot replay (or read back via timing) translations cached on
+  // another site.
+  const origin = senderOrigin(port.sender);
+
   port.onMessage.addListener((msg: TranslateRequest) => {
     if (msg?.type !== "translate") return;
-    void handleTranslate(msg, emit, controller.signal);
+    void handleTranslate(msg, origin, emit, controller.signal);
   });
 });
 
+function senderOrigin(sender: chrome.runtime.MessageSender | undefined): string {
+  try {
+    return new URL(sender?.url ?? sender?.tab?.url ?? "").origin;
+  } catch {
+    return "unknown";
+  }
+}
+
 async function handleTranslate(
   req: TranslateRequest,
+  origin: string,
   emit: (ev: TranslateEvent) => void,
   signal: AbortSignal,
 ): Promise<void> {
   const settings = await loadSettings();
+  // The language travels with the request; only accept known tags, since the
+  // name ends up in the system prompt.
+  const targetLang = TARGET_LANGUAGES.some((l) => l.tag === req.targetLang) ? req.targetLang : settings.targetLang;
   if (!settings.anthropicApiKey) {
     emit({
       type: "segment-error",
@@ -85,17 +103,17 @@ async function handleTranslate(
   const provider = withWarmup(
     new AnthropicProvider(settings.anthropicApiKey, settings.model),
     warmupGate,
-    `${settings.model}\u0000${settings.targetLang}`,
+    `${settings.model}\u0000${targetLang}`,
   );
   const stats = await withSlot(() =>
     runBatch(
       req,
       {
         provider,
-        targetLang: settings.targetLang,
+        targetLang,
         model: settings.model,
         cache: {
-          key: (text) => cacheKey(settings.model, settings.targetLang, text),
+          key: (text) => cacheKey(origin, settings.model, targetLang, text),
           getMany: cacheGetMany,
           put: cachePut,
         },

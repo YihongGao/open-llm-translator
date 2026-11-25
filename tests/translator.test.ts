@@ -29,6 +29,7 @@ const page = { title: "t", url: "https://example.com" };
 const req = (texts: string[]): TranslateRequest => ({
   type: "translate",
   batchId: "b1",
+  targetLang: "zh-TW",
   page,
   segments: texts.map((text, i) => ({ id: `s${i}`, text })),
 });

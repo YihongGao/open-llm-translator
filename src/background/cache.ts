@@ -1,7 +1,9 @@
 // Persistent translation cache in IndexedDB (the service worker's in-memory
 // state is lost whenever Chrome suspends it, so a Map alone would be useless).
 //
-// Key: SHA-256(model, targetLang, source text). No eviction yet.
+// Key: SHA-256(origin, model, targetLang, source text). Partitioned by origin
+// so one site's (possibly prompt-injected) translation is never replayed on
+// another. No eviction yet.
 
 import type { CacheEntry } from "./translator";
 
@@ -31,8 +33,8 @@ function openDb(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-export async function cacheKey(model: string, targetLang: string, text: string): Promise<string> {
-  const bytes = new TextEncoder().encode(`${model}\u0000${targetLang}\u0000${text}`);
+export async function cacheKey(origin: string, model: string, targetLang: string, text: string): Promise<string> {
+  const bytes = new TextEncoder().encode(`${origin}\u0000${model}\u0000${targetLang}\u0000${text}`);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
