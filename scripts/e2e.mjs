@@ -11,11 +11,13 @@
 // LLMT_EXT_DIR (default dist-e2e), HEADED=1 to watch, LLMT_SCREENSHOT=<file.png>
 // to save the viewport at the end.
 //
-// API key: ANTHROPIC_API_KEY, or the first line of the file at LLMT_KEY_FILE
+// API key, first found: ANTHROPIC_API_KEY from the environment or .env.local
+// (gitignored; the environment wins), then the first line of LLMT_KEY_FILE
 // (default ~/.config/llmt/anthropic-key). The key is only passed to the
 // extension's storage inside the throwaway profile; it is never printed.
 
 import { chromium } from "playwright";
+import { existsSync } from "node:fs";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
@@ -26,13 +28,16 @@ const LANG = process.env.LLMT_LANG ?? "zh-TW";
 const EXT_DIR = path.resolve(process.env.LLMT_EXT_DIR ?? "dist-e2e");
 const DEFAULT_URL = "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/";
 
+// Does not override variables already set in the environment.
+if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+
 async function loadKey() {
   if (process.env.ANTHROPIC_API_KEY) return process.env.ANTHROPIC_API_KEY.trim();
   const file = process.env.LLMT_KEY_FILE ?? path.join(homedir(), ".config/llmt/anthropic-key");
   try {
     return (await readFile(file, "utf8")).split("\n")[0].trim();
   } catch {
-    throw new Error(`No API key: set ANTHROPIC_API_KEY or create ${file} (one line, the key only).`);
+    throw new Error(`No API key: put ANTHROPIC_API_KEY=... in .env.local, export it, or create ${file}.`);
   }
 }
 
