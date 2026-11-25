@@ -40,6 +40,7 @@ export class AnthropicProvider implements TranslationProvider {
     );
 
     for await (const event of stream) {
+      if (event.type === "message_start") req.onResponseStart?.();
       if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
         for (const seg of parser.push(event.delta.text)) yield { kind: "segment", ...seg };
       }

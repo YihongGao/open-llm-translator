@@ -5,6 +5,8 @@ export interface ProviderRequest {
   texts: readonly string[];
   targetLang: string;
   page: PageContext;
+  /** Called once when the API response starts streaming. */
+  onResponseStart?: () => void;
 }
 
 export type ProviderEvent =

@@ -14,7 +14,10 @@ import { loadSettings } from "../shared/settings";
 import { toggleTab } from "../shared/tab-control";
 import { cacheGetMany, cacheKey, cachePut } from "./cache";
 import { AnthropicProvider, describeAnthropicError, isAbort } from "./providers/anthropic";
+import { CacheWarmupGate, withWarmup } from "./cache-warmup";
 import { estimateCostUsd } from "./pricing";
+
+const warmupGate = new CacheWarmupGate();
 import { runBatch, type BatchStats } from "./translator";
 
 // ---------------------------------------------------------------------------
@@ -78,7 +81,12 @@ async function handleTranslate(
     return;
   }
 
-  const provider = new AnthropicProvider(settings.anthropicApiKey, settings.model);
+  // The cached prefix (system prompt) depends on model and target language.
+  const provider = withWarmup(
+    new AnthropicProvider(settings.anthropicApiKey, settings.model),
+    warmupGate,
+    `${settings.model}\u0000${settings.targetLang}`,
+  );
   const stats = await withSlot(() =>
     runBatch(
       req,
