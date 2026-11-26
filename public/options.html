@@ -24,6 +24,14 @@
         opacity: 0.7;
         margin: 4px 0 0;
       }
+      .hint a {
+        color: LinkText;
+      }
+      @media (prefers-color-scheme: dark) {
+        .hint a {
+          color: #8ab4f8;
+        }
+      }
       input,
       select {
         width: 100%;
@@ -76,6 +84,12 @@
       <label for="geminiApiKey">Gemini API key</label>
       <input id="geminiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." />
       <p class="hint">API key 只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。</p>
+      <p class="hint">
+        建議為這個擴充功能另建專用的 API key，並在服務商那邊設定用量上限：
+        <a href="https://console.anthropic.com/settings/limits" target="_blank" rel="noopener noreferrer">Anthropic</a>、
+        <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener noreferrer">OpenAI</a>、
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google</a>。
+      </p>
       <p class="hint" id="dataNotice">
         翻譯時，畫面上要翻譯的段落文字、頁面標題和網址（只含網域與路徑，不含查詢字串）會用您的 API key
         送到所選 model 的服務商（Anthropic、OpenAI 或 Google），依該服務商的 API 條款處理。譯文會快取在這台電腦，不會送到其他地方。
