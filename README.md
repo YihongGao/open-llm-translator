@@ -15,6 +15,14 @@ npm run build        # 產出 dist/
 
 開發時用 `npm run dev`（esbuild watch）。改完後到 `chrome://extensions` 按重新載入；`public/` 底下的檔案只在啟動時複製一次。
 
+## 上架
+
+```bash
+npm run package      # build + 檢查（無 E2E 設定、無 source map、無 remote code）→ release/*.zip
+```
+
+送審各欄位要填的內容在 `docs/store-submission.md`，隱私權政策草稿在 `docs/privacy-policy.md`。
+
 ## Model
 
 每家三檔，依價格與定位對應（價格為每百萬 token 的 input / output，2026-11）：
