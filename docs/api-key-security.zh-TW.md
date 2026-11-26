@@ -37,9 +37,7 @@ key 只在擴充功能的背景 service worker 裡使用，透過 HTTPS 呼叫�
 以下做法能在 key 被盜時把損失降到最低：
 
 1. **為這個擴充功能另建專用的 key**，不要和其他專案共用。這樣能單獨看到它的用量，撤銷時也不會影響其他服務。
-2. **在服務商那邊設定費用上限**：[Anthropic](https://console.anthropic.com/settings/limits)、[OpenAI](https://platform.openai.com/settings/organization/limits)、[Google AI Studio](https://aistudio.google.com/spend)（**Monthly spend cap**；Google 標示為實驗性功能，並說明實際花費可能超出約 10 分鐘的用量）。採用預付額度並關閉自動儲值，也是一道硬上限：餘額用完，請求就會停止。
-
-   Gemini 的 key 請在 [AI Studio](https://aistudio.google.com/apikey) 建立。2026 年 5 月之後在那裡建立的 key 只能呼叫 Gemini API，即使外洩也無法拿去用其他 Google Cloud 服務。在 AI Studio 顯示 **Unrestricted** 的舊 key 會被 Gemini API 拒絕；請點 **Add restrictions** → **Restrict to Gemini API only**。詳見 Google 的 [API key 說明](https://aistudio.google.com/docs/api-key)。
+2. **在服務商那邊設定費用上限**：[Anthropic](https://console.anthropic.com/settings/limits)、[OpenAI](https://platform.openai.com/settings/organization/limits)、[Google AI Studio](https://aistudio.google.com/spend)。採用預付額度並關閉自動儲值，也是一道硬上限：餘額用完，請求就會停止。
 3. **懷疑外洩時，請到服務商網站撤銷 key**，再建一把新的，舊 key 隨即失效。只在擴充功能裡按「清除」並不夠，已經被偷走的副本在撤銷之前仍然有效。
 4. 保持電腦沒有惡意程式：這是擴充功能唯一無法替您防範的情況。
 

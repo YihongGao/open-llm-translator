@@ -37,9 +37,7 @@ Encryption needs a second key to decrypt with, and an extension has nowhere safe
 These steps limit the damage even if your key is stolen:
 
 1. **Create a key only for this extension.** Do not reuse a key from other projects. You can then see this extension's usage on its own and revoke the key without breaking anything else.
-2. **Set a spending limit with your provider**: [Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google AI Studio](https://aistudio.google.com/spend) (**Monthly spend cap**; Google marks it experimental and notes spending can overshoot it by about 10 minutes of usage). Prepaid credit with automatic top-up turned off is a hard ceiling too: when the balance reaches zero, requests stop.
-
-   For Gemini, create the key in [AI Studio](https://aistudio.google.com/apikey). Keys created there since May 2026 can call only the Gemini API, so a leaked key cannot be used for other Google Cloud services. An older key that shows **Unrestricted** in AI Studio is rejected by the Gemini API; use **Add restrictions** → **Restrict to Gemini API only**. See Google's [API key guide](https://aistudio.google.com/docs/api-key).
+2. **Set a spending limit with your provider**: [Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google AI Studio](https://aistudio.google.com/spend). Prepaid credit with automatic top-up turned off is a hard ceiling too: when the balance reaches zero, requests stop.
 3. **Revoke the key** on the provider's site if you think it leaked, then create a new one. The old key then stops working. Deleting it from the extension (**清除** on the options page) is not enough on its own, because a copy that was already stolen keeps working until you revoke it.
 4. Keep your computer free of malware: this is the one case the extension cannot protect against.
 
