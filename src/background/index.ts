@@ -147,27 +147,40 @@ function formatBatchLog(batchId: string, requested: string, s: BatchStats): stri
 }
 
 // ---------------------------------------------------------------------------
-// Debug helper, run from chrome://extensions -> Service Worker -> Console:
+// Debug helper, dev and E2E builds only (absent from release builds).
+// Run from chrome://extensions -> Service Worker -> Console:
 //   await llmtMeasurePrompts()
 // Prints the system prompt's token count per target language (free API call),
 // to check it stays above the model's minimum cacheable prefix.
 
-(globalThis as { llmtMeasurePrompts?: () => Promise<void> }).llmtMeasurePrompts = async () => {
-  const settings = await loadSettings();
-  if (!settings.anthropicApiKey || !settings.model.startsWith("claude-")) {
-    console.warn("[llmt] 只支援 Claude model，且需要 Anthropic API key");
-    return;
-  }
-  const rows = await countSystemPromptTokens(
-    settings.anthropicApiKey,
-    settings.model,
-    TARGET_LANGUAGES.map((l) => l.tag),
-  );
-  console.table(rows.map((r) => ({ ...r, model: settings.model, cacheable: r.tokens >= 512 })));
-};
+if (__LLMT_DEBUG__) {
+  (globalThis as { llmtMeasurePrompts?: () => Promise<void> }).llmtMeasurePrompts = async () => {
+    const settings = await loadSettings();
+    if (!settings.anthropicApiKey || !settings.model.startsWith("claude-")) {
+      console.warn("[llmt] 只支援 Claude model，且需要 Anthropic API key");
+      return;
+    }
+    const rows = await countSystemPromptTokens(
+      settings.anthropicApiKey,
+      settings.model,
+      TARGET_LANGUAGES.map((l) => l.tag),
+    );
+    console.table(rows.map((r) => ({ ...r, model: settings.model, cacheable: r.tokens >= 512 })));
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Keyboard shortcut.
+
+/** Scheme and host only, so full URLs (paths, queries) stay out of the console. */
+function describeTabOrigin(url: string | undefined): string {
+  try {
+    const { protocol, host } = new URL(url ?? "");
+    return `${protocol}//${host}`;
+  } catch {
+    return "(unknown url)";
+  }
+}
 
 // The toolbar icon opens the popup (manifest default_popup); the keyboard
 // shortcut toggles directly.
@@ -176,7 +189,7 @@ chrome.commands.onCommand.addListener((command, tab) => {
   if (command === "toggle-translation") {
     void toggleTab(tab.id).then((res) => {
       // chrome://, the Web Store and similar pages cannot be scripted.
-      if (!res.ok) console.info("[llmt] this tab cannot be translated:", tab.url ?? "(unknown url)");
+      if (!res.ok) console.info("[llmt] this tab cannot be translated:", describeTabOrigin(tab.url));
     });
   } else if (command === "toggle-subtitles") {
     // Only offered on YouTube; elsewhere the shortcut does nothing. The URL is

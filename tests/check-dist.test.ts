@@ -38,6 +38,7 @@ describe("check-dist", () => {
     ["source map", {}, { "background.js.map": "{}" }, "source map in bundle"],
     ["eval", {}, { "content.js": "eval(x)" }, "matches"],
     ["remote import", {}, { "content.js": 'import("https://x.example/a.js")' }, "matches"],
+    ["debug helper", {}, { "background.js": "globalThis.llmtMeasurePrompts=async()=>{}" }, "debug helper"],
     ["escaped CJK", {}, { "popup.js": 'const s = "\\u7ffb\\u8b6f";' }, "escaped CJK"],
   ] as const)("rejects %s", (_name, manifest, files, message) => {
     const r = check(dist(manifest, files));
