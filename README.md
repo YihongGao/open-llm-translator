@@ -47,7 +47,7 @@ gh attestation verify open-llm-translator-<version>.zip --repo YihongGao/open-ll
    - OpenAI: [platform.openai.com](https://platform.openai.com/api-keys)
    - Google Gemini: [aistudio.google.com](https://aistudio.google.com/apikey)
 
-   Create a key just for this extension and set a spending limit with the provider ([Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits)), so a leaked key or a runaway page cannot cost much.
+   Worried about your key being stolen? Web pages, other extensions and the developer cannot read it, and it never leaves your computer except to go to the provider. See [How your API key is protected](docs/api-key-security.md) for what is and is not covered. As an extra safeguard, create a key just for this extension and set a spending limit with the provider ([Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google](https://aistudio.google.com/spend)), so even a leaked key cannot cost much.
 2. Right-click the extension icon and choose **Options** (選項). Pick a model, paste the key for that provider, and click **測試連線** (Test connection).
 3. On any page, click the extension icon and press **翻譯此頁** (Translate this page), or press `Alt+A` (`Option+A` on macOS). Press it again to show only the original.
 4. On a YouTube video, the menu also offers **開啟雙語字幕** (Turn on bilingual subtitles), shortcut `Alt+S` (`Option+S` on macOS). Subtitles and page translation are separate switches, so you can translate only the subtitles or only the comments. Subtitles stay on when you move to another video in the same tab; after a page reload, turn them on again.

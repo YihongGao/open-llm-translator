@@ -2,7 +2,7 @@
 
 English | [繁體中文](api-key-security.zh-TW.md)
 
-**Short version:** web pages, other extensions, Chrome Sync and the developer cannot get your key. Malware running on your computer can. Use a key made only for this extension, with a spending limit, and the worst case stays small.
+**Short version:** web pages, other extensions and Chrome Sync cannot get your key, and there is no developer server, so the developer never receives it. Malware running on your computer can. Use a key made only for this extension, with a spending limit, and the worst case stays small.
 
 ## Where the key is stored
 
@@ -21,10 +21,10 @@ The key is used only in the extension's background service worker, to call the p
 | A web page you visit | Yes | Web pages cannot read an extension's storage. The extension's script inside the page (its *content script*) is also locked out: before it is injected, the extension calls `chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" })`, which limits storage to the extension's own pages and service worker. If that call fails, nothing is injected. The key is never sent to the page. |
 | Another extension | Yes | Each extension's `chrome.storage` is separate. Other extensions cannot read it. |
 | Google, through Chrome Sync | Yes | The key is stored only in `local`, never in `sync`. |
-| The developer of this extension | Yes | There is no developer server. Your browser talks to the provider directly. The source code is public, so you can check this. |
+| The developer's server | Yes | There is none. Your browser talks to the provider directly. The source code is public, so you can check this. |
 | An error message shown on the page | Yes | Some providers repeat the key in their error messages. Key-shaped text (`sk-…`, `AIza…`) is masked before any error reaches the page. |
 | **Malware on your computer, or someone who can sign in to your computer account** | **No** | Anything that can read your files can read the Chrome profile folder, and the key is there in plain text. |
-| A malicious future update of this extension | Partly | The code is open source, every commit is signed, release builds carry a [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations), and Chrome Web Store reviews each update. None of this makes it impossible. |
+| A compromised update of this extension (for example, if the developer's Chrome Web Store account were hijacked) | Partly | The code is open source, every commit is signed, release builds carry a [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations), and Chrome Web Store reviews each update. None of this makes it impossible. |
 
 The last two rows are not specific to this extension. Every tool where you bring your own API key (browser extensions, command-line tools, editor plugins) stores the key somewhere on your computer, and malware on that computer can find it.
 
@@ -37,8 +37,8 @@ Encryption needs a second key to decrypt with, and an extension has nowhere safe
 These steps limit the damage even if your key is stolen:
 
 1. **Create a key only for this extension.** Do not reuse a key from other projects. You can then see this extension's usage on its own and revoke the key without breaking anything else.
-2. **Set a spending limit with your provider**: [Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits). For Gemini, create the key in a separate Google Cloud project so its usage and billing are separate.
-3. **Revoke the key** on the provider's site if you think it leaked, then create a new one. The old key stops working immediately. Deleting it from the extension (**清除** on the options page) is not enough on its own, because a copy that was already stolen keeps working until you revoke it.
+2. **Set a spending limit with your provider**: [Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google AI Studio](https://aistudio.google.com/spend). Prepaid credit with automatic top-up turned off is a hard ceiling too: when the balance reaches zero, requests stop.
+3. **Revoke the key** on the provider's site if you think it leaked, then create a new one. The old key then stops working. Deleting it from the extension (**清除** on the options page) is not enough on its own, because a copy that was already stolen keeps working until you revoke it.
 4. Keep your computer free of malware: this is the one case the extension cannot protect against.
 
 ## Check it yourself

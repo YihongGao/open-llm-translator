@@ -45,7 +45,7 @@ gh attestation verify open-llm-translator-<version>.zip --repo YihongGao/open-ll
    - OpenAI：[platform.openai.com](https://platform.openai.com/api-keys)
    - Google Gemini：[aistudio.google.com](https://aistudio.google.com/apikey)
 
-   建議為這個擴充功能另建專用的 key，並在服務商那邊設定用量上限（[Anthropic](https://console.anthropic.com/settings/limits)、[OpenAI](https://platform.openai.com/settings/organization/limits)），萬一 key 外洩或頁面異常，損失也有限。
+   擔心 key 被竊取嗎？網頁、其他擴充功能和開發者都讀不到它，它也只會從您的電腦送到服務商，不會送到其他地方。能防範什麼、不能防範什麼，見 [API key 如何受到保護](docs/api-key-security.zh-TW.md)。若想多一層保障，建議為這個擴充功能另建專用的 key，並在服務商那邊設定費用上限（[Anthropic](https://console.anthropic.com/settings/limits)、[OpenAI](https://platform.openai.com/settings/organization/limits)、[Google](https://aistudio.google.com/spend)），萬一 key 外洩，損失也有限。
 2. 在擴充功能圖示上按右鍵，選「選項」。選擇 model，填入該家的 API key，按「測試連線」確認。
 3. 在任何網頁點擴充功能圖示，按「翻譯此頁」，或按快捷鍵 `Alt+A`（macOS 為 `Option+A`）。再按一次就只顯示原文。
 4. 在 YouTube 影片頁，選單會多一個「開啟雙語字幕」，快捷鍵 `Alt+S`（macOS 為 `Option+S`）。字幕和網頁翻譯是兩個獨立開關，可以只翻字幕或只翻留言。在同一分頁換到其他影片時，字幕會繼續作用；重新整理頁面後要再開一次。
