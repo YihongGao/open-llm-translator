@@ -48,7 +48,7 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 在 YouTube 影片頁，選單會多一個「開啟雙語字幕」，快捷鍵 Alt+S（macOS 為 Option+S）。
 
 【隱私】
-只有你按下翻譯（或開啟字幕）的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到你選擇的服務商。沒有開發者伺服器，不蒐集任何使用資料。API key 只存在本機，不經 Chrome Sync 同步。
+只有你按下翻譯（或開啟字幕）的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到你選擇的服務商。沒有開發者伺服器，不蒐集分析或遙測資料。API key 只存在本機，不經 Chrome Sync 同步。
 
 YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標，OpenAI 與 GPT 是 OpenAI 的商標。本擴充功能與這些公司無關，也未經它們認可。
 ```
@@ -62,7 +62,7 @@ YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標
 | 素材 | 規格 | 狀態 |
 |---|---|---|
 | Store icon | 128×128 | `public/icons/icon-128.png` |
-| Screenshot | 1280×800 或 640×400，至少 1 張 | 待產生：`docs/store-assets/screenshot-*.png` |
+| Screenshot | 1280×800 或 640×400，1 到 5 張 | `docs/store-assets/screenshot-1-docs-popup.png`、`docs/store-assets/screenshot-2-article.png`；YouTube 字幕截圖待補 |
 | Small promo tile | 440×280 | `docs/store-assets/promo-small-440x280.png` |
 
 ---
@@ -96,13 +96,13 @@ Translates the text of the current web page with a large language model chosen b
 | Health information | 否 | |
 | Financial and payment information | 否 | |
 | Authentication information | **是** | 使用者的 LLM API key（只存在本機，只送到對應服務商） |
-| Personal communications | 否 | 見下方說明 |
+| Personal communications | **是** | 見下方說明 |
 | Location | 否 | |
 | Web history | **是** | 送出所翻譯頁面的網域與路徑，保守起見申報 |
 | User activity | 否 | |
 | Website content | **是** | 要翻譯的段落文字與頁面標題；YouTube 上開啟雙語字幕時，還有影片字幕文字 |
 
-說明：使用者在 webmail 或聊天頁面上按翻譯時，送出的文字可能包含私人訊息。這部分仍屬於「Website content」（使用者主動在該頁面觸發），所以「Personal communications」不勾。如果審查人員對此有疑慮，再補勾。
+說明：使用者在 webmail 或聊天頁面上按翻譯時，送出的文字可能包含私人訊息，所以「Personal communications」也勾選。多申報不會被罰，少申報才會被審查挑出來。
 
 **Certifications**：三項全部勾選
 
@@ -133,8 +133,6 @@ Additional instructions：
 ```
 This extension needs the user's own LLM API key. A test key for Anthropic with a small spend limit is in the Password field.
 
-To test YouTube subtitles: open a YouTube video that has English subtitles, click the toolbar icon, then "開啟雙語字幕" (or press Alt+S). The English subtitles and their translation appear at the bottom of the player.
-
 The UI is in Traditional Chinese; English equivalents are given below.
 
 1. Right-click the toolbar icon and choose "Options" (選項).
@@ -144,6 +142,9 @@ The UI is in Traditional Chinese; English equivalents are given below.
 5. Click the toolbar icon and press 翻譯此頁 (Translate this page), or press Alt+A (Option+A on macOS).
    Traditional Chinese translations appear below each paragraph as they stream in.
 6. The popup button now reads 顯示原文 (Show original). Press it, or the shortcut, to hide the translations.
+7. To test YouTube subtitles, open https://www.youtube.com/watch?v=arj7oStGLkU (a TED talk with English subtitles).
+8. Click the toolbar icon and press 開啟雙語字幕 (Turn on bilingual subtitles), or press Alt+S (Option+S on macOS).
+   The English subtitles and their Traditional Chinese translation appear at the bottom of the player.
 
-Without an API key, the popup and the page show "尚未設定 API key" (API key not set) with a button that opens the Options page.
+Without an API key, the popup shows "尚未設定 Anthropic（Claude） 的 API key。" (Anthropic API key not set), and the page shows the same notice with a 開啟設定 (Open settings) button.
 ```
