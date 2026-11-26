@@ -32,7 +32,8 @@ Preconditions:
 
 ## Gotchas
 
-- **Not yet proven by a run.** This recipe is derived from source (`src/content/youtube/`, `src/page/youtube-hook.ts`). The first agent to drive it should fix this file to match what actually happens and delete this bullet.
+- **Blocked in Playwright as of 2026-11-26.** The YouTube player shows 「發生錯誤，請重新整理或稍後再試。」 in Playwright's Chromium, headless and headed, so the `<video>` never loads (`readyState` 0) and subtitles never turn on. The popup part works: `state().subs` reads `開啟雙語字幕（Alt+S）` on a watch page. Prove subtitles by hand in a normal Chrome with `dist/` loaded, and report the automated path as not verified. Do not change browser flags to get past the player's automation check.
+- The rest of this recipe is derived from source (`src/content/youtube/`, `src/page/youtube-hook.ts`), not from a run.
 - The hook only sees caption requests the player makes after it is installed, so turning subtitles on flips CC once to force a refetch. If `沒有收到 YouTube 字幕` appears, try a different video before blaming the change.
 - Consent or sign-in interstitials (EU), ads before the video, and A/B DOM changes can block `#movie_player`. Report the blocker rather than weakening the journey.
 - Unsupported: Shorts, embeds, `m.youtube.com`, YouTube Music, and live streams. They are expected to show a notice or no button.
