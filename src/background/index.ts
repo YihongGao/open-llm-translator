@@ -18,6 +18,7 @@ import { countSystemPromptTokens } from "./providers/anthropic";
 import { createProvider, isAbort, missingKeyMessage } from "./providers/registry";
 import { CacheWarmupGate, withWarmup } from "./cache-warmup";
 import { estimateCostUsd } from "./pricing";
+import { redactSecrets } from "./redact";
 
 const warmupGate = new CacheWarmupGate();
 import { runBatch, type BatchStats } from "./translator";
@@ -220,6 +221,6 @@ async function testConnection(): Promise<TestConnectionResult> {
     }
     return { ok: false, message: "API 有回應，但沒有解析到譯文" };
   } catch (err) {
-    return { ok: false, message: setup.describeError(err).message };
+    return { ok: false, message: redactSecrets(setup.describeError(err).message) };
   }
 }
