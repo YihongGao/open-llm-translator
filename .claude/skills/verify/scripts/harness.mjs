@@ -119,6 +119,7 @@ async function installMock(ctx, mode, calls) {
 }
 
 // ---------------------------------------------------------------------------
+// Fixture server, popup and page drivers, launch().
 
 function serveFixtures() {
   const server = createServer(async (req, res) => {
