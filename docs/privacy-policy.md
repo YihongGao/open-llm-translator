@@ -16,6 +16,7 @@ Only when you start a translation (by clicking the toolbar button or pressing th
 | Page title | Up to 200 characters, used as translation context |
 | Page address | Origin and path only (for example `https://example.com/docs/intro`). Query strings and fragments are removed before sending |
 | Video subtitles (YouTube only) | When you turn on bilingual subtitles on a YouTube video: the video's caption text, a few minutes ahead of playback, with the video title as the page title. The video ID is not sent: the address is reduced to `https://www.youtube.com/watch` |
+| Technical request headers (Anthropic only) | The official Anthropic SDK adds `X-Stainless-*` headers to each request: the SDK version, the JavaScript runtime and its version, the operating system, and the CPU architecture |
 
 To get the captions, the extension reads the caption data that YouTube's player downloads in that tab. When the player shows captions already in your target language, the extension downloads the original-language captions from YouTube itself, in the same way the player does. This happens only while subtitles are on.
 
@@ -75,6 +76,7 @@ LLM Bilingual Translator（以下稱「本擴充功能」）用大型語言模�
 | 頁面標題 | 最多 200 字，作為翻譯的上下文 |
 | 頁面網址 | 只含網域與路徑（例如 `https://example.com/docs/intro`），送出前會移除查詢字串與 `#` 之後的部分 |
 | 影片字幕（僅 YouTube） | 你在 YouTube 影片開啟雙語字幕時：影片的字幕文字（翻譯播放位置前方幾分鐘的內容），並以影片標題作為頁面標題。不會送出影片 ID：網址只剩 `https://www.youtube.com/watch` |
+| 請求的技術標頭（僅 Anthropic） | Anthropic 官方 SDK 會在每個請求加上 `X-Stainless-*` 標頭：SDK 版本、JavaScript 執行環境與版本、作業系統、CPU 架構 |
 
 為了取得字幕，本擴充功能會讀取 YouTube 播放器在該分頁下載的字幕資料。播放器顯示的字幕已經是目標語言時，本擴充功能會用和播放器相同的方式，向 YouTube 下載原文字幕。只有在字幕開啟期間才會這樣做。
 

@@ -49,6 +49,8 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 
 【隱私】
 只有你按下翻譯（或開啟字幕）的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到你選擇的服務商。沒有開發者伺服器，不蒐集任何使用資料。API key 只存在本機，不經 Chrome Sync 同步。
+
+YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標，OpenAI 與 GPT 是 OpenAI 的商標。本擴充功能與這些公司無關，也未經它們認可。
 ```
 
 **Category**：Tools（或 Productivity）
@@ -78,7 +80,7 @@ Translates the text of the current web page with a large language model chosen b
 | Permission | Justification |
 |---|---|
 | `activeTab` | When the user clicks the toolbar button or presses the keyboard shortcut, the extension gets temporary access to the current tab so it can read the paragraphs to translate and insert the translations below them. It has no access to other tabs, and no access before the user acts. |
-| `scripting` | Used only after the user starts a translation, to inject the extension's own content script and stylesheet (packaged files content.js and content.css) into the active tab with chrome.scripting.executeScript and insertCSS. When the user turns on bilingual subtitles on a YouTube video, it also injects the packaged file youtube-hook.js into the page's main world: a small read-only script that observes the caption data YouTube's player downloads, so the subtitles can be translated. No content scripts run automatically on any site. |
+| `scripting` | Used only after the user acts. When the user starts a translation, it injects the packaged content.js and content.css into the active tab with chrome.scripting.executeScript and insertCSS. When the user turns on bilingual subtitles on a YouTube video, it also injects the packaged youtube-hook.js into the page's main world. While subtitles are on, that script: (1) wraps XMLHttpRequest.prototype.open and send to copy the caption responses (/api/timedtext) that the player downloads, without changing any request or response; (2) clicks the player's CC button so that the player requests captions (off and on again if CC is already on), and turns CC off afterwards if it turned CC on; (3) if the player's captions are already in the target language, fetches the original-language track from YouTube's /api/timedtext in the page's own context. When subtitles are off, every request passes through unchanged. No content scripts run automatically on any site. |
 | `storage` | Stores the user's settings (selected model, target language) and the API keys the user enters, in chrome.storage.local only (never synced). Access is restricted to extension pages with setAccessLevel(TRUSTED_CONTEXTS). |
 | Host permission `https://api.anthropic.com/*` | Sends the text to translate to the Anthropic API with the user's own API key, only when the user has selected a Claude model. |
 | Host permission `https://api.openai.com/*` | Sends the text to translate to the OpenAI API with the user's own API key, only when the user has selected a GPT model. |
