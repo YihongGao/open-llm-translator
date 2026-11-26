@@ -18,6 +18,7 @@ import { countSystemPromptTokens } from "./providers/anthropic";
 import { createProvider, isAbort, missingKeyMessage } from "./providers/registry";
 import { CacheWarmupGate, withWarmup } from "./cache-warmup";
 import { estimateCostUsd } from "./pricing";
+import { redactSecrets } from "./redact";
 
 const warmupGate = new CacheWarmupGate();
 import { runBatch, type BatchStats } from "./translator";
@@ -168,10 +169,6 @@ function formatBatchLog(batchId: string, requested: string, s: BatchStats): stri
 // ---------------------------------------------------------------------------
 // Keyboard shortcut.
 
-// Keep the API key out of content scripts: by default chrome.storage.local is
-// readable from them. Runs on every worker start; the call is idempotent.
-void chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
-
 // The toolbar icon opens the popup (manifest default_popup); the keyboard
 // shortcut toggles directly.
 chrome.commands.onCommand.addListener((command, tab) => {
@@ -224,6 +221,6 @@ async function testConnection(): Promise<TestConnectionResult> {
     }
     return { ok: false, message: "API 有回應，但沒有解析到譯文" };
   } catch (err) {
-    return { ok: false, message: setup.describeError(err).message };
+    return { ok: false, message: redactSecrets(setup.describeError(err).message) };
   }
 }

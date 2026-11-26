@@ -32,6 +32,27 @@ try {
   check("below-the-fold paragraph not translated yet", hostState(s1, "far").length === 0);
   check("no error toast", s1.toast === null, s1.toast);
 
+  // Security: the content script's isolated world must not read chrome.storage
+  // (the API key lives there). executeScript's default world is the same one
+  // content.js runs in.
+  const tabId = await run.sw.evaluate(async (u) => (await chrome.tabs.query({})).find((t) => t.url === u)?.id, page.url());
+  const storageProbe = await run.sw.evaluate(async (id) => {
+    const [r] = await chrome.scripting.executeScript({
+      target: { tabId: id },
+      func: async () => {
+        try {
+          const v = await chrome.storage.local.get(null);
+          return { readable: true, keys: Object.keys(v) };
+        } catch (e) {
+          return { readable: false, error: String(e) };
+        }
+      },
+    });
+    return r.result;
+  }, tabId);
+  await run.writeJson("02b-storage-probe.json", storageProbe);
+  check("content-script world cannot read chrome.storage", storageProbe?.readable === false, storageProbe);
+
   // 3. Scroll: the far paragraph translates once in view.
   await page.locator("#far").scrollIntoViewIfNeeded();
   const s2 = await waitForPage(page, (s) => hostState(s, "far").some((n) => n.state === "done"), { label: "far paragraph" });

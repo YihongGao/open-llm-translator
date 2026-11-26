@@ -3,6 +3,7 @@
 
 import type { TranslateEvent, TranslateRequest } from "../shared/messages";
 import type { TokenUsage, TranslationProvider } from "./providers/types";
+import { redactSecrets } from "./redact";
 
 /** Per-batch numbers for the service worker console. */
 export interface BatchStats {
@@ -91,7 +92,7 @@ export async function runBatch(
   const emitError = (texts: readonly string[], message: string, scope: "page" | "segment", settings = false) => {
     const ids = texts.flatMap((t) => idsByText.get(t) ?? []);
     stats.failed += texts.length;
-    if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message, scope, settings });
+    if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message: redactSecrets(message), scope, settings });
   };
   const finish = (): BatchStats => {
     deps.emit({

@@ -159,6 +159,20 @@ describe("runBatch", () => {
     expect(cache.store.get("k:a")).toEqual({ text: "A", model: MODEL });
   });
 
+  it("redacts API keys echoed in provider error text before emitting segment-error", async () => {
+    const key = "sk-ant-api03-AbCdEfGhIjKlMnOpQrStUvWxYz0123456789";
+    const provider: TranslationProvider = {
+      async *translate() {
+        throw new Error(`invalid x-api-key ${key}`);
+      },
+    };
+    const { events } = await run(req(["a"]), provider);
+    const errors = events.filter((e) => e.type === "segment-error");
+    expect(errors).toHaveLength(1);
+    expect(JSON.stringify(events)).not.toContain(key);
+    expect(errors[0]).toMatchObject({ message: "invalid x-api-key sk-***" });
+  });
+
   it("emits nothing further once aborted", async () => {
     const controller = new AbortController();
     const events: TranslateEvent[] = [];

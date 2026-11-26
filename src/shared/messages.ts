@@ -64,7 +64,7 @@ export type TranslateEvent =
     };
 
 // extension -> content (chrome.tabs.sendMessage). Content scripts cannot read
-// chrome.storage (see background setAccessLevel), so the settings they need
+// chrome.storage (toggleTab sets TRUSTED_CONTEXTS before injecting), so the settings they need
 // travel with these messages. Each one is answered with a TabState.
 /** The two things a tab can translate, toggled independently. */
 export type Feature = "page" | "subtitles";
