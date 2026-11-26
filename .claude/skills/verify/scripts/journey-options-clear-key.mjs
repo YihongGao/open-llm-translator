@@ -20,8 +20,8 @@ try {
   const clear = (name) => page.getByRole("button", { name: `清除 ${name} API key` });
   await clear("Anthropic").waitFor({ timeout: 5000 });
   await page.locator("#anthropicApiKey").waitFor();
-  // Load is async: wait until the stored key has filled the field.
-  await page.waitForFunction(() => document.querySelector("#anthropicApiKey").value !== "");
+  // Load is async: wait until the stored key is reflected in the placeholder.
+  await page.waitForFunction(() => document.querySelector("#anthropicApiKey").placeholder.startsWith("已儲存"));
   await run.screenshot(page, "01-options-loaded.png", { fullPage: true });
 
   check("Gemini clear button disabled (no stored key)", await clear("Gemini").isDisabled());
@@ -40,7 +40,7 @@ try {
   await page.waitForTimeout(300);
   check("confirm names the provider", /Anthropic/.test(dialogMessage ?? ""), dialogMessage);
   check("dismiss keeps the stored key", (await stored("anthropicApiKey")) === "sk-ant-verify-mock");
-  check("dismiss keeps the field value", (await page.locator("#anthropicApiKey").inputValue()) === "sk-ant-verify-mock");
+  check("dismiss keeps the saved-key placeholder", (await page.locator("#anthropicApiKey").getAttribute("placeholder")).startsWith("已儲存"));
   check("dismiss leaves button enabled", await clear("Anthropic").isEnabled());
 
   // Accept: only that key goes.
@@ -51,7 +51,7 @@ try {
   await run.writeJson("02-storage-after-clear-keys.json", Object.keys(keys));
   await run.screenshot(page, "02-options-after-clear.png", { fullPage: true });
   check("anthropicApiKey removed from storage", !("anthropicApiKey" in keys), Object.keys(keys));
-  check("field emptied", (await page.locator("#anthropicApiKey").inputValue()) === "");
+  check("field back to the example placeholder", (await page.locator("#anthropicApiKey").getAttribute("placeholder")) === "sk-ant-...");
   check("status says deleted", /已刪除.*Anthropic/.test(await page.locator("#status").textContent()), await page.locator("#status").textContent());
   check("openaiApiKey intact", keys.openaiApiKey === "sk-verify-openai");
   check("unsaved Gemini edit not saved", !("geminiApiKey" in keys) || keys.geminiApiKey === "");

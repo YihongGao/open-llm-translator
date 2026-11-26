@@ -22,7 +22,9 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export type ProviderId = "anthropic" | "openai" | "gemini";
 
-export const PROVIDERS: ReadonlyArray<{ id: ProviderId; label: string; keySetting: keyof Settings }> = [
+export type KeySetting = "anthropicApiKey" | "openaiApiKey" | "geminiApiKey";
+
+export const PROVIDERS: ReadonlyArray<{ id: ProviderId; label: string; keySetting: KeySetting }> = [
   { id: "anthropic", label: "Anthropic（Claude）", keySetting: "anthropicApiKey" },
   { id: "openai", label: "OpenAI（GPT）", keySetting: "openaiApiKey" },
   { id: "gemini", label: "Google（Gemini）", keySetting: "geminiApiKey" },
@@ -84,6 +86,25 @@ export async function loadSettings(): Promise<Settings> {
 
 export async function saveSettings(patch: Partial<Settings>): Promise<void> {
   await chrome.storage.local.set(patch);
+}
+
+/**
+ * The options page never shows a saved key again, so an empty field means
+ * "keep what is stored": only keys the user typed are written.
+ */
+export function typedKeyPatch(typed: Record<KeySetting, string>): Partial<Settings> {
+  const patch: Partial<Settings> = {};
+  for (const [setting, value] of Object.entries(typed) as [KeySetting, string][]) {
+    if (value.trim()) patch[setting] = value.trim();
+  }
+  return patch;
+}
+
+/** Placeholder for a key field: the last four characters of a stored key, or the example format. */
+export function keyFieldHint(stored: string, example: string): string {
+  if (!stored) return example;
+  const tail = stored.length >= 16 ? `…${stored.slice(-4)}` : "";
+  return `已儲存${tail ? `（${tail}）` : ""}，要更換請貼上新的 key`;
 }
 
 /** Deletes one stored API key (removed, not blanked) and leaves every other setting alone. */
