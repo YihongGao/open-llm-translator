@@ -12,7 +12,7 @@
 - **不會同步**：擴充功能不使用 `chrome.storage.sync`，key 不會傳到您的 Google 帳號或其他裝置。
 - **隨時可以刪除**：設定頁每個 key 旁邊都有「清除」按鈕。移除擴充功能時也會一併刪除。清除瀏覽資料則不會刪掉它。
 
-key 只在擴充功能的背景 service worker 裡使用，透過 HTTPS 呼叫您選擇的服務商（`api.anthropic.com`、`api.openai.com` 或 `generativelanguage.googleapis.com`），不會送到其他地方。
+只有擴充功能自己的背景程式（service worker）和頁面讀得到 key，而且只會透過 HTTPS 送到您選擇的服務商（`api.anthropic.com`、`api.openai.com` 或 `generativelanguage.googleapis.com`）。儲存之後就不會再顯示：選項頁只顯示最後 4 個字元，無法從那裡複製。
 
 ## 哪些情況擋得住
 
@@ -23,6 +23,7 @@ key 只在擴充功能的背景 service worker 裡使用，透過 HTTPS 呼叫�
 | Google（透過 Chrome Sync） | 是 | key 只存在 `local`，不存在 `sync`。 |
 | 開發者的伺服器 | 是 | 根本沒有開發者伺服器，瀏覽器直接連到服務商。原始碼公開，可以自行檢查。 |
 | 顯示在網頁上的錯誤訊息 | 是 | 有些服務商會在錯誤訊息裡重複 key。錯誤訊息送到網頁之前，看起來像 key 的字串（`sk-…`、`AIza…`）會先被遮掉。 |
+| 能使用您已解鎖電腦的人 | 部分 | 選項頁不會顯示已儲存的 key，無法直接從那裡複製。但熟悉 Chrome 開發人員工具的人，仍然能從擴充功能的儲存空間讀出來。離開座位時請鎖定電腦。 |
 | **您電腦上的惡意程式，或能登入您電腦帳號的人** | **否** | 能讀您檔案的程式就能讀 Chrome 設定檔資料夾，key 以明文存在那裡。 |
 | 被入侵的擴充功能更新（例如開發者的 Chrome Web Store 帳號被盜） | 部分 | 原始碼開源、每個 commit 都有簽章、release 附 [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)，Chrome Web Store 也會審查每次更新，但無法完全排除。 |
 
@@ -51,6 +52,7 @@ Chrome 官方文件：
 本 repo 的程式碼：
 
 - [`src/shared/settings.ts`](../src/shared/settings.ts)：設定（包括 key）只讀寫 `chrome.storage.local`。
+- [`src/options/options.ts`](../src/options/options.ts)：key 欄位只能寫入，已儲存的 key 不會再放回頁面。
 - [`src/shared/tab-control.ts`](../src/shared/tab-control.ts)：注入任何程式到網頁之前，先執行 `setAccessLevel("TRUSTED_CONTEXTS")`。
 - [`src/background/redact.ts`](../src/background/redact.ts)：遮掉錯誤訊息裡像 key 的字串。
 - [`public/manifest.json`](../public/manifest.json)：擴充功能只有三家服務商 API 的 host permission。

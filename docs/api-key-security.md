@@ -12,7 +12,7 @@ Your key is saved in the extension's own storage, [`chrome.storage.local`](https
 - It is **not synced**: the extension does not use `chrome.storage.sync`, so the key never goes to your Google account or your other devices.
 - You can **delete it at any time** with the **清除** (Clear) button next to each key on the options page. Removing the extension also deletes it. Clearing browsing data does not.
 
-The key is used only in the extension's background service worker, to call the provider you selected (`api.anthropic.com`, `api.openai.com` or `generativelanguage.googleapis.com`) over HTTPS. It goes nowhere else.
+Only the extension's own background service worker and pages can read the key. It is sent only to the provider you selected (`api.anthropic.com`, `api.openai.com` or `generativelanguage.googleapis.com`), over HTTPS. Once saved, it is never shown again: the options page shows only its last four characters, so it cannot be copied from there.
 
 ## What protects it
 
@@ -23,6 +23,7 @@ The key is used only in the extension's background service worker, to call the p
 | Google, through Chrome Sync | Yes | The key is stored only in `local`, never in `sync`. |
 | The developer's server | Yes | There is none. Your browser talks to the provider directly. The source code is public, so you can check this. |
 | An error message shown on the page | Yes | Some providers repeat the key in their error messages. Key-shaped text (`sk-…`, `AIza…`) is masked before any error reaches the page. |
+| Someone using your unlocked computer | Partly | The options page never shows a saved key, so it cannot simply be copied from there. Someone who knows Chrome's developer tools could still read it from the extension's storage. Lock your computer when you step away. |
 | **Malware on your computer, or someone who can sign in to your computer account** | **No** | Anything that can read your files can read the Chrome profile folder, and the key is there in plain text. |
 | A compromised update of this extension (for example, if the developer's Chrome Web Store account were hijacked) | Partly | The code is open source, every commit is signed, release builds carry a [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations), and Chrome Web Store reviews each update. None of this makes it impossible. |
 
@@ -51,6 +52,7 @@ Chrome documentation:
 In this repository:
 
 - [`src/shared/settings.ts`](../src/shared/settings.ts): settings, including the key, are read from and written to `chrome.storage.local` only.
+- [`src/options/options.ts`](../src/options/options.ts): key fields are write-only; a saved key is never put back into the page.
 - [`src/shared/tab-control.ts`](../src/shared/tab-control.ts): `setAccessLevel("TRUSTED_CONTEXTS")` runs before any script is injected into a page.
 - [`src/background/redact.ts`](../src/background/redact.ts): masks key-shaped text in error messages.
 - [`public/manifest.json`](../public/manifest.json): the extension has host permission only for the three provider APIs.
