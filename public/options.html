@@ -76,6 +76,10 @@
       <label for="geminiApiKey">Gemini API key</label>
       <input id="geminiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." />
       <p class="hint">API key 只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。</p>
+      <p class="hint" id="dataNotice">
+        翻譯時，畫面上要翻譯的段落文字、頁面標題和網址（只含網域與路徑，不含查詢字串）會用你的 API key
+        送到所選 model 的服務商（Anthropic、OpenAI 或 Google），依該服務商的 API 條款處理。譯文會快取在這台電腦，不會送到其他地方。
+      </p>
 
       <label for="targetLang">目標語言</label>
       <select id="targetLang"></select>
