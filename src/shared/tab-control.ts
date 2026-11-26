@@ -1,10 +1,15 @@
 // Tab-level control shared by the popup and the keyboard-shortcut handler.
 // Both run in a user-gesture context, so activeTab grants scripting access.
 
-import type { ContentMessage, TabState } from "./messages";
+import type { ContentMessage, Feature, TabState } from "./messages";
 import { loadSettings } from "./settings";
 
 export type ToggleResult = { ok: true; active: boolean } | { ok: false; reason: "restricted" };
+
+/** The feature's on/off state in a TabState. */
+function featureActive(state: TabState, feature: Feature): boolean {
+  return feature === "subtitles" ? state.subtitles === true : state.active;
+}
 
 /** Pages Chrome never lets extensions script. */
 export function isRestrictedUrl(url: string | undefined): boolean {
@@ -29,10 +34,21 @@ export function getTabState(tabId: number): Promise<TabState | null> {
   return send(tabId, { type: "llmt-status" });
 }
 
-export async function toggleTab(tabId: number): Promise<ToggleResult> {
-  const msg: ContentMessage = { type: "llmt-toggle", targetLang: (await loadSettings()).targetLang };
+export async function toggleTab(tabId: number, feature: Feature = "page"): Promise<ToggleResult> {
+  const msg: ContentMessage = { type: "llmt-toggle", targetLang: (await loadSettings()).targetLang, feature };
+  if (feature === "subtitles") {
+    // The page hook reads the player's caption requests; it must run in the
+    // page's main world, where the player's XMLHttpRequest lives. Idempotent,
+    // and needed even when the content script is already there for page
+    // translation.
+    try {
+      await chrome.scripting.executeScript({ target: { tabId }, world: "MAIN", files: ["youtube-hook.js"] });
+    } catch {
+      return { ok: false, reason: "restricted" };
+    }
+  }
   const state = await send(tabId, msg);
-  if (state) return { ok: true, active: state.active };
+  if (state) return { ok: true, active: featureActive(state, feature) };
 
   // No receiver yet: inject on demand, then deliver the first toggle.
   try {
@@ -42,7 +58,7 @@ export async function toggleTab(tabId: number): Promise<ToggleResult> {
     return { ok: false, reason: "restricted" };
   }
   const after = await send(tabId, msg);
-  return { ok: true, active: after?.active ?? true };
+  return { ok: true, active: after ? featureActive(after, feature) : true };
 }
 
 export async function setTabLanguage(tabId: number, targetLang: string): Promise<void> {

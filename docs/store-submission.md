@@ -37,11 +37,18 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 • 譯文快取在本機，同一段文字不重複計費
 • 目標語言：繁體中文（台灣）、简体中文、English、日本語、한국어
 
+【YouTube 雙語字幕】
+在 YouTube 影片上開啟雙語字幕，原文和譯文一起顯示在影片下方，全螢幕也看得到。
+• 把字幕合併成完整句子再翻，自動產生的字幕也能翻得通順
+• 只翻播放位置前方幾分鐘，看多少翻多少
+• 和網頁翻譯分開：可以只翻字幕，或只翻留言
+
 【使用方式】
 點工具列圖示開啟選單，按「翻譯此頁」；或直接按快捷鍵 Alt+A（macOS 為 Option+A）。
+在 YouTube 影片頁，選單會多一個「開啟雙語字幕」，快捷鍵 Alt+S（macOS 為 Option+S）。
 
 【隱私】
-只有你按下翻譯的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到你選擇的服務商。沒有開發者伺服器，不蒐集任何使用資料。API key 只存在本機，不經 Chrome Sync 同步。
+只有你按下翻譯（或開啟字幕）的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到你選擇的服務商。沒有開發者伺服器，不蒐集任何使用資料。API key 只存在本機，不經 Chrome Sync 同步。
 ```
 
 **Category**：Tools（或 Productivity）
@@ -63,7 +70,7 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 **Single purpose description**
 
 ```
-Translates the text of the current web page with a large language model chosen by the user and shows each translation directly below the original paragraph, so the page can be read bilingually.
+Translates the text of the current web page with a large language model chosen by the user and shows each translation directly below the original paragraph, so the page can be read bilingually. On YouTube video pages, the same translation can be applied to the video's subtitles, shown bilingually in the player.
 ```
 
 **Permission justification**
@@ -71,7 +78,7 @@ Translates the text of the current web page with a large language model chosen b
 | Permission | Justification |
 |---|---|
 | `activeTab` | When the user clicks the toolbar button or presses the keyboard shortcut, the extension gets temporary access to the current tab so it can read the paragraphs to translate and insert the translations below them. It has no access to other tabs, and no access before the user acts. |
-| `scripting` | Used only after the user starts a translation, to inject the extension's own content script and stylesheet (packaged files content.js and content.css) into the active tab with chrome.scripting.executeScript and insertCSS. No content scripts run automatically on any site. |
+| `scripting` | Used only after the user starts a translation, to inject the extension's own content script and stylesheet (packaged files content.js and content.css) into the active tab with chrome.scripting.executeScript and insertCSS. When the user turns on bilingual subtitles on a YouTube video, it also injects the packaged file youtube-hook.js into the page's main world: a small read-only script that observes the caption data YouTube's player downloads, so the subtitles can be translated. No content scripts run automatically on any site. |
 | `storage` | Stores the user's settings (selected model, target language) and the API keys the user enters, in chrome.storage.local only (never synced). Access is restricted to extension pages with setAccessLevel(TRUSTED_CONTEXTS). |
 | Host permission `https://api.anthropic.com/*` | Sends the text to translate to the Anthropic API with the user's own API key, only when the user has selected a Claude model. |
 | Host permission `https://api.openai.com/*` | Sends the text to translate to the OpenAI API with the user's own API key, only when the user has selected a GPT model. |
@@ -91,7 +98,7 @@ Translates the text of the current web page with a large language model chosen b
 | Location | 否 | |
 | Web history | **是** | 送出所翻譯頁面的網域與路徑，保守起見申報 |
 | User activity | 否 | |
-| Website content | **是** | 要翻譯的段落文字與頁面標題 |
+| Website content | **是** | 要翻譯的段落文字與頁面標題；YouTube 上開啟雙語字幕時，還有影片字幕文字 |
 
 說明：使用者在 webmail 或聊天頁面上按翻譯時，送出的文字可能包含私人訊息。這部分仍屬於「Website content」（使用者主動在該頁面觸發），所以「Personal communications」不勾。如果審查人員對此有疑慮，再補勾。
 
@@ -123,6 +130,8 @@ Additional instructions：
 
 ```
 This extension needs the user's own LLM API key. A test key for Anthropic with a small spend limit is in the Password field.
+
+To test YouTube subtitles: open a YouTube video that has English subtitles, click the toolbar icon, then "開啟雙語字幕" (or press Alt+S). The English subtitles and their translation appear at the bottom of the player.
 
 The UI is in Traditional Chinese; English equivalents are given below.
 

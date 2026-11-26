@@ -32,6 +32,10 @@
     "toggle-translation": {
       "suggested_key": { "default": "Alt+A" },
       "description": "切換此頁翻譯"
+    },
+    "toggle-subtitles": {
+      "suggested_key": { "default": "Alt+S" },
+      "description": "切換 YouTube 雙語字幕"
     }
   },
   "options_page": "options.html"

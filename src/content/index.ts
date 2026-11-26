@@ -23,6 +23,9 @@ import {
   type SegmentCandidate,
 } from "./segmenter";
 import { hideToast, showToast } from "./toast";
+import { isYouTubeUrl } from "../shared/youtube-bridge";
+import { createSubtitleController } from "./youtube/controller";
+import { OVERLAY_CLASS } from "./youtube/overlay";
 
 declare global {
   interface Window {
@@ -572,30 +575,42 @@ function main(): void {
     scan(document.body);
   }
 
+  // Bilingual subtitles, independent of page translation (on YouTube one may
+  // want only the comments translated, or only the video).
+  const subtitles = isYouTubeUrl(location.href) ? createSubtitleController() : null;
+
   // Whoever injected us sends the first toggle right after injection.
   chrome.runtime.onMessage.addListener((msg: ContentMessage, _sender, sendResponse) => {
     switch (msg?.type) {
       case "llmt-toggle":
-        if (active) deactivate();
+        if (msg.feature === "subtitles") {
+          if (!subtitles) break;
+          if (subtitles.isActive()) subtitles.disable();
+          else subtitles.enable(msg.targetLang);
+        } else if (active) deactivate();
         else activate(msg.targetLang);
         break;
       case "llmt-set-lang":
         // While off, the change is applied by the next activation (which compares
         // against translatedLang and re-translates).
         if (active && msg.targetLang !== translatedLang) retranslateAll(msg.targetLang);
+        subtitles?.setLanguage(msg.targetLang);
         break;
       case "llmt-status":
         break;
       default:
         return false;
     }
-    sendResponse({ active } satisfies TabState);
+    sendResponse({ active, subtitles: subtitles ? subtitles.isActive() : null } satisfies TabState);
     return false;
   });
 }
 
 function isOurs(el: Element): boolean {
-  return el.tagName.toUpperCase() === TRANSLATION_TAG || el.closest(TRANSLATION_TAG.toLowerCase()) !== null;
+  return (
+    el.tagName.toUpperCase() === TRANSLATION_TAG ||
+    el.closest(`${TRANSLATION_TAG.toLowerCase()}, .${OVERLAY_CLASS}`) !== null
+  );
 }
 
 const INLINE_DISPLAY = /^inline/;

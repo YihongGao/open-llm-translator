@@ -100,6 +100,17 @@ describe("collectSegments", () => {
     const asInline = collectSegments(document.body, { targetLang: "zh-TW", displayOf });
     expect(asInline.map((s) => s.text)).toEqual(["Get startedRead the blog"]);
   });
+
+  it("leaves video players alone (their caption windows change every few seconds)", () => {
+    document.body.innerHTML = `
+      <div id="movie_player" class="html5-video-player">
+        <div class="caption-window"><span>So in college, I was a government major.</span></div>
+        <div class="llmt-yt-overlay"><div>Subtitle overlay text</div></div>
+      </div>
+      <p>A comment below the video.</p>`;
+    const found = collectSegments(document.body, { targetLang: "zh-TW", displayOf: () => "block" });
+    expect(found.map((s) => s.text)).toEqual(["A comment below the video."]);
+  });
 });
 
 describe("insertionPoint", () => {

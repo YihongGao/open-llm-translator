@@ -28,3 +28,49 @@ llmt-translation.llmt-error {
 html.llmt-hidden llmt-translation {
   display: none !important;
 }
+
+/* --- YouTube bilingual subtitles ------------------------------------------
+   The overlay lives inside the player (#movie_player) so it also shows in
+   fullscreen. YouTube's own caption window is hidden while ours is on; the
+   player still downloads captions, which is how we read them. */
+
+html.llmt-yt-on #movie_player .caption-window {
+  display: none !important;
+}
+
+.llmt-yt-overlay {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 2%;
+  z-index: 40;
+  text-align: center;
+  pointer-events: none;
+  font: var(--llmt-yt-size, 18px) / 1.45 "YouTube Noto", Roboto, "PingFang TC", "Noto Sans TC", "Noto Sans CJK TC",
+    system-ui, sans-serif;
+}
+
+/* Clear the progress bar while the controls are shown. */
+#movie_player:not(.ytp-autohide) .llmt-yt-overlay {
+  bottom: 60px;
+}
+
+.llmt-yt-overlay[hidden],
+.llmt-yt-row[hidden] {
+  display: none;
+}
+
+.llmt-yt-line {
+  display: inline;
+  padding: 0.08em 0.35em;
+  background: rgba(8, 8, 8, 0.75);
+  color: #fff;
+  white-space: pre-wrap;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.llmt-yt-src {
+  font-size: 0.85em;
+  color: #e6e6e6;
+}
