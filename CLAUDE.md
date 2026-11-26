@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Chrome MV3 extension that inserts LLM translations next to the original text (bilingual view), plus bilingual YouTube subtitles. Users bring their own Anthropic / OpenAI / Gemini API key. README.md (in Traditional Chinese) has the per-file responsibility table, design decisions, and known limitations; read it before structural changes. User-facing strings are Traditional Chinese.
+Chrome MV3 extension that inserts LLM translations next to the original text (bilingual view), plus bilingual YouTube subtitles. Users bring their own Anthropic / OpenAI / Gemini API key. `docs/architecture.md` has the per-file responsibility table, design decisions, and hidden-text filtering limits; read it before structural changes. `README.md` (English) and `README.zh-TW.md` are for users, and `CONTRIBUTING.md` for contributors; keep the two READMEs in sync. User-facing strings are Traditional Chinese.
 
 ## Commands
 
@@ -58,7 +58,7 @@ Five esbuild bundles (`scripts/build.mjs`): `background` (ESM service worker), `
 
 **Providers** (`src/background/providers/`): `TranslationProvider.translate()` is an async generator of `segment` events ending with exactly one `end` event. Anthropic uses the SDK; OpenAI and Gemini use raw `fetch` + SSE (`http.ts`) and send `store: false`. `registry.ts` picks the provider from the model id. Only Anthropic needs explicit prompt-cache breakpoints, so only it goes through `CacheWarmupGate` (`cache-warmup.ts`), which lets one request per prompt prefix write the cache before the others fan out.
 
-**Adding or changing a model** touches `MODELS` in `src/shared/settings.ts` (UI + provider mapping) and `PRICES` in `src/background/pricing.ts` (cost estimate in the service worker log). Also update the README model table. Unknown model ids fall back to the Anthropic provider.
+**Adding or changing a model** touches `MODELS` in `src/shared/settings.ts` (UI + provider mapping) and `PRICES` in `src/background/pricing.ts` (cost estimate in the service worker log). Also update the model table in both `README.md` and `README.zh-TW.md`. Unknown model ids fall back to the Anthropic provider.
 
 **YouTube subtitles** are a second, independent feature (`Feature = "page" | "subtitles"`). `src/page/youtube-hook.ts` runs in the MAIN world and only *reads* the player's own `/api/timedtext` responses (signed URLs and `pot` tokens make self-built requests unreliable). It forwards them to the content script as JSON-string `CustomEvent`s on `document`, validated by `src/shared/youtube-bridge.ts`. `src/content/youtube/controller.ts` owns the lifecycle and uses the same Port protocol as page translation. `refill.ts` schedules 5-minute windows, topping up when less than 60s remains ahead.
 
