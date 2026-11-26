@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LLM Bilingual Translator",
+  "name": "Open LLM Translator",
   "version": "0.1.0",
   "description": "在原文下方顯示 LLM 翻譯（雙語對照）",
   "minimum_chrome_version": "120",
@@ -21,7 +21,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "LLM Translator",
+    "default_title": "Open LLM Translator",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"

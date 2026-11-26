@@ -1,4 +1,4 @@
-// Verification harness for the LLM Bilingual Translator extension.
+// Verification harness for the Open LLM Translator extension.
 // Import it from a drive script that lives in this directory (Node resolves
 // `playwright` from the repo's node_modules):
 //

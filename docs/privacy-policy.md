@@ -1,8 +1,8 @@
-# Privacy Policy — LLM Bilingual Translator
+# Privacy Policy — Open LLM Translator
 
 _Last updated: 2026-11-26_
 
-LLM Bilingual Translator ("the extension") translates web pages with a large language model (LLM) and shows each translation below the original text. This policy explains what data the extension handles and where it goes.
+Open LLM Translator ("the extension") translates web pages with a large language model (LLM) and shows each translation below the original text. This policy explains what data the extension handles and where it goes.
 
 The extension has no server of its own. The developer does not receive, collect, or store any of your data.
 
@@ -62,7 +62,7 @@ Questions: luciferstut@gmail.com
 
 _最後更新：2026-11-26_
 
-LLM Bilingual Translator（以下稱「本擴充功能」）用大型語言模型（LLM）翻譯網頁，並把譯文顯示在原文下方。本政策說明本擴充功能處理哪些資料、送到哪裡。
+Open LLM Translator（以下稱「本擴充功能」）用大型語言模型（LLM）翻譯網頁，並把譯文顯示在原文下方。本政策說明本擴充功能處理哪些資料、送到哪裡。
 
 本擴充功能沒有自己的伺服器，開發者不會收到、蒐集或儲存您的任何資料。
 

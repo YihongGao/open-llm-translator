@@ -1,4 +1,4 @@
-# LLM Bilingual Translator verification map
+# Open LLM Translator verification map
 
 This directory is the maintained source for verifying the user-facing behavior of the extension. Read this index before driving anything, then use the matching feature file as the recipe. Harness API, launch, doctor and cleanup are in [../SKILL.md](../SKILL.md).
 

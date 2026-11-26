@@ -1,6 +1,6 @@
 // Builds dist/ and zips it for Chrome Web Store upload, refusing to package
 // anything the store would reject or that must never ship.
-// Usage: npm run package   → release/llm-bilingual-translator-<version>.zip
+// Usage: npm run package   → release/open-llm-translator-<version>.zip
 //
 // Checks (each one fails the run):
 //   - npm run typecheck and npm test pass (before anything is built)
@@ -61,7 +61,7 @@ if (problems.length) {
 }
 
 await mkdir(RELEASE, { recursive: true });
-const out = resolve(RELEASE, `llm-bilingual-translator-${manifest.version}.zip`);
+const out = resolve(RELEASE, `open-llm-translator-${manifest.version}.zip`);
 // Zip the contents of dist/ so manifest.json sits at the archive root. Entry
 // names use "/" on every OS (readdir returns "\" on Windows).
 const entries = {};

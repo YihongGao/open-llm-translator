@@ -1,4 +1,4 @@
-# LLM Bilingual Translator
+# Open LLM Translator
 
 Chrome extension (MV3)：保留原文，在原文旁或下方插入 LLM 翻譯（雙語對照）。使用自己的 API key，支援 Anthropic（Claude）、OpenAI（GPT）、Google（Gemini）。
 

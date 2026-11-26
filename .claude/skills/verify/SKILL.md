@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Drive the LLM Bilingual Translator Chrome extension (MV3) in a real Playwright Chromium to prove user-facing behavior — toolbar popup, in-page bilingual translation, error toasts, options page, YouTube subtitles — with the LLM API mocked at the network boundary (free) or real (costs money). Use after changing anything under src/ or public/, before claiming a feature works, or to reproduce a bug the way a user hits it.
+description: Drive the Open LLM Translator Chrome extension (MV3) in a real Playwright Chromium to prove user-facing behavior — toolbar popup, in-page bilingual translation, error toasts, options page, YouTube subtitles — with the LLM API mocked at the network boundary (free) or real (costs money). Use after changing anything under src/ or public/, before claiming a feature works, or to reproduce a bug the way a user hits it.
 ---
 
 # Verify the extension

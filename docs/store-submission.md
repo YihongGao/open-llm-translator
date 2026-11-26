@@ -4,7 +4,7 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 
 送審前檢查：
 
-- [ ] `npm run package` 通過，上傳 `release/llm-bilingual-translator-<version>.zip`
+- [ ] `npm run package` 通過，上傳 `release/open-llm-translator-<version>.zip`
 - [ ] `public/manifest.json` 的 `version` 比上一次上傳的高
 - [ ] `docs/privacy-policy.md` 已合併進 `main`（隱私權政策網址指向 `main` 上的檔案），`<contact email>` 已替換
 - [ ] 測試用 API key 已建立，放在有花費上限的 workspace（見「Test instructions」）
@@ -113,7 +113,7 @@ Translates the text of the current web page with a large language model chosen b
 **Privacy policy URL**：
 
 ```
-https://github.com/YihongGao/llm-translator/blob/main/docs/privacy-policy.md
+https://github.com/YihongGao/open-llm-translator/blob/main/docs/privacy-policy.md
 ```
 
 這個網址要等 `docs/privacy-policy.md` 合併進 `main` 才有效，且檔案不能改名或搬移。之後改成獨立網頁時，記得同步更新 dashboard 的這個欄位。

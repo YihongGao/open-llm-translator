@@ -1,5 +1,5 @@
 {
-  "name": "my-llm-translator",
+  "name": "open-llm-translator",
   "version": "0.1.0",
   "private": true,
   "description": "Chrome extension: bilingual (immersive-style) page translation powered by LLMs",
