@@ -42,9 +42,17 @@ export interface SegmentCandidate {
 }
 
 /** Elements whose subtree is never translated (and never part of a parent's text). */
+/**
+ * Video players: their caption windows change every few seconds, so each line
+ * would be sent as a new segment (subtitles have their own feature). Covers
+ * YouTube's player, which also holds our subtitle overlay.
+ */
+const PLAYER_CLASS = "html5-video-player";
+
 export function isSkipped(el: Element): boolean {
   return (
     EXCLUDED_TAGS.has(el.tagName.toUpperCase()) ||
+    el.classList.contains(PLAYER_CLASS) ||
     el.getAttribute("translate") === "no" ||
     el.classList.contains("notranslate") ||
     el.getAttribute("aria-hidden") === "true" ||
