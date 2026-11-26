@@ -23,11 +23,11 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 用大型語言模型（LLM）翻譯網頁，譯文直接顯示在每段原文下方，原文和譯文對照閱讀。
 
 【需要自備 API key】
-本擴充功能不提供翻譯額度。請在設定頁填入你自己的 API key，支援：
+本擴充功能不提供翻譯額度。請在設定頁填入您自己的 API key，支援：
 • Anthropic（Claude Haiku／Sonnet／Opus）
 • OpenAI（GPT）
 • Google（Gemini）
-只需要填你要用的那一家。費用依各服務商的 API 價格，由你的帳號支付。
+只需要填您要用的那一家。費用依各服務商的 API 價格，由您的帳號支付。
 
 【功能】
 • 雙語對照：譯文插在原文下方，沿用原頁面的字型與連結
@@ -48,7 +48,7 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 在 YouTube 影片頁，選單會多一個「開啟雙語字幕」，快捷鍵 Alt+S（macOS 為 Option+S）。
 
 【隱私】
-只有你按下翻譯（或開啟字幕）的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到你選擇的服務商。沒有開發者伺服器，不蒐集分析或遙測資料。API key 只存在本機，不經 Chrome Sync 同步。
+只有您按下翻譯（或開啟字幕）的分頁，才會把要翻譯的文字、頁面標題與網址（不含查詢字串）送到您選擇的服務商。沒有開發者伺服器，不蒐集分析或遙測資料。API key 只存在本機，不經 Chrome Sync 同步。
 
 YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標，OpenAI 與 GPT 是 OpenAI 的商標。本擴充功能與這些公司無關，也未經它們認可。
 ```
