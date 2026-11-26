@@ -40,6 +40,23 @@
         margin-top: 6px;
         font: inherit;
       }
+      .key-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 6px;
+      }
+      .key-row input {
+        flex: 1;
+        margin-top: 0;
+      }
+      .key-row button {
+        padding: 8px 12px;
+        white-space: nowrap;
+      }
+      button:disabled {
+        cursor: not-allowed;
+      }
       .actions {
         margin-top: 24px;
         display: flex;
@@ -76,13 +93,22 @@
       <p class="hint">只需要填所選 model 那一家的 API key。</p>
 
       <label for="anthropicApiKey">Anthropic API key</label>
-      <input id="anthropicApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." />
+      <div class="key-row">
+        <input id="anthropicApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." />
+        <button type="button" class="clear-key" data-for="anthropicApiKey" aria-label="清除 Anthropic API key" disabled>清除</button>
+      </div>
 
       <label for="openaiApiKey">OpenAI API key</label>
-      <input id="openaiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-..." />
+      <div class="key-row">
+        <input id="openaiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-..." />
+        <button type="button" class="clear-key" data-for="openaiApiKey" aria-label="清除 OpenAI API key" disabled>清除</button>
+      </div>
 
       <label for="geminiApiKey">Gemini API key</label>
-      <input id="geminiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." />
+      <div class="key-row">
+        <input id="geminiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." />
+        <button type="button" class="clear-key" data-for="geminiApiKey" aria-label="清除 Gemini API key" disabled>清除</button>
+      </div>
       <p class="hint">API key 只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。</p>
       <p class="hint">
         建議為這個擴充功能另建專用的 API key，並在服務商那邊設定用量上限：

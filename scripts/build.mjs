@@ -31,6 +31,9 @@ const common = {
   // them into \uXXXX runs, which a store reviewer can read as obfuscation.
   charset: "utf8",
   logLevel: "info",
+  // Debug-only code (src/background/index.ts) is gated on this and tree-shaken
+  // out of release builds. check-dist.mjs fails if it ships.
+  define: { __LLMT_DEBUG__: JSON.stringify(watch || e2e) },
 };
 
 const builds = [

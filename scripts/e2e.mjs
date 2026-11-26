@@ -5,6 +5,7 @@
 // Usage:
 //   node scripts/e2e.mjs no-key  [url]   # missing-key notice; no API calls, free
 //   node scripts/e2e.mjs measure         # system prompt tokens per language; free (count_tokens)
+//                                        # needs the E2E build: release builds omit globalThis.llmtMeasurePrompts
 //   node scripts/e2e.mjs translate <url> # translate the whole page and report cost; SPENDS MONEY
 //
 // Options (env): LLMT_MODEL (default claude-haiku-5-5, same as the extension), LLMT_LANG (default zh-TW),
