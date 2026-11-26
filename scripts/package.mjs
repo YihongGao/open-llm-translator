@@ -8,6 +8,7 @@
 //   - no source maps in the bundle
 //   - no remote or dynamic code: eval(, new Function(, importScripts(,
 //     import("http…") — MV3 forbids executing code not shipped in the package
+//   - no \uXXXX-escaped CJK text (reads as obfuscation to store reviewers)
 import { execFileSync, execSync } from "node:child_process";
 import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { resolve, sep } from "node:path";
@@ -44,10 +45,14 @@ for (const size of ["16", "32", "48", "128"]) {
 const files = await readdir(DIST, { recursive: true });
 for (const f of files.filter((f) => f.endsWith(".map"))) problems.push(`source map in bundle: ${f}`);
 
+// Escaped Chinese strings look like the "character encoding" obfuscation the
+// store rejects as Red Titanium.
+const ESCAPED_CJK = /\\u[4-9][0-9A-Fa-f]{3}/;
 const REMOTE_CODE = [/\beval\(/, /\bnew Function\(/, /\bimportScripts\(/, /\bimport\(\s*["'`]https?:/];
 for (const f of files.filter((f) => f.endsWith(".js"))) {
   const src = await readFile(`${DIST}/${f}`, "utf8");
   for (const re of REMOTE_CODE) if (re.test(src)) problems.push(`${f} matches ${re}`);
+  if (ESCAPED_CJK.test(src)) problems.push(`${f} has \\uXXXX-escaped CJK text: build with esbuild charset "utf8"`);
 }
 
 if (problems.length) {

@@ -27,6 +27,9 @@ const common = {
   target: "chrome120",
   sourcemap: watch ? "inline" : false,
   minify: !watch,
+  // Keep Chinese UI strings readable in the bundle. The default "ascii" turns
+  // them into \uXXXX runs, which a store reviewer can read as obfuscation.
+  charset: "utf8",
   logLevel: "info",
 };
 
