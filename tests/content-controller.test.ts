@@ -63,7 +63,7 @@ beforeAll(async () => {
     <h4>Kubelet</h4>
     <p><a href="#nav">A paragraph that is entirely a link.</a></p>`;
   await import("../src/content/index");
-  expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: true });
+  expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: true, subtitles: null });
   await scrollAllIntoView();
 });
 
@@ -131,9 +131,9 @@ describe("content controller", () => {
   });
 
   it("retries failed segments when translation is switched off and on again", async () => {
-    expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: false });
-    expect(tell({ type: "llmt-status" })).toEqual({ active: false });
-    expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: true });
+    expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: false, subtitles: null });
+    expect(tell({ type: "llmt-status" })).toEqual({ active: false, subtitles: null });
+    expect(tell({ type: "llmt-toggle", targetLang: "zh-TW" })).toEqual({ active: true, subtitles: null });
     expect(toast()).toBeNull();
     await scrollAllIntoView();
     expect(posted).toHaveLength(2);
@@ -144,7 +144,7 @@ describe("content controller", () => {
   });
 
   it("re-translates everything when the popup changes the target language", async () => {
-    expect(tell({ type: "llmt-set-lang", targetLang: "ja" })).toEqual({ active: true });
+    expect(tell({ type: "llmt-set-lang", targetLang: "ja" })).toEqual({ active: true, subtitles: null });
     expect(document.querySelectorAll("llmt-translation")).toHaveLength(0);
     await scrollAllIntoView();
     const last = posted.at(-1)!;

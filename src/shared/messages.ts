@@ -66,21 +66,29 @@ export type TranslateEvent =
 // extension -> content (chrome.tabs.sendMessage). Content scripts cannot read
 // chrome.storage (see background setAccessLevel), so the settings they need
 // travel with these messages. Each one is answered with a TabState.
+/** The two things a tab can translate, toggled independently. */
+export type Feature = "page" | "subtitles";
+
 export interface ToggleMessage {
   type: "llmt-toggle";
   targetLang: string;
+  /** Defaults to "page". */
+  feature?: Feature;
 }
 export interface StatusMessage {
   type: "llmt-status";
 }
-/** Target language changed in the popup: re-translate the page if active. */
+/** Target language changed in the popup: re-translate whatever is active. */
 export interface SetLanguageMessage {
   type: "llmt-set-lang";
   targetLang: string;
 }
 export type ContentMessage = ToggleMessage | StatusMessage | SetLanguageMessage;
 export interface TabState {
+  /** Page translation is on. */
   active: boolean;
+  /** Bilingual subtitles are on; null where they are not offered (not YouTube). */
+  subtitles: boolean | null;
 }
 
 // content -> background: content scripts cannot call openOptionsPage() themselves.

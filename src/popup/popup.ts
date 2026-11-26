@@ -2,6 +2,7 @@
 
 import { TARGET_LANGUAGES, apiKeyFor, fillModelSelect, loadSettings, providerOf, saveSettings } from "../shared/settings";
 import { getTabState, isRestrictedUrl, setTabLanguage, toggleTab } from "../shared/tab-control";
+import { isYouTubeWatchUrl } from "../shared/youtube-bridge";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -9,6 +10,7 @@ const warn = $<HTMLDivElement>("warn");
 const targetLang = $<HTMLSelectElement>("targetLang");
 const model = $<HTMLSelectElement>("model");
 const toggleBtn = $<HTMLButtonElement>("toggle");
+const subsBtn = $<HTMLButtonElement>("subs");
 const note = $<HTMLParagraphElement>("note");
 const warnText = $<HTMLSpanElement>("warnText");
 
@@ -27,18 +29,20 @@ $("shortcuts").addEventListener("click", () => {
   window.close();
 });
 
-/** The shortcut as the user actually configured it (e.g. "⌥A"), or "" if unset. */
-async function shortcutLabel(): Promise<string> {
+/** Shortcuts as the user actually configured them (e.g. "⌥A"), "" if unset. */
+async function shortcutLabels(): Promise<{ page: string; subtitles: string }> {
   const commands = await chrome.commands.getAll();
-  return commands.find((c) => c.name === "toggle-translation")?.shortcut ?? "";
+  const of = (name: string) => commands.find((c) => c.name === name)?.shortcut ?? "";
+  return { page: of("toggle-translation"), subtitles: of("toggle-subtitles") };
 }
 
 async function init(): Promise<void> {
-  const [settings, [tab], shortcut] = await Promise.all([
+  const [settings, [tab], shortcuts] = await Promise.all([
     loadSettings(),
     chrome.tabs.query({ active: true, currentWindow: true }),
-    shortcutLabel(),
+    shortcutLabels(),
   ]);
+  const shortcut = shortcuts.page;
   targetLang.value = settings.targetLang;
   model.value = settings.model;
   const updateWarn = () => {
@@ -71,6 +75,23 @@ async function init(): Promise<void> {
       toggleBtn.textContent = "此頁面無法翻譯";
       note.textContent = "Chrome 不允許擴充功能在這個頁面執行。";
     });
+
+    // Bilingual subtitles: on YouTube video pages, or wherever they are already on.
+    const subsOn = state?.subtitles === true;
+    if (isYouTubeWatchUrl(tab?.url) || subsOn) {
+      const subsSuffix = shortcuts.subtitles ? `（${shortcuts.subtitles}）` : "";
+      subsBtn.textContent = `${subsOn ? "關閉雙語字幕" : "開啟雙語字幕"}${subsSuffix}`;
+      subsBtn.classList.add("show");
+      subsBtn.addEventListener("click", async () => {
+        subsBtn.disabled = true;
+        const res = await toggleTab(tabId, "subtitles");
+        if (res.ok) {
+          window.close();
+          return;
+        }
+        note.textContent = "Chrome 不允許擴充功能在這個頁面執行。";
+      });
+    }
   }
   if (!shortcut) note.textContent ||= "尚未設定快捷鍵，可在「快捷鍵」中設定。";
 
