@@ -13,7 +13,8 @@ npm run typecheck    # tsc --noEmit (covers src, scripts, tests)
 npm test             # vitest run
 npx vitest run tests/segmenter.test.ts            # one file
 npx vitest run tests/segmenter.test.ts -t "name"  # one test
-npm run package      # typecheck + test + build + store checks → release/*.zip
+npm run check:dist   # store-rejection checks on dist/ (build first)
+npm run package      # typecheck + test + build + check:dist → release/*.zip
 ```
 
 E2E (Playwright, real Chromium; build first with `npm run build:e2e`, which writes `dist-e2e/` with `<all_urls>` — never ship it):
@@ -30,7 +31,13 @@ Tests touching the DOM need `// @vitest-environment happy-dom` as the first line
 
 ## Before declaring a change done
 
-- Any change under `src/`, `scripts/` or `tests/`: run `npm run typecheck` and `npm test`, and both must pass. Report failures with their output; do not call the work done. CI (`.github/workflows/ci.yml`) runs the same checks plus `npm run build` on every PR and push to `main`.
+- Any change under `src/`, `scripts/` or `tests/`: run `npm run typecheck` and `npm test`, and both must pass. Report failures with their output; do not call the work done. CI (`.github/workflows/ci.yml`) runs on every PR and push to `main`: the same checks plus `build` and `check:dist`, `npm test` on Windows, and every `.claude/skills/verify/scripts/journey-*.mjs` against the E2E build (mocked API, headless). Branch protection requires only its `ci-ok` job. CI picks up new journeys through that glob, so a journey must use the mock and exit non-zero on failure.
+
+## CI and release
+
+- `.github/workflows/security.yml`: CodeQL and dependency review.
+- `.github/workflows/release.yml`: pushing a `v*.*.*` tag runs `npm run package`, attests the zip, and attaches it to a GitHub Release. The tag must equal the version in both `package.json` and `public/manifest.json`. Uploading to the Chrome Web Store stays manual.
+- Actions are pinned to commit SHAs with the version in a comment; Dependabot (`.github/dependabot.yml`) bumps them. Pin new actions the same way.
 - Changes to user-visible behavior (popup, options page, rendered translations, toasts, YouTube subtitles): also prove it in the real extension with the project `verify` skill (`.claude/skills/verify/`): run `npm run build:e2e`, then the matching journey from its feature map. Unit tests alone don't count as proof for these.
 - Behavior changes come with a test that fails without the change.
 
@@ -57,4 +64,4 @@ Five esbuild bundles (`scripts/build.mjs`): `background` (ESM service worker), `
 
 ## Release constraints
 
-`npm run package` refuses to zip if `typecheck` or `test` fails, if the manifest has an E2E name or broad host permissions (`<all_urls>`, `*://*/*`), if source maps are present, or if bundles contain remote/dynamic code (`eval(`, `new Function(`, `importScripts(`, `import("http…")`). Keep new code and dependencies compatible with these checks. Store listing text is in `docs/store-submission.md`; the privacy policy in `docs/privacy-policy.md` must be updated when data handling changes.
+`npm run package` refuses to zip if `typecheck` or `test` fails, or if `scripts/check-dist.mjs` finds an E2E manifest name, broad host permissions (`<all_urls>`, `*://*/*`), missing icons, source maps, `\uXXXX`-escaped CJK text, or remote/dynamic code (`eval(`, `new Function(`, `importScripts(`, `import("http…")`). Keep new code and dependencies compatible with these checks. Store listing text is in `docs/store-submission.md`; the privacy policy in `docs/privacy-policy.md` must be updated when data handling changes.

@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for tooling; runtime deps (shipped in the bundle) stay separate.
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  # Keeps the SHA pins in .github/workflows current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
