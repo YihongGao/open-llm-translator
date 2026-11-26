@@ -89,7 +89,7 @@ Stable handles:
   - `llmt-toast` shadow root: `.msg`, `.detail`, `.action`, `.close`
 - Options page (a normal tab at `chrome-extension://<extId>/options.html`, so use Playwright locators):
   - Inputs and selects: `#model`, `#anthropicApiKey`, `#openaiApiKey`, `#geminiApiKey`, `#targetLang`
-  - Buttons: role button `儲存`, role button `測試連線`
+  - Buttons: role button `儲存`, role button `測試連線`, and one per provider named `清除 Anthropic API key` / `清除 OpenAI API key` / `清除 Gemini API key` (disabled when no key is stored; click opens a `confirm` dialog, so register `page.once("dialog", ...)` first). Journey: `journey-options-clear-key.mjs`
   - Status: `#status`
 - Fixture: `fixtures/article.html`, served at `run.fixture()`. Element ids are the probes:
   - `title`, `intro`, `link-only`, `li-1`, `li-2`: should translate.

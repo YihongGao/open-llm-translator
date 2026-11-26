@@ -85,3 +85,8 @@ export async function loadSettings(): Promise<Settings> {
 export async function saveSettings(patch: Partial<Settings>): Promise<void> {
   await chrome.storage.local.set(patch);
 }
+
+/** Deletes one stored API key (removed, not blanked) and leaves every other setting alone. */
+export async function clearApiKey(provider: (typeof PROVIDERS)[number]): Promise<void> {
+  await chrome.storage.local.remove(provider.keySetting);
+}
