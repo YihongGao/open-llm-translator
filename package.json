@@ -11,6 +11,7 @@
     "test": "vitest run",
     "build:e2e": "node scripts/build.mjs --e2e",
     "icons": "node scripts/build-icons.mjs",
+    "package": "node scripts/package.mjs",
     "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
