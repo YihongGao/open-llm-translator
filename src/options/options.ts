@@ -4,9 +4,12 @@ import {
   clearApiKey,
   TARGET_LANGUAGES,
   fillModelSelect,
+  keyFieldHint,
   loadSettings,
   providerOf,
   saveSettings,
+  typedKeyPatch,
+  type KeySetting,
   type Settings,
 } from "../shared/settings";
 
@@ -17,12 +20,20 @@ const model = $<HTMLSelectElement>("model");
 const targetLang = $<HTMLSelectElement>("targetLang");
 const status = $<HTMLSpanElement>("status");
 const testBtn = $<HTMLButtonElement>("test");
-/** One password field per provider, id = its settings key. */
-const keyInputs = PROVIDERS.map((p) => ({
-  provider: p,
-  input: $<HTMLInputElement>(p.keySetting),
-  clearBtn: document.querySelector<HTMLButtonElement>(`.clear-key[data-for="${p.keySetting}"]`)!,
-}));
+/**
+ * One write-only password field per provider, id = its settings key. A saved
+ * key is never put back into the page; the placeholder shows its last four
+ * characters instead, so the key cannot be copied out of the options page.
+ */
+const keyInputs = PROVIDERS.map((p) => {
+  const input = $<HTMLInputElement>(p.keySetting);
+  return {
+    provider: p,
+    input,
+    example: input.placeholder,
+    clearBtn: document.querySelector<HTMLButtonElement>(`.clear-key[data-for="${p.keySetting}"]`)!,
+  };
+});
 
 fillModelSelect(model);
 for (const l of TARGET_LANGUAGES) targetLang.add(new Option(l.label, l.tag));
@@ -39,24 +50,26 @@ function markActiveKey(): void {
     document.querySelector(`label[for="${input.id}"]`)?.classList.toggle("active", provider.id === active);
 }
 
-/** Clear buttons mirror what is stored, not what is typed. */
-function setClearEnabled(stored: Partial<Settings>): void {
-  for (const { provider, clearBtn } of keyInputs) clearBtn.disabled = !stored[provider.keySetting];
+/** Placeholders and clear buttons mirror what is stored, not what is typed. */
+function showStoredKeys(stored: Settings): void {
+  for (const { provider, input, example, clearBtn } of keyInputs) {
+    input.placeholder = keyFieldHint(stored[provider.keySetting], example);
+    clearBtn.disabled = !stored[provider.keySetting];
+  }
 }
 
 async function save(): Promise<void> {
-  const patch: Partial<Settings> = { model: model.value, targetLang: targetLang.value };
-  for (const { provider, input } of keyInputs) (patch as Record<string, string>)[provider.keySetting] = input.value.trim();
-  await saveSettings(patch);
-  setClearEnabled(patch);
+  const typed = Object.fromEntries(keyInputs.map(({ provider, input }) => [provider.keySetting, input.value])) as Record<KeySetting, string>;
+  await saveSettings({ model: model.value, targetLang: targetLang.value, ...typedKeyPatch(typed) });
+  for (const { input } of keyInputs) input.value = "";
+  showStoredKeys(await loadSettings());
 }
 
 void loadSettings().then((s) => {
-  for (const { provider, input } of keyInputs) input.value = String(s[provider.keySetting]);
   model.value = s.model;
   targetLang.value = s.targetLang;
   markActiveKey();
-  setClearEnabled(s);
+  showStoredKeys(s);
 });
 
 model.addEventListener("change", markActiveKey);
@@ -66,11 +79,12 @@ form.addEventListener("submit", (e) => {
   void save().then(() => show("已儲存（已開啟的頁面需重新切換翻譯才會套用新語言）", "ok"));
 });
 
-for (const { provider, input, clearBtn } of keyInputs) {
+for (const { provider, input, example, clearBtn } of keyInputs) {
   clearBtn.addEventListener("click", () => {
     if (!confirm(`確定要刪除 ${provider.label} 的 API key？刪除後要重新貼上才能使用。`)) return;
     void clearApiKey(provider).then(() => {
       input.value = "";
+      input.placeholder = example;
       clearBtn.disabled = true;
       show(`已刪除 ${provider.label} 的 API key`, "ok");
     });

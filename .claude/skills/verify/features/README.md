@@ -41,5 +41,5 @@ Each feature file starts with an H1 title and one paragraph describing the user-
 - [Page translation](./page-translation.md): toggle from the popup, viewport-lazy translation, skipped elements, restore original. Proven by `scripts/journey-page-translation.mjs`.
 - [Popup language and model](./popup-language-model.md): switch target language (re-translates the open page) and model (key warning, persisted).
 - [Error notices](./error-notices.md): missing key, invalid key, rate limit. Covers the toast, the ⚠ markers and retry on re-toggle.
-- [Options page](./options-page.md): API keys, model, language, 儲存, 測試連線.
+- [Options page](./options-page.md): write-only API key fields, 清除, model, language, 儲存, 測試連線. Proven by `scripts/journey-options-write-only-keys.mjs` and `scripts/journey-options-clear-key.mjs`.
 - [YouTube bilingual subtitles](./youtube-subtitles.md): subtitle overlay on `youtube.com/watch`. Needs the live site and is not yet proven by a run.
