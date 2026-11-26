@@ -8,8 +8,9 @@
 //   - no remote or dynamic code: eval(, new Function(, importScripts(,
 //     import("http…") — MV3 forbids executing code not shipped in the package
 import { execFileSync } from "node:child_process";
-import { mkdir, readFile, readdir, rm } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { resolve, sep } from "node:path";
+import { zipSync } from "fflate";
 
 const DIST = "dist";
 const RELEASE = "release";
@@ -44,8 +45,14 @@ if (problems.length) {
 
 await mkdir(RELEASE, { recursive: true });
 const out = resolve(RELEASE, `llm-bilingual-translator-${manifest.version}.zip`);
-await rm(out, { force: true });
-// Zip the contents of dist/ so manifest.json sits at the archive root; -X drops
-// macOS extended attributes.
-execFileSync("zip", ["-r", "-X", "-q", out, ".", "-x", ".DS_Store", "-x", "*/.DS_Store"], { cwd: DIST });
+// Zip the contents of dist/ so manifest.json sits at the archive root. Entry
+// names use "/" on every OS (readdir returns "\" on Windows).
+const entries = {};
+for (const f of files) {
+  const name = f.split(sep).join("/");
+  if (name.split("/").pop() === ".DS_Store") continue;
+  const path = `${DIST}/${name}`;
+  if ((await stat(path)).isFile()) entries[name] = await readFile(path);
+}
+await writeFile(out, zipSync(entries, { level: 9 }));
 console.log(`\npackage: wrote ${out} (version ${manifest.version}, ${files.length} entries checked)`);

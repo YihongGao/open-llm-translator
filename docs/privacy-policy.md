@@ -53,8 +53,7 @@ Changes to this policy will be published at this address with a new "Last update
 
 ## Contact
 
-<!-- TODO: replace with the publisher's contact address before publishing -->
-Questions: `<contact email>`
+Questions: luciferstut@gmail.com
 
 ---
 
@@ -97,5 +96,4 @@ LLM Bilingual Translator（以下稱「本擴充功能」）用大型語言模�
 
 ## 聯絡方式
 
-<!-- TODO: 發佈前換成發佈者的聯絡信箱 -->
-`<contact email>`
+luciferstut@gmail.com
