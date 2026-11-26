@@ -3,17 +3,29 @@
 // Usage: npm run package   → release/llm-bilingual-translator-<version>.zip
 //
 // Checks (each one fails the run):
+//   - npm run typecheck and npm test pass (before anything is built)
 //   - manifest: no "(E2E)" name, no broad host access (<all_urls>, *://*/*)
 //   - no source maps in the bundle
 //   - no remote or dynamic code: eval(, new Function(, importScripts(,
 //     import("http…") — MV3 forbids executing code not shipped in the package
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { resolve, sep } from "node:path";
 import { zipSync } from "fflate";
 
 const DIST = "dist";
 const RELEASE = "release";
+
+// Never zip a build whose types or tests are broken. Through the shell so
+// `npm` resolves to npm.cmd on Windows.
+for (const script of ["typecheck", "test"]) {
+  try {
+    execSync(`npm run ${script}`, { stdio: "inherit" });
+  } catch {
+    console.error(`\npackage: refusing to package: \`npm run ${script}\` failed`);
+    process.exit(1);
+  }
+}
 
 execFileSync("node", ["scripts/build.mjs"], { stdio: "inherit" });
 

@@ -13,7 +13,7 @@ npm run typecheck    # tsc --noEmit (covers src, scripts, tests)
 npm test             # vitest run
 npx vitest run tests/segmenter.test.ts            # one file
 npx vitest run tests/segmenter.test.ts -t "name"  # one test
-npm run package      # build + store checks → release/*.zip
+npm run package      # typecheck + test + build + store checks → release/*.zip
 ```
 
 E2E (Playwright, real Chromium; build first with `npm run build:e2e`, which writes `dist-e2e/` with `<all_urls>` — never ship it):
@@ -27,6 +27,12 @@ node scripts/e2e.mjs translate <url>  # SPENDS MONEY on real API calls
 Env: `LLMT_MODEL`, `LLMT_LANG`, `HEADED=1`, `LLMT_SCREENSHOT`, `LLMT_DUMP`. Keys come from env or `.env.local` (gitignored). See the header of `scripts/e2e.mjs`.
 
 Tests touching the DOM need `// @vitest-environment happy-dom` as the first line; the default environment is node. Provider tests run against a local mock SSE server, not real APIs.
+
+## Before declaring a change done
+
+- Any change under `src/`, `scripts/` or `tests/`: run `npm run typecheck` and `npm test`, and both must pass. Report failures with their output; do not call the work done. CI (`.github/workflows/ci.yml`) runs the same checks plus `npm run build` on every PR and push to `main`.
+- Changes to user-visible behavior (popup, options page, rendered translations, toasts, YouTube subtitles): also prove it in the real extension with the project `verify` skill (`.claude/skills/verify/`): run `npm run build:e2e`, then the matching journey from its feature map. Unit tests alone don't count as proof for these.
+- Behavior changes come with a test that fails without the change.
 
 ## Architecture
 
@@ -51,4 +57,4 @@ Five esbuild bundles (`scripts/build.mjs`): `background` (ESM service worker), `
 
 ## Release constraints
 
-`npm run package` refuses to zip if the manifest has an E2E name or broad host permissions (`<all_urls>`, `*://*/*`), if source maps are present, or if bundles contain remote/dynamic code (`eval(`, `new Function(`, `importScripts(`, `import("http…")`). Keep new code and dependencies compatible with these checks. Store listing text is in `docs/store-submission.md`; the privacy policy in `docs/privacy-policy.md` must be updated when data handling changes.
+`npm run package` refuses to zip if `typecheck` or `test` fails, if the manifest has an E2E name or broad host permissions (`<all_urls>`, `*://*/*`), if source maps are present, or if bundles contain remote/dynamic code (`eval(`, `new Function(`, `importScripts(`, `import("http…")`). Keep new code and dependencies compatible with these checks. Store listing text is in `docs/store-submission.md`; the privacy policy in `docs/privacy-policy.md` must be updated when data handling changes.
