@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- Verification fixture served by harness.mjs. Each element is a probe; ids are stable handles for drive scripts. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Verify fixture: scheduling basics</title>
+    <style>
+      body { font: 16px/1.5 system-ui, sans-serif; max-width: 720px; margin: 24px auto; padding: 0 16px; }
+      #far { margin-top: 2400px; }
+    </style>
+  </head>
+  <body>
+    <nav id="nav"><a href="#intro">Overview</a> · <a href="#far">Further reading</a></nav>
+    <h1 id="title">Scheduling basics</h1>
+    <p id="intro">The scheduler watches for newly created Pods that have no Node assigned and picks the best Node for each one.</p>
+    <p id="link-only"><a href="https://example.com/guide">Read the full scheduling guide</a></p>
+    <ul>
+      <li id="li-1">Filtering finds the Nodes where a Pod can run.</li>
+      <li id="li-2">Scoring ranks the remaining Nodes.</li>
+    </ul>
+    <!-- Must stay untranslated: <button>, <pre>, [translate=no]. -->
+    <button id="btn" type="button">Do not translate this button</button>
+    <pre id="code">kubectl get pods --all-namespaces</pre>
+    <p id="no-translate" translate="no">This paragraph opts out of translation.</p>
+    <!-- Below the fold: translated only after scrolling into view. -->
+    <p id="far">This paragraph sits far below the first screen and should wait until it is scrolled into view.</p>
+  </body>
+</html>
