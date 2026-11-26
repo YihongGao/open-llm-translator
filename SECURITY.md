@@ -21,4 +21,4 @@ Examples of what we want to hear about:
 - Prompt injection that affects translations on a different site than the one containing the injected text, or that makes the extension do anything other than translate.
 - Script execution in the extension's pages (popup, options) or through the translations it inserts into a page.
 
-Out of scope: a page influencing how its own text is translated on that same site (a known limitation, see [docs/architecture.md](docs/architecture.md#hidden-text-filtering)), and issues in the LLM providers' own services.
+Out of scope: reading the key with access to the user's files or OS account (the key is stored unencrypted on disk; see [docs/api-key-security.md](docs/api-key-security.md)), a page influencing how its own text is translated on that same site (a known limitation, see [docs/architecture.md](docs/architecture.md#hidden-text-filtering)), and issues in the LLM providers' own services.

@@ -74,7 +74,7 @@ Reasoning ("thinking") is set to the lowest level each model allows, because tho
 
 - Nothing is sent until you start a translation on a tab. Then only the paragraphs on screen, the page title and the page address (without query string) go to the provider you selected, with your key.
 - There is no developer server. No analytics or telemetry.
-- Your API key is stored only on your device (`chrome.storage.local`). It is not synced through Chrome Sync, and web pages cannot read it.
+- Your API key is stored only on your device (`chrome.storage.local`). It is not synced through Chrome Sync, and web pages and other extensions cannot read it. What this does and does not protect against: [How your API key is protected](docs/api-key-security.md).
 - OpenAI and Gemini requests are sent with `store: false`.
 
 Full details: [Privacy Policy](docs/privacy-policy.md).

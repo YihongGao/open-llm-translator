@@ -72,7 +72,7 @@ reasoning（thinking）都設在各 model 允許的最低檔，因為這些 toke
 
 - 在您對分頁按下翻譯之前，不會送出任何資料。按下之後，只有畫面上的段落、頁面標題與網址（不含查詢字串）會用您的 key 送到您選擇的服務商。
 - 沒有開發者伺服器，不蒐集分析或遙測資料。
-- API key 只存在您的裝置上（`chrome.storage.local`），不經 Chrome Sync 同步，網頁也讀不到。
+- API key 只存在您的裝置上（`chrome.storage.local`），不經 Chrome Sync 同步，網頁和其他擴充功能都讀不到。能防範什麼、不能防範什麼，見 [API key 如何受到保護](docs/api-key-security.zh-TW.md)。
 - 送到 OpenAI 和 Gemini 的請求都帶 `store: false`。
 
 完整說明見[隱私權政策](docs/privacy-policy.md)。
