@@ -51,6 +51,9 @@ export async function toggleTab(tabId: number, feature: Feature = "page"): Promi
   if (state) return { ok: true, active: featureActive(state, feature) };
 
   // No receiver yet: inject on demand, then deliver the first toggle.
+  // Every content-script injection passes through here, so this is where the
+  // API key is shielded from it. Fail closed: if this throws, nothing is injected.
+  await chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
   try {
     await chrome.scripting.insertCSS({ target: { tabId }, files: ["content.css"] });
     await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
