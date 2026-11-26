@@ -1,0 +1,65 @@
+name: Bug report
+description: Something does not work as expected. 中文或英文都可以。
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      description: The page where it happens, if it is public. Remove anything private from the address.
+  - type: dropdown
+    id: feature
+    attributes:
+      label: Feature
+      options:
+        - Page translation
+        - YouTube subtitles
+        - Toolbar menu or options page
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model and target language
+      placeholder: claude-haiku-5-5, 繁體中文（台灣）
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message
+      description: Text of the notice in the top-right corner, or the reason shown when you click ⚠ next to a paragraph. Never paste your API key.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version
+      description: Shown on chrome://extensions.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: chrome
+    attributes:
+      label: Chrome version and OS
+      description: From chrome://version.
+      placeholder: Chrome 142, Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed from
+      options:
+        - Chrome Web Store
+        - GitHub Release zip
+        - Built from source
+    validations:
+      required: true
