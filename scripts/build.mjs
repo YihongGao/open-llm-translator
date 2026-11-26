@@ -35,6 +35,8 @@ const builds = [
   { ...common, entryPoints: { background: "src/background/index.ts" }, format: "esm", outdir },
   // Content scripts and extension pages are classic scripts.
   { ...common, entryPoints: { content: "src/content/index.ts" }, format: "iife", outdir },
+  // Injected into YouTube's main world (chrome.scripting world "MAIN").
+  { ...common, entryPoints: { "youtube-hook": "src/page/youtube-hook.ts" }, format: "iife", outdir },
   { ...common, entryPoints: { options: "src/options/options.ts" }, format: "iife", outdir },
   { ...common, entryPoints: { popup: "src/popup/popup.ts" }, format: "iife", outdir },
 ];

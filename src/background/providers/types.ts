@@ -31,10 +31,15 @@ export interface TokenUsage {
 }
 
 /**
- * One implementation per backend (Anthropic API now; Gemini API / local CLI
- * bridge later). Implementations throw on transport/API errors; partial
- * results already yielded stay valid.
+ * One implementation per backend (Anthropic, OpenAI, Gemini). Implementations
+ * throw on transport/API errors; partial results already yielded stay valid.
  */
 export interface TranslationProvider {
   translate(req: ProviderRequest, signal: AbortSignal): AsyncGenerator<ProviderEvent>;
+}
+
+export interface ErrorInfo {
+  message: string;
+  /** Fixable in the options page (key or model). */
+  settings: boolean;
 }

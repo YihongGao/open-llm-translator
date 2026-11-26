@@ -16,12 +16,16 @@ import {
   collectSegments,
   insertionPoint,
   isExcludedByAncestor,
+  isHiddenForReader,
   isSameText,
   isSkipped,
   type Layout,
   type SegmentCandidate,
 } from "./segmenter";
 import { hideToast, showToast } from "./toast";
+import { isYouTubeUrl } from "../shared/youtube-bridge";
+import { createSubtitleController } from "./youtube/controller";
+import { OVERLAY_CLASS } from "./youtube/overlay";
 
 declare global {
   interface Window {
@@ -42,11 +46,18 @@ const MAX_RETRIES = 1;
 type Status = "idle" | "queued" | "pending" | "done" | "error" | "retired";
 
 /**
- * A container whose text is re-translated more often than this is treated as
- * volatile (clock, counter, ticker) and left untranslated: each change would
- * otherwise cost an API call and a cache entry.
+ * A container whose text changes after being translated more often than this
+ * is treated as volatile (clock, counter, ticker) and left untranslated: each
+ * change would otherwise cost an API call and a cache entry. Reset on every
+ * activation, so toggling translation off and on recovers it.
  */
 const MAX_RETRANSLATIONS = 3;
+
+/** How often segments that are in the viewport but invisible are checked again. */
+const HIDDEN_RECHECK_MS = 1000;
+
+/** Longest page title sent with each batch (code points). */
+const MAX_TITLE_CHARS = 200;
 
 interface SegState {
   id: string;
@@ -86,28 +97,105 @@ function main(): void {
 
   const io = new IntersectionObserver(
     (entries) => {
+      // Decide for every entry first, then render: interleaving style reads
+      // with node insertion would force a layout per segment.
+      const visible: SegState[] = [];
       for (const entry of entries) {
         // While toggled off, keep observing so segments are picked up on re-activation.
         if (!entry.isIntersecting || !active) continue;
         const segs = byObserved.get(entry.target) ?? [];
         byObserved.delete(entry.target);
         io.unobserve(entry.target);
-        for (const seg of segs) if (seg.status === "idle") enqueue(seg);
+        for (const seg of segs) {
+          if (seg.status !== "idle") continue;
+          if (isHiddenForReader(seg.candidate)) watchHidden(seg);
+          else visible.push(seg);
+        }
       }
+      for (const seg of visible) enqueue(seg);
     },
     { rootMargin: VIEWPORT_MARGIN },
   );
 
+  /** Run's first element (text nodes cannot be observed), else the container. */
+  const targetOf = (seg: SegState): Element =>
+    seg.candidate.nodes.find((n): n is Element => n.nodeType === Node.ELEMENT_NODE) ?? seg.candidate.container;
+
   function observe(seg: SegState): void {
-    // Observe the run's first element (text nodes cannot be observed).
-    const target =
-      seg.candidate.nodes.find((n): n is Element => n.nodeType === Node.ELEMENT_NODE) ?? seg.candidate.container;
+    const target = targetOf(seg);
     const list = byObserved.get(target);
     if (list) list.push(seg);
     else {
       byObserved.set(target, [seg]);
       io.observe(target);
     }
+  }
+
+  // --- hidden segments ----------------------------------------------------------
+  //
+  // A segment near the viewport but invisible (opacity 0, visibility hidden,
+  // clipped...) is not sent: hidden text is the usual carrier for prompt
+  // injection. Pages also reveal content later (scroll-reveal animations once
+  // the block is well inside the viewport, dropdowns, accordions), so hidden
+  // segments are re-checked for as long as they are actually in the viewport,
+  // which keeps the cost proportional to what is on screen.
+
+  /** Hidden segments by observed element. */
+  const hiddenByTarget = new Map<Element, Set<SegState>>();
+  /** Hidden segments whose element is inside the actual viewport. */
+  const hiddenInView = new Set<SegState>();
+  let hiddenTimer: number | undefined;
+
+  const viewportIo = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      for (const seg of hiddenByTarget.get(entry.target) ?? []) {
+        if (entry.isIntersecting) hiddenInView.add(seg);
+        else hiddenInView.delete(seg);
+      }
+    }
+    recheckHidden();
+  });
+
+  function watchHidden(seg: SegState): void {
+    const target = targetOf(seg);
+    const set = hiddenByTarget.get(target);
+    if (set) set.add(seg);
+    else {
+      hiddenByTarget.set(target, new Set([seg]));
+      viewportIo.observe(target);
+    }
+  }
+
+  function unwatchHidden(seg: SegState): void {
+    hiddenInView.delete(seg);
+    for (const [target, set] of hiddenByTarget) {
+      if (!set.delete(seg)) continue;
+      if (set.size === 0) {
+        hiddenByTarget.delete(target);
+        viewportIo.unobserve(target);
+      }
+      break;
+    }
+  }
+
+  /** Sends hidden segments that became visible; keeps a timer running while any remain on screen. */
+  function recheckHidden(): void {
+    if (!active) return;
+    const revealed = [...hiddenInView].filter((seg) => seg.status === "idle" && !isHiddenForReader(seg.candidate));
+    for (const seg of revealed) {
+      unwatchHidden(seg);
+      enqueue(seg);
+    }
+    if (hiddenInView.size > 0 && hiddenTimer === undefined)
+      hiddenTimer = window.setTimeout(() => {
+        hiddenTimer = undefined;
+        recheckHidden();
+      }, HIDDEN_RECHECK_MS);
+  }
+
+  function stopHiddenTimer(): void {
+    window.clearTimeout(hiddenTimer);
+    hiddenTimer = undefined;
   }
 
   // --- scanning ---------------------------------------------------------------
@@ -117,6 +205,12 @@ function main(): void {
     seg.status = "retired";
     seg.node?.remove();
     byId.delete(seg.id);
+    unobserve(seg);
+  }
+
+  /** Drops the segment's viewport registrations (both the normal and the hidden one). */
+  function unobserve(seg: SegState): void {
+    unwatchHidden(seg);
     for (const [target, list] of byObserved) {
       const i = list.indexOf(seg);
       if (i === -1) continue;
@@ -129,25 +223,40 @@ function main(): void {
     }
   }
 
-  /** Re-translations per container, for MAX_RETRANSLATIONS. */
+  /** Changed-after-translation counts per container, for MAX_RETRANSLATIONS. */
   let churn = new WeakMap<Element, number>();
 
   /**
    * Reconcile segments under `root` with the DOM: keep segments whose anchor
-   * and text are unchanged, retire every other segment under `root` (text
-   * changed in place, anchor replaced, run extended), and register new ones.
+   * and text are unchanged, carry a segment over to a rebuilt run with the
+   * same text (framework re-render), retire every other segment under `root`
+   * (text changed in place, run extended), and register new ones.
    */
   function scan(root: Element): void {
     const candidates = collectSegments(root, { targetLang });
     const kept = new Set<SegState>();
+    const unmatched = new Set<SegmentCandidate>();
     for (const c of candidates) {
       const existing = byAnchor.get(c.anchor);
       if (existing && existing.status !== "retired" && existing.candidate.text === c.text) kept.add(existing);
+      else unmatched.add(c);
     }
     for (const seg of [...byId.values()]) {
       if (kept.has(seg) || !root.contains(seg.candidate.container)) continue;
+      // Same text rebuilt with new nodes in the same container: keep the
+      // segment (and its translation) instead of translating it again.
+      const same = [...unmatched].find((c) => c.container === seg.candidate.container && c.text === seg.candidate.text);
+      if (same) {
+        unmatched.delete(same);
+        adopt(seg, same);
+        kept.add(seg);
+        continue;
+      }
+      // Only text that changed after being sent costs anything; idle segments
+      // (streamed text, off-screen updates) are free to change.
+      const sent = seg.status === "pending" || seg.status === "done" || seg.status === "error";
       retire(seg);
-      churn.set(seg.candidate.container, (churn.get(seg.candidate.container) ?? 0) + 1);
+      if (sent) churn.set(seg.candidate.container, (churn.get(seg.candidate.container) ?? 0) + 1);
     }
 
     for (const candidate of candidates) {
@@ -174,6 +283,16 @@ function main(): void {
       byId.set(seg.id, seg);
       observe(seg);
     }
+  }
+
+  /** Moves a segment onto a rebuilt run with identical text. */
+  function adopt(seg: SegState, candidate: SegmentCandidate): void {
+    const wasObserved = seg.status === "idle";
+    if (wasObserved) unobserve(seg);
+    seg.candidate = candidate;
+    byAnchor.set(candidate.anchor, seg);
+    if (wasObserved) observe(seg);
+    else if (seg.node && !seg.hidden) mountNode(seg);
   }
 
   let pendingRoots = new Set<Element>();
@@ -264,7 +383,9 @@ function main(): void {
         batchId: String(nextBatch++),
         segments: batch,
         targetLang,
-        page: { title: document.title, url: location.href },
+        // Long titles are cut: only the start is visible in a tab, so the rest
+        // is effectively hidden text, and it is resent with every batch.
+        page: { title: [...document.title].slice(0, MAX_TITLE_CHARS).join(""), url: location.href },
       };
       getPort().postMessage(req);
     }
@@ -408,6 +529,9 @@ function main(): void {
       io.unobserve(target);
       io.observe(target);
     }
+    // Volatile-text counts start over, so toggling recovers a blocked container.
+    churn = new WeakMap();
+    recheckHidden();
     // Retry failures (e.g. the user just fixed the API key).
     shownPageErrors.clear();
     hideToast();
@@ -425,6 +549,7 @@ function main(): void {
     active = false;
     document.documentElement.classList.add("llmt-hidden");
     mo.disconnect();
+    stopHiddenTimer();
     // Segments still waiting for the viewport stay registered; re-activation
     // rescans and IntersectionObserver keeps working on them.
   }
@@ -435,8 +560,12 @@ function main(): void {
     churn = new WeakMap();
     for (const seg of byId.values()) seg.node?.remove();
     for (const target of byObserved.keys()) io.unobserve(target);
+    for (const target of hiddenByTarget.keys()) viewportIo.unobserve(target);
     byId.clear();
     byObserved.clear();
+    hiddenByTarget.clear();
+    hiddenInView.clear();
+    stopHiddenTimer();
     byAnchor = new WeakMap();
     queue.length = 0;
     awaitingModel.clear();
@@ -446,30 +575,42 @@ function main(): void {
     scan(document.body);
   }
 
+  // Bilingual subtitles, independent of page translation (on YouTube one may
+  // want only the comments translated, or only the video).
+  const subtitles = isYouTubeUrl(location.href) ? createSubtitleController() : null;
+
   // Whoever injected us sends the first toggle right after injection.
   chrome.runtime.onMessage.addListener((msg: ContentMessage, _sender, sendResponse) => {
     switch (msg?.type) {
       case "llmt-toggle":
-        if (active) deactivate();
+        if (msg.feature === "subtitles") {
+          if (!subtitles) break;
+          if (subtitles.isActive()) subtitles.disable();
+          else subtitles.enable(msg.targetLang);
+        } else if (active) deactivate();
         else activate(msg.targetLang);
         break;
       case "llmt-set-lang":
         // While off, the change is applied by the next activation (which compares
         // against translatedLang and re-translates).
         if (active && msg.targetLang !== translatedLang) retranslateAll(msg.targetLang);
+        subtitles?.setLanguage(msg.targetLang);
         break;
       case "llmt-status":
         break;
       default:
         return false;
     }
-    sendResponse({ active } satisfies TabState);
+    sendResponse({ active, subtitles: subtitles ? subtitles.isActive() : null } satisfies TabState);
     return false;
   });
 }
 
 function isOurs(el: Element): boolean {
-  return el.tagName.toUpperCase() === TRANSLATION_TAG || el.closest(TRANSLATION_TAG.toLowerCase()) !== null;
+  return (
+    el.tagName.toUpperCase() === TRANSLATION_TAG ||
+    el.closest(`${TRANSLATION_TAG.toLowerCase()}, .${OVERLAY_CLASS}`) !== null
+  );
 }
 
 const INLINE_DISPLAY = /^inline/;

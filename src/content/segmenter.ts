@@ -7,6 +7,8 @@
 // of the run — which stays stable across rescans because our own inserted
 // nodes are ignored when runs are computed.
 
+import { normalizeText } from "../shared/text";
+
 export const TRANSLATION_TAG = "LLMT-TRANSLATION";
 
 /** Excluded entirely: neither a segment nor part of a parent's text. */
@@ -40,9 +42,17 @@ export interface SegmentCandidate {
 }
 
 /** Elements whose subtree is never translated (and never part of a parent's text). */
+/**
+ * Video players: their caption windows change every few seconds, so each line
+ * would be sent as a new segment (subtitles have their own feature). Covers
+ * YouTube's player, which also holds our subtitle overlay.
+ */
+const PLAYER_CLASS = "html5-video-player";
+
 export function isSkipped(el: Element): boolean {
   return (
     EXCLUDED_TAGS.has(el.tagName.toUpperCase()) ||
+    el.classList.contains(PLAYER_CLASS) ||
     el.getAttribute("translate") === "no" ||
     el.classList.contains("notranslate") ||
     el.getAttribute("aria-hidden") === "true" ||
@@ -65,15 +75,146 @@ export function isExcludedByAncestor(el: Element): boolean {
   return false;
 }
 
+/** The computed-style properties the visibility checks read. */
+export type StyleLike = Pick<
+  CSSStyleDeclaration,
+  "display" | "visibility" | "opacity" | "fontSize" | "color" | "clip" | "clipPath" | "overflow" | "overflowX" | "overflowY"
+> & {
+  backgroundClip?: string;
+  webkitBackgroundClip?: string;
+  backgroundImage?: string;
+  webkitTextFillColor?: string;
+  webkitTextStrokeWidth?: string;
+};
+
+const ZERO_CLIP = /^rect\(\s*0(px)?\s*,?\s*0(px)?\s*,?\s*0(px)?\s*,?\s*0(px)?\s*\)$/;
+const ZERO_CLIP_PATH = /^(inset\(\s*(50|100)%\s*\)|circle\(\s*0(px|%)?\s*.*\))$/;
+const CLIPPING_OVERFLOW = /^(hidden|clip)$/;
+
+/** Alpha of a computed colour; "transparent" and rgba(…, 0) are 0, unparsable colours count as opaque. */
+export function colorAlpha(color: string): number {
+  const c = color.trim();
+  if (c === "transparent") return 0;
+  const m = /^rgba?\(([^)]*)\)$/.exec(c);
+  if (!m) return 1;
+  const parts = m[1]!.split(/[\s,/]+/).filter(Boolean);
+  if (parts.length < 4) return 1;
+  const a = parts[3]!;
+  return a.endsWith("%") ? Number.parseFloat(a) / 100 : Number.parseFloat(a);
+}
+
+/** The colour glyphs are filled with: -webkit-text-fill-color wins over color. */
+const fillAlpha = (s: StyleLike) => colorAlpha(s.webkitTextFillColor || s.color);
+
+/**
+ * Hides the element's whole box, whatever its children do: display none,
+ * near-zero opacity, zero clipping, or a box clipped to at most 1px in either
+ * direction (sr-only, height:0 + overflow:hidden). `rect` is only read when the
+ * overflow is clipping, since it forces layout.
+ */
+export function boxHidden(s: StyleLike, rect: () => { width: number; height: number }, withVisibility = true): boolean {
+  if (s.display === "none") return true;
+  if (withVisibility && (s.visibility === "hidden" || s.visibility === "collapse")) return true;
+  if (s.opacity !== "" && Number.parseFloat(s.opacity) < 0.05) return true;
+  if (ZERO_CLIP.test(s.clip.trim()) || ZERO_CLIP_PATH.test(s.clipPath.trim())) return true;
+  // overflow does not apply to inline boxes, and display:contents has no box.
+  if (s.display === "inline" || s.display === "contents") return false;
+  if (![s.overflow, s.overflowX, s.overflowY].some((o) => CLIPPING_OVERFLOW.test(o ?? ""))) return false;
+  // Border box, so the aspect-ratio trick (height:0 + padding-bottom) still counts as visible.
+  const r = rect();
+  return r.width <= 1 || r.height <= 1;
+}
+
+/**
+ * Glyphs painted by something other than the fill colour: gradient text
+ * (background-clip:text with a background image, on the element or an
+ * ancestor) or outlined text (-webkit-text-stroke).
+ */
+function textPaintedOtherwise(el: Element, s: StyleLike): boolean {
+  if (Number.parseFloat(s.webkitTextStrokeWidth ?? "") > 0) return true;
+  for (let cur: Element | null = el; cur && cur !== document.documentElement; cur = cur.parentElement) {
+    const cs: StyleLike = cur === el ? s : getComputedStyle(cur);
+    const clip = cs.backgroundClip === "text" || cs.webkitBackgroundClip === "text";
+    if (clip && cs.backgroundImage && cs.backgroundImage !== "none") return true;
+  }
+  return false;
+}
+
+/** The element's own text cannot be read: sub-2px font, or transparent glyphs nothing else paints. */
+export function textInvisible(el: Element, s: StyleLike = getComputedStyle(el)): boolean {
+  if (s.fontSize !== "" && Number.parseFloat(s.fontSize) < 2) return true;
+  return fillAlpha(s) < 0.1 && !textPaintedOtherwise(el, s);
+}
+
+const rectOf = (el: Element) => () => el.getBoundingClientRect();
+
+/**
+ * The element hides itself, as opposed to inheriting its parent's state:
+ * visibility, font size and colour are inherited, so they only count when they
+ * differ from the parent's (otherwise every <a> in a paragraph that is still
+ * fading in would be dropped). Used to drop hidden pieces from a visible run.
+ */
+export function isSelfHidden(el: Element): boolean {
+  const s = getComputedStyle(el);
+  if (boxHidden(s, rectOf(el), false)) return true;
+  const parent = el.parentElement;
+  const ps = parent ? getComputedStyle(parent) : undefined;
+  const invisible = (v: string | undefined) => v === "hidden" || v === "collapse";
+  if (invisible(s.visibility) && !invisible(ps?.visibility)) return true;
+  if (s.fontSize !== "" && Number.parseFloat(s.fontSize) < 2 && !(ps && Number.parseFloat(ps.fontSize) < 2)) return true;
+  if (fillAlpha(s) < 0.1 && !(ps && fillAlpha(ps) < 0.1) && !textPaintedOtherwise(el, s)) return true;
+  return false;
+}
+
+/**
+ * Whether a segment is hidden from the reader at the moment it would be sent.
+ * The container's box and its ancestors' boxes must be visible, and at least
+ * one element carrying the run's text must have readable glyphs. Colour and
+ * font size are judged on those text-bearing elements, not on the container
+ * (a font-size:0 wrapper around sized links, a gradient wrapper around <p>).
+ */
+export function isHiddenForReader(seg: Pick<SegmentCandidate, "container" | "nodes">): boolean {
+  const { container } = seg;
+  const cs = getComputedStyle(container);
+  if (boxHidden(cs, rectOf(container))) return true;
+  for (let cur = container.parentElement; cur && cur !== document.body; cur = cur.parentElement) {
+    // Visibility is inherited and can be overridden below, so the container's
+    // computed visibility already answers it.
+    if (boxHidden(getComputedStyle(cur), rectOf(cur), false)) return true;
+  }
+  let readable = false;
+  for (const n of seg.nodes) {
+    if (n.nodeType === Node.TEXT_NODE) {
+      if ((n.textContent ?? "").trim() !== "" && !textInvisible(container, cs)) readable = true;
+    } else if (n.nodeType === Node.ELEMENT_NODE) {
+      const el = n as Element;
+      if ((el.textContent ?? "").trim() === "") continue;
+      const s = getComputedStyle(el);
+      if (!boxHidden(s, rectOf(el)) && !textInvisible(el, s)) readable = true;
+    }
+    if (readable) return false;
+  }
+  return true;
+}
+
 export interface CollectOptions {
   targetLang: string;
   /** Injected for tests; defaults to getComputedStyle. */
   displayOf?: (el: Element) => string;
+  /** Injected for tests; defaults to isSelfHidden. */
+  hiddenOf?: (el: Element) => boolean;
 }
 
 export function collectSegments(root: Element, opts: CollectOptions): SegmentCandidate[] {
   const displayOf = opts.displayOf ?? ((el: Element) => getComputedStyle(el).display);
+  const hiddenOf = opts.hiddenOf ?? isSelfHidden;
   const out: SegmentCandidate[] = [];
+
+  // Text an element hides inside an otherwise visible run (an opacity:0 or
+  // display:none span in a paragraph, any element type) is dropped from the
+  // run, so it is never sent. Hidden *blocks* — including inline tags styled
+  // as boxes, such as card links — are left to the content script's send-time
+  // check, because pages often fade blocks in or reveal collapsed sections later.
 
   // An inline-tagged element counts as inline unless CSS makes it a box
   // (e.g. nav links styled display:block) or it wraps block content (card links).
@@ -96,7 +237,7 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
     if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
     const el = node as Element;
-    if (isSkipped(el)) return "";
+    if (isSkipped(el) || hiddenOf(el)) return "";
     if (el.tagName.toUpperCase() === "BR") return " ";
     let s = "";
     for (const child of el.childNodes) s += textOf(child);
@@ -112,8 +253,11 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
       } else if (child.nodeType === Node.ELEMENT_NODE) {
         const c = child as Element;
         if (isSkipped(c)) continue;
+        // display:none is not inherited, so it is always the element's own choice;
+        // an inline-tagged one is dropped without splitting the sentence around it.
+        if (INLINE_TAGS.has(c.tagName.toUpperCase()) && displayOf(c) === "none") continue;
         if (isInline(c)) {
-          run.push(c);
+          if (!hiddenOf(c)) run.push(c);
         } else {
           flush(el, run);
           run = [];
@@ -128,9 +272,8 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
   return out;
 }
 
-export function normalizeText(s: string): string {
-  return s.replace(/\s+/g, " ").trim();
-}
+// Invisible characters are stripped here so hidden instructions never reach the model.
+export { normalizeText };
 
 const LETTER = /\p{L}/u;
 

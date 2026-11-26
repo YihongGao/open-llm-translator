@@ -7,6 +7,7 @@
 
 import type { PageContext } from "../shared/messages";
 import { languageName } from "../shared/settings";
+import { normalizeText, stripInvisible } from "../shared/text";
 
 // Caching note: the system prompt is sent with cache_control and must stay
 // byte-identical across requests for a given target language. Claude Sonnet
@@ -61,9 +62,15 @@ export function buildSystemPrompt(targetLang: string): string {
   ].join("\n");
 }
 
+/** Longest page title included in the prompt (code points). */
+export const MAX_TITLE_CHARS = 200;
+
 export function buildUserMessage(texts: readonly string[], page: PageContext): string {
   const lines = texts.map((t, i) => `[${i + 1}] ${toSingleLine(t)}`);
-  return [`Page title: ${toSingleLine(page.title)}`, `Page URL: ${pageUrlForPrompt(page.url)}`, "", "<segments>", ...lines, "</segments>"].join(
+  // The content script already caps the title; repeated here because the
+  // request comes from a page-controlled context.
+  const title = [...toSingleLine(page.title)].slice(0, MAX_TITLE_CHARS).join("");
+  return [`Page title: ${title}`, `Page URL: ${pageUrlForPrompt(page.url)}`, "", "<segments>", ...lines, "</segments>"].join(
     "\n",
   );
 }
@@ -81,8 +88,9 @@ function pageUrlForPrompt(url: string): string {
   }
 }
 
+/** Single line, invisible characters removed (page titles can carry hidden instructions too). */
 function toSingleLine(s: string): string {
-  return s.replace(/\s+/g, " ").trim();
+  return normalizeText(s);
 }
 
 export interface ParsedSegment {
@@ -157,7 +165,8 @@ export class SegmentLineParser {
 
   private flushCurrent(out: ParsedSegment[]): void {
     if (!this.current) return;
-    const text = this.current.parts.join(" ").trim();
+    // Model output is inserted into the page; drop any invisible characters it echoed.
+    const text = stripInvisible(this.current.parts.join(" ")).trim();
     if (text) {
       this.seen.add(this.current.index);
       out.push({ index: this.current.index, text });

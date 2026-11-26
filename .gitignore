@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-e2e/
+release/
 .DS_Store
 # local secrets (E2E API key)
 .env

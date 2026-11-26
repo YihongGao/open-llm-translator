@@ -3,9 +3,15 @@
 import { vi } from "vitest";
 import type { TranslateEvent, TranslateRequest } from "../../src/shared/messages";
 
+type IoCallback = (entries: Array<{ target: Element; isIntersecting: boolean }>) => void;
+
 export const h = {
-  ioCallback: null as unknown as (entries: Array<{ target: Element; isIntersecting: boolean }>) => void,
+  /** The scheduling observer (viewport plus margin). */
+  ioCallback: null as unknown as IoCallback,
   observed: [] as Element[],
+  /** The exact-viewport observer that tracks hidden segments. */
+  viewportCallback: null as unknown as IoCallback,
+  viewportObserved: [] as Element[],
   posted: [] as TranslateRequest[],
   toPage: null as unknown as (ev: TranslateEvent) => void,
   onContentMessage: null as unknown as (msg: unknown, sender: unknown, reply: (r: unknown) => void) => void,
@@ -20,11 +26,17 @@ export function tell(msg: unknown): unknown {
   return reply;
 }
 
-/** Reports everything observed so far as visible, then waits past the batch flush delay. */
+/**
+ * Reports everything observed so far as being in the viewport (to both
+ * observers), then waits past the batch flush delay.
+ */
 export async function scrollAllIntoView(): Promise<void> {
   const targets = h.observed;
   h.observed = [];
   h.ioCallback(targets.map((target) => ({ target, isIntersecting: true })));
+  const hidden = h.viewportObserved;
+  h.viewportObserved = [];
+  if (hidden.length) h.viewportCallback(hidden.map((target) => ({ target, isIntersecting: true })));
   await sleep(200);
 }
 
@@ -32,11 +44,15 @@ export async function scrollAllIntoView(): Promise<void> {
 export const afterRescan = () => sleep(500);
 
 class FakeIO {
-  constructor(cb: typeof h.ioCallback) {
-    h.ioCallback = cb;
+  private readonly viewport: boolean;
+  constructor(cb: IoCallback, opts?: { rootMargin?: string }) {
+    // The content script creates the margin observer first, then the exact-viewport one.
+    this.viewport = !opts?.rootMargin;
+    if (this.viewport) h.viewportCallback = cb;
+    else h.ioCallback = cb;
   }
   observe(t: Element) {
-    h.observed.push(t);
+    (this.viewport ? h.viewportObserved : h.observed).push(t);
   }
   unobserve() {}
   disconnect() {}
@@ -55,6 +71,7 @@ export async function loadContent(html: string, lang = "zh-TW"): Promise<void> {
   if ((h.onContentMessage as unknown) && (tell({ type: "llmt-status" }) as { active?: boolean })?.active)
     tell({ type: "llmt-toggle", targetLang: lang });
   h.observed = [];
+  h.viewportObserved = [];
   h.posted.length = 0;
   (globalThis as any).IntersectionObserver = FakeIO;
   (globalThis as any).chrome = {
