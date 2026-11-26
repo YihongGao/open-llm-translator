@@ -2,7 +2,7 @@
 
 [English](api-key-security.md) | 繁體中文
 
-**簡單說：** 網頁、其他擴充功能、Chrome Sync 和開發者都拿不到您的 key；但您電腦上的惡意程式拿得到。請使用專為這個擴充功能建立、並設有用量上限的 key，這樣最壞的情況損失也有限。
+**簡單說：** 網頁、其他擴充功能和 Chrome Sync 都拿不到您的 key，而且沒有開發者伺服器，開發者不會收到您的 key；但您電腦上的惡意程式拿得到。請使用專為這個擴充功能建立、並設有用量上限的 key，這樣最壞的情況損失也有限。
 
 ## key 存在哪裡
 
@@ -21,10 +21,10 @@ key 只在擴充功能的背景 service worker 裡使用，透過 HTTPS 呼叫�
 | 您瀏覽的網頁 | 是 | 網頁讀不到擴充功能的儲存空間。擴充功能放進網頁裡的程式（content script）也被擋在外面：注入之前，擴充功能會先呼叫 `chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" })`，只允許擴充功能自己的頁面和 service worker 存取；這個呼叫失敗就不注入。key 也從不傳到網頁。 |
 | 其他擴充功能 | 是 | 每個擴充功能的 `chrome.storage` 各自獨立，彼此讀不到。 |
 | Google（透過 Chrome Sync） | 是 | key 只存在 `local`，不存在 `sync`。 |
-| 這個擴充功能的開發者 | 是 | 沒有開發者伺服器，瀏覽器直接連到服務商。原始碼公開，可以自行檢查。 |
+| 開發者的伺服器 | 是 | 根本沒有開發者伺服器，瀏覽器直接連到服務商。原始碼公開，可以自行檢查。 |
 | 顯示在網頁上的錯誤訊息 | 是 | 有些服務商會在錯誤訊息裡重複 key。錯誤訊息送到網頁之前，看起來像 key 的字串（`sk-…`、`AIza…`）會先被遮掉。 |
 | **您電腦上的惡意程式，或能登入您電腦帳號的人** | **否** | 能讀您檔案的程式就能讀 Chrome 設定檔資料夾，key 以明文存在那裡。 |
-| 這個擴充功能日後被植入惡意更新 | 部分 | 原始碼開源、每個 commit 都有簽章、release 附 [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)，Chrome Web Store 也會審查每次更新，但無法完全排除。 |
+| 被入侵的擴充功能更新（例如開發者的 Chrome Web Store 帳號被盜） | 部分 | 原始碼開源、每個 commit 都有簽章、release 附 [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)，Chrome Web Store 也會審查每次更新，但無法完全排除。 |
 
 最後兩項並非這個擴充功能獨有。所有要自備 API key 的工具（瀏覽器擴充功能、命令列工具、編輯器外掛）都會把 key 存在電腦某處，電腦上的惡意程式都找得到。
 
