@@ -62,7 +62,7 @@ YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標
 | 素材 | 規格 | 狀態 |
 |---|---|---|
 | Store icon | 128×128 | `public/icons/icon-128.png` |
-| Screenshot | 1280×800 或 640×400，1 到 5 張 | `docs/store-assets/screenshot-1-docs-popup.png`、`docs/store-assets/screenshot-2-article.png`；YouTube 字幕截圖待補 |
+| Screenshot | 1280×800 或 640×400，1 到 5 張 | `docs/store-assets/screenshot-1-docs-popup.png`、`docs/store-assets/screenshot-2-article.png`、`docs/store-assets/screenshot-3-youtube.png` |
 | Small promo tile | 440×280 | `docs/store-assets/promo-small-440x280.png` |
 
 ---
