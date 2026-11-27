@@ -18,6 +18,8 @@
 - **YouTube 雙語字幕**：原文和譯文字幕一起顯示在播放器內，全螢幕也看得到。字幕會先合併成完整句子再翻，自動產生的字幕也能翻得通順。
 - **目標語言**：繁體中文（台灣）、简体中文、English、日本語、한국어。
 
+介面提供 English、日本語、繁體中文，跟著瀏覽器的語言自動切換；其他語言一律顯示英文。
+
 | 工具列選單 | YouTube 雙語字幕 |
 |---|---|
 | ![工具列選單](docs/store-assets/screenshot-1-docs-popup.png) | ![YouTube 雙語字幕](docs/store-assets/screenshot-3-youtube.png) |
