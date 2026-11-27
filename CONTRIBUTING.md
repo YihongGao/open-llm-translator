@@ -56,7 +56,7 @@ The harness and feature recipes are documented in [.claude/skills/verify/SKILL.m
 
 ## Pull requests
 
-- `main` only accepts changes through pull requests.
+- Open pull requests against `develop`. `main` and `develop` only accept changes through pull requests.
 - **Commits must be signed** (GPG or SSH) and show as Verified on GitHub. To sign with your existing SSH key:
   ```bash
   git config --global gpg.format ssh

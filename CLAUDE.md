@@ -32,7 +32,7 @@ Tests touching the DOM need `// @vitest-environment happy-dom` as the first line
 
 ## Before declaring a change done
 
-- Any change under `src/`, `scripts/` or `tests/`: run `npm run typecheck` and `npm test`, and both must pass. Report failures with their output; do not call the work done. CI (`.github/workflows/ci.yml`) runs on every PR and push to `main`: the same checks plus `build` and `check:dist`, `npm test` on Windows, and every `.claude/skills/verify/scripts/journey-*.mjs` against the E2E build (mocked API, headless). Branch protection requires only its `ci-ok` job. CI picks up new journeys through that glob, so a journey must use the mock and exit non-zero on failure.
+- Any change under `src/`, `scripts/` or `tests/`: run `npm run typecheck` and `npm test`, and both must pass. Report failures with their output; do not call the work done. CI (`.github/workflows/ci.yml`) runs on every PR and on pushes to `main` and `develop`: the same checks plus `build` and `check:dist`, `npm test` on Windows, and every `.claude/skills/verify/scripts/journey-*.mjs` against the E2E build (mocked API, headless). The `protected branches` ruleset (`main` and `develop`) requires only its `ci-ok` job, plus signed commits and no force-push or deletion. CI picks up new journeys through that glob, so a journey must use the mock and exit non-zero on failure.
 
 ## CI and release
 
