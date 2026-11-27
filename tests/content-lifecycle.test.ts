@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 // Regression tests for the segment lifecycle findings of the 2026-11-26 review
 // (C1, C2, C3, C4, S2). Each scenario runs against a fresh content script.
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { afterRescan, answer, h, loadContent, scrollAllIntoView, sleep, tell } from "./helpers/content-harness";
 
 const texts = () => h.posted.flatMap((b) => b.segments.map((s) => s.text));
@@ -193,5 +193,34 @@ describe("S2-4: page title", () => {
     await scrollAllIntoView();
     expect([...h.posted[0]!.page.title].length).toBe(200);
     document.title = "";
+  });
+});
+
+describe("page already in the target language", () => {
+  beforeEach(() => document.querySelectorAll("llmt-toast").forEach((el) => el.remove()));
+  const toastText = () => document.querySelector("llmt-toast")?.shadowRoot?.textContent ?? "";
+
+  it("activating on a page that is already in the target language says so instead of doing nothing", async () => {
+    await loadContent(`<p>Hello world, this is the first paragraph.</p>`, "en");
+    await scrollAllIntoView();
+    expect(texts()).toEqual([]);
+    expect(toastText()).toContain("English");
+  });
+
+  it("does not claim that when there is text to translate", async () => {
+    await loadContent(`<p>Hello world, this is the first paragraph.</p>`, "zh-TW");
+    expect(document.querySelector("llmt-toast")).toBeNull();
+  });
+
+  it("does not claim that on a page with no text at all", async () => {
+    await loadContent(`<div></div>`, "en");
+    expect(document.querySelector("llmt-toast")).toBeNull();
+  });
+
+  it("does not toast on a later rescan", async () => {
+    await loadContent(`<div id="b"></div>`, "en");
+    document.getElementById("b")!.append(Object.assign(document.createElement("p"), { textContent: "Hello world, this is later text." }));
+    await afterRescan();
+    expect(document.querySelector("llmt-toast")).toBeNull();
   });
 });

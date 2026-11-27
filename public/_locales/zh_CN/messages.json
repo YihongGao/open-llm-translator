@@ -366,6 +366,18 @@
       }
     }
   },
+  "toastPageAlreadyTarget": {
+    "message": "此页面似乎已经是$language$",
+    "description": "language is the target language's own name, e.g. English or 日本語",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastPageAlreadyTargetHint": {
+    "message": "如需翻译，请在工具栏弹出窗口的“翻译为”中选择其他语言。"
+  },
   "toastRetryHint": {
     "message": "修复后，关闭再重新开启翻译即可重试失败的段落。"
   },

@@ -3,6 +3,7 @@
 // work happens in the background worker over a Port.
 
 import { t } from "../shared/i18n";
+import { TARGET_LANGUAGES } from "../shared/settings";
 import {
   PORT_NAME,
   type ContentMessage,
@@ -233,8 +234,9 @@ function main(): void {
    * same text (framework re-render), retire every other segment under `root`
    * (text changed in place, run extended), and register new ones.
    */
-  function scan(root: Element): void {
-    const candidates = collectSegments(root, { targetLang });
+  function scan(root: Element): { candidates: number; alreadyTarget: number } {
+    const stats = { alreadyTarget: 0 };
+    const candidates = collectSegments(root, { targetLang, stats });
     const kept = new Set<SegState>();
     const unmatched = new Set<SegmentCandidate>();
     for (const c of candidates) {
@@ -284,6 +286,7 @@ function main(): void {
       byId.set(seg.id, seg);
       observe(seg);
     }
+    return { candidates: candidates.length, alreadyTarget: stats.alreadyTarget };
   }
 
   /** Moves a segment onto a rebuilt run with identical text. */
@@ -542,8 +545,14 @@ function main(): void {
       seg.retries = 0;
       observe(seg);
     }
-    scan(document.body);
+    const { candidates, alreadyTarget } = scan(document.body);
     mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+    // Nothing to translate because the page is already in the target language:
+    // say so, or the toggle looks broken.
+    if (candidates === 0 && alreadyTarget > 0) {
+      const label = TARGET_LANGUAGES.find((l) => l.tag === targetLang)?.label ?? targetLang;
+      showToast({ message: t("toastPageAlreadyTarget", label), detail: t("toastPageAlreadyTargetHint"), autoHideMs: 8000 });
+    }
   }
 
   function deactivate(): void {

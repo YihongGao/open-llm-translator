@@ -366,6 +366,18 @@
       }
     }
   },
+  "toastPageAlreadyTarget": {
+    "message": "此頁面似乎已經是$language$",
+    "description": "language is the target language's own name, e.g. English or 日本語",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastPageAlreadyTargetHint": {
+    "message": "若要翻譯，請在工具列彈出視窗的「翻譯成」中選擇其他語言。"
+  },
   "toastRetryHint": {
     "message": "修正後，關閉再開啟翻譯即可重試失敗的段落。"
   },
