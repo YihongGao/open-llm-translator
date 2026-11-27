@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Open LLM Translator</title>
@@ -161,22 +161,22 @@
     <h1>Open LLM Translator</h1>
 
     <div class="warn" id="warn" role="alert">
-      <span id="warnText">尚未設定 API key。</span><button type="button" id="warnSettings">開啟設定</button>
+      <span id="warnText" data-i18n="popupWarnNoKey">No API key set.</span><button type="button" id="warnSettings" data-i18n="openSettings">Open settings</button>
     </div>
 
-    <label for="targetLang">翻譯成</label>
+    <label for="targetLang" data-i18n="popupTranslateTo">Translate to</label>
     <select id="targetLang"></select>
 
-    <label for="model">Model</label>
+    <label for="model" data-i18n="labelModel">Model</label>
     <select id="model"></select>
 
-    <button type="button" id="toggle">翻譯此頁</button>
-    <button type="button" id="subs">開啟雙語字幕</button>
+    <button type="button" id="toggle" data-i18n="popupTranslatePage">Translate this page</button>
+    <button type="button" id="subs" data-i18n="popupSubsOn">Turn on bilingual subtitles</button>
     <p id="note" role="status"></p>
 
     <footer>
-      <button type="button" class="link" id="settings">⚙ 設定</button>
-      <button type="button" class="link" id="shortcuts">快捷鍵</button>
+      <button type="button" class="link" id="settings" data-i18n="popupSettings">⚙ Settings</button>
+      <button type="button" class="link" id="shortcuts" data-i18n="popupShortcuts">Shortcuts</button>
       <span id="version"></span>
     </footer>
 

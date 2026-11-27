@@ -3,6 +3,7 @@
 // covering the toggle -> viewport -> batch -> render path.
 import { beforeAll, describe, expect, it } from "vitest";
 import type { TranslateEvent, TranslateRequest } from "../src/shared/messages";
+import { i18nStub } from "./helpers/i18n";
 
 let ioCallback: (entries: Array<{ target: Element; isIntersecting: boolean }>) => void;
 let observed: Element[] = [];
@@ -47,6 +48,7 @@ const toast = () => document.querySelector("llmt-toast")?.shadowRoot ?? null;
 beforeAll(async () => {
   (globalThis as any).IntersectionObserver = FakeIO;
   (globalThis as any).chrome = {
+    i18n: i18nStub(),
     runtime: {
       connect: () => ({
         postMessage: (m: TranslateRequest) => posted.push(m),

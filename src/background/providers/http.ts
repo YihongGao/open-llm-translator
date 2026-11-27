@@ -1,6 +1,7 @@
 // Shared plumbing for the providers called over plain fetch (OpenAI, Gemini):
 // HTTP errors with a user-facing description, and a server-sent events reader.
 
+import { t } from "../../shared/i18n";
 import type { ErrorInfo } from "./types";
 
 /** Non-2xx response, or an error event inside a 200 stream (status 0). */
@@ -33,15 +34,15 @@ export async function ensureOk(provider: string, res: Response): Promise<void> {
 export function describeHttpError(provider: string, err: unknown): ErrorInfo {
   if (err instanceof ProviderHttpError) {
     const s = err.status;
-    if (s === 401) return { message: `${provider} API key 無效（401），請到設定頁確認`, settings: true };
-    if (s === 403) return { message: `${provider} API key 沒有此 model 的權限（403）：${err.message}`, settings: true };
-    if (s === 404) return { message: `${provider} 找不到 model（404），請到設定頁確認 model`, settings: true };
-    if (s === 429) return { message: `${provider} 超過速率限制或額度（429），稍後再試`, settings: false };
-    if (s === 400) return { message: `${provider} 請求被拒（400）：${err.message}`, settings: false };
-    if (s === 0) return { message: `${provider} 串流中斷：${err.message}`, settings: false };
-    return { message: `${provider} API 錯誤 ${s}：${err.message}`, settings: false };
+    if (s === 401) return { message: t("errKeyInvalid", provider), settings: true };
+    if (s === 403) return { message: t("errForbidden", provider, err.message), settings: true };
+    if (s === 404) return { message: t("errModelNotFound", provider), settings: true };
+    if (s === 429) return { message: t("errRateLimit", provider), settings: false };
+    if (s === 400) return { message: t("errBadRequest", provider, err.message), settings: false };
+    if (s === 0) return { message: t("errStreamInterrupted", provider, err.message), settings: false };
+    return { message: t("errApi", provider, String(s), err.message), settings: false };
   }
-  if (err instanceof TypeError) return { message: `無法連線到 ${provider} API`, settings: false };
+  if (err instanceof TypeError) return { message: t("errConnect", provider), settings: false };
   return { message: err instanceof Error ? err.message : String(err), settings: false };
 }
 

@@ -1,3 +1,4 @@
+import { localizePage, t } from "../shared/i18n";
 import type { TestConnectionResult } from "../shared/messages";
 import {
   PROVIDERS,
@@ -6,6 +7,7 @@ import {
   fillModelSelect,
   keyFieldHint,
   loadSettings,
+  providerLabel,
   providerOf,
   saveSettings,
   typedKeyPatch,
@@ -14,6 +16,8 @@ import {
 } from "../shared/settings";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+localizePage();
 
 const form = $<HTMLFormElement>("form");
 const model = $<HTMLSelectElement>("model");
@@ -27,12 +31,12 @@ const testBtn = $<HTMLButtonElement>("test");
  */
 const keyInputs = PROVIDERS.map((p) => {
   const input = $<HTMLInputElement>(p.keySetting);
-  return {
-    provider: p,
-    input,
-    example: input.placeholder,
-    clearBtn: document.querySelector<HTMLButtonElement>(`.clear-key[data-for="${p.keySetting}"]`)!,
-  };
+  const label = document.querySelector<HTMLLabelElement>(`label[for="${input.id}"]`)!;
+  const clearBtn = document.querySelector<HTMLButtonElement>(`.clear-key[data-for="${p.keySetting}"]`)!;
+  // The label reads "Anthropic API key", the same in every UI language.
+  clearBtn.setAttribute("aria-label", t("optionsClearAria", label.textContent ?? ""));
+  label.dataset.activeLabel = t("optionsActiveKeyLabel");
+  return { provider: p, input, example: input.placeholder, clearBtn };
 });
 
 fillModelSelect(model);
@@ -76,31 +80,31 @@ model.addEventListener("change", markActiveKey);
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-  void save().then(() => show("已儲存（已開啟的頁面需重新切換翻譯才會套用新語言）", "ok"));
+  void save().then(() => show(t("optionsSaved"), "ok"));
 });
 
 for (const { provider, input, example, clearBtn } of keyInputs) {
   clearBtn.addEventListener("click", () => {
-    if (!confirm(`確定要刪除 ${provider.label} 的 API key？刪除後要重新貼上才能使用。`)) return;
+    if (!confirm(t("optionsConfirmDeleteKey", providerLabel(provider)))) return;
     void clearApiKey(provider).then(() => {
       input.value = "";
       input.placeholder = example;
       clearBtn.disabled = true;
-      show(`已刪除 ${provider.label} 的 API key`, "ok");
+      show(t("optionsKeyDeleted", providerLabel(provider)), "ok");
     });
   });
 }
 
 testBtn.addEventListener("click", async () => {
   testBtn.disabled = true;
-  show("測試中…");
+  show(t("optionsTesting"));
   try {
     await save();
     const res = (await chrome.runtime.sendMessage({ type: "llmt-test-connection" })) as TestConnectionResult;
-    if (res.ok) show(`成功：${res.sample}`, "ok");
-    else show(`失敗：${res.message}`, "err");
+    if (res.ok) show(t("optionsTestOk", res.sample), "ok");
+    else show(t("optionsTestFail", res.message), "err");
   } catch (err) {
-    show(`失敗：${err instanceof Error ? err.message : String(err)}`, "err");
+    show(t("optionsTestFail", err instanceof Error ? err.message : String(err)), "err");
   } finally {
     testBtn.disabled = false;
   }

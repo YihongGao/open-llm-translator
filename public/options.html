@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Open LLM Translator 設定</title>
+    <title data-i18n="optionsTitle">Open LLM Translator Settings</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -78,61 +78,60 @@
         color: #c62828;
       }
       label.active::after {
-        content: "（目前使用）";
+        content: attr(data-active-label);
         font-weight: 400;
         opacity: 0.7;
       }
     </style>
   </head>
   <body>
-    <h1>Open LLM Translator 設定</h1>
+    <h1 data-i18n="optionsTitle">Open LLM Translator Settings</h1>
 
     <form id="form">
-      <label for="model">Model</label>
+      <label for="model" data-i18n="labelModel">Model</label>
       <select id="model"></select>
-      <p class="hint">只需要填所選 model 那一家的 API key。</p>
+      <p class="hint" data-i18n="optionsModelHint">You only need the API key for the provider of the selected model.</p>
 
       <label for="anthropicApiKey">Anthropic API key</label>
       <div class="key-row">
         <input id="anthropicApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." />
-        <button type="button" class="clear-key" data-for="anthropicApiKey" aria-label="清除 Anthropic API key" disabled>清除</button>
+        <button type="button" class="clear-key" data-for="anthropicApiKey" disabled data-i18n="optionsClear">Clear</button>
       </div>
 
       <label for="openaiApiKey">OpenAI API key</label>
       <div class="key-row">
         <input id="openaiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-..." />
-        <button type="button" class="clear-key" data-for="openaiApiKey" aria-label="清除 OpenAI API key" disabled>清除</button>
+        <button type="button" class="clear-key" data-for="openaiApiKey" disabled data-i18n="optionsClear">Clear</button>
       </div>
 
       <label for="geminiApiKey">Gemini API key</label>
       <div class="key-row">
         <input id="geminiApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." />
-        <button type="button" class="clear-key" data-for="geminiApiKey" aria-label="清除 Gemini API key" disabled>清除</button>
+        <button type="button" class="clear-key" data-for="geminiApiKey" disabled data-i18n="optionsClear">Clear</button>
       </div>
-      <p class="hint">API key 只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。儲存後不會再顯示完整的 key，也無法從這裡複製；要更換請直接貼上新的 key，欄位留空則保留原本的 key。</p>
+      <p class="hint" data-i18n="optionsKeyStorageHint">API keys are stored only in chrome.storage.local on this computer and are not synced through Chrome Sync. A saved key is never shown in full again and can't be copied from here. To replace a key, paste a new one; leave a field empty to keep the existing key.</p>
       <p class="hint">
-        建議為這個擴充功能另建專用的 API key，並在服務商那邊設定用量上限：
-        <a href="https://console.anthropic.com/settings/limits" target="_blank" rel="noopener noreferrer">Anthropic</a>、
-        <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener noreferrer">OpenAI</a>、
-        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google</a>。
+        <span data-i18n="optionsLimitsLead">We recommend creating a dedicated API key for this extension and setting a spending limit with the provider:</span>
+        <a href="https://console.anthropic.com/settings/limits" target="_blank" rel="noopener noreferrer">Anthropic</a><span data-i18n="optionsListSeparator">, </span>
+        <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener noreferrer">OpenAI</a><span data-i18n="optionsListSeparator">, </span>
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google</a><span data-i18n="optionsLimitsEnd">.</span>
       </p>
-      <p class="hint" id="dataNotice">
-        翻譯時，畫面上要翻譯的段落文字、頁面標題和網址（只含網域與路徑，不含查詢字串）會用您的 API key
-        送到所選 model 的服務商（Anthropic、OpenAI 或 Google），依該服務商的 API 條款處理。譯文會快取在這台電腦，不會送到其他地方。
+      <p class="hint" id="dataNotice" data-i18n="optionsDataNotice">
+        When translating, the text of the segments to translate, the page title and the URL (domain and path only, no query string) are sent with your API key to the provider of the selected model (Anthropic, OpenAI or Google) and handled under that provider's API terms. Translations are cached on this computer and are not sent anywhere else.
       </p>
 
-      <label for="targetLang">目標語言</label>
+      <label for="targetLang" data-i18n="optionsTargetLang">Target language</label>
       <select id="targetLang"></select>
 
       <div class="actions">
-        <button type="submit">儲存</button>
-        <button type="button" id="test">測試連線</button>
+        <button type="submit" data-i18n="optionsSave">Save</button>
+        <button type="button" id="test" data-i18n="optionsTest">Test connection</button>
         <span id="status" role="status"></span>
       </div>
     </form>
 
-    <p class="hint" style="margin-top: 32px">
-      使用方式：點擴充功能圖示開啟選單，或直接按快捷鍵（預設 Alt/Option+A）切換翻譯。快捷鍵可在 chrome://extensions/shortcuts 修改。
+    <p class="hint" style="margin-top: 32px" data-i18n="optionsUsage">
+      How to use: click the extension icon to open the menu, or press the shortcut (default Alt/Option+A) to toggle translation. You can change shortcuts at chrome://extensions/shortcuts.
     </p>
 
     <script src="options.js"></script>

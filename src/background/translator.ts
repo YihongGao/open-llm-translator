@@ -1,6 +1,7 @@
 // Per-batch pipeline: dedupe -> cache lookup -> provider stream -> cache write.
 // Kept free of chrome.* APIs so it can be unit-tested with fakes.
 
+import { t, type MessageKey } from "../shared/i18n";
 import type { TranslateEvent, TranslateRequest } from "../shared/messages";
 import type { TokenUsage, TranslationProvider } from "./providers/types";
 import { redactSecrets } from "./redact";
@@ -45,10 +46,10 @@ export interface BatchDeps {
 }
 
 const MISSING_REASON = {
-  complete: "模型漏翻了這一段",
-  max_tokens: "輸出超過長度上限，這一段被截斷",
-  refusal: "模型拒絕翻譯這一段內容",
-} as const;
+  complete: "errMissedComplete",
+  max_tokens: "errMissedMaxTokens",
+  refusal: "errMissedRefusal",
+} as const satisfies Record<string, MessageKey>;
 
 /**
  * Guarantees every segment id in `req` receives exactly one `segment` or
@@ -164,7 +165,7 @@ export async function runBatch(
     writeCache(stats.servedModel ?? deps.model);
     emitError(
       missTexts.filter((_, i) => !results.has(i)),
-      MISSING_REASON[reason],
+      t(MISSING_REASON[reason]),
       "segment",
     );
   }

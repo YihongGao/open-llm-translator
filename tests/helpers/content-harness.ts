@@ -2,6 +2,7 @@
 // IntersectionObserver / chrome.* (adapted from the review's reproduction harness).
 import { vi } from "vitest";
 import type { TranslateEvent, TranslateRequest } from "../../src/shared/messages";
+import { i18nStub } from "./i18n";
 
 type IoCallback = (entries: Array<{ target: Element; isIntersecting: boolean }>) => void;
 
@@ -75,6 +76,7 @@ export async function loadContent(html: string, lang = "zh-TW"): Promise<void> {
   h.posted.length = 0;
   (globalThis as any).IntersectionObserver = FakeIO;
   (globalThis as any).chrome = {
+    i18n: i18nStub(),
     runtime: {
       connect: () => ({
         postMessage: (m: TranslateRequest) => h.posted.push(m),

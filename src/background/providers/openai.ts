@@ -1,6 +1,7 @@
 // OpenAI Responses API over fetch + SSE.
 // https://developers.openai.com/api/reference/resources/responses/methods/create
 
+import { t } from "../../shared/i18n";
 import { SegmentLineParser, buildSystemPrompt, buildUserMessage } from "../protocol";
 import { ProviderHttpError, ensureOk, readSse } from "./http";
 import type { ProviderEvent, ProviderRequest, TranslationProvider } from "./types";
@@ -62,7 +63,7 @@ export class OpenAIProvider implements TranslationProvider {
       signal,
     });
     await ensureOk("OpenAI", res);
-    if (!res.body) throw new ProviderHttpError("OpenAI", 0, "回應沒有內容");
+    if (!res.body) throw new ProviderHttpError("OpenAI", 0, t("errEmptyResponse"));
 
     const parser = new SegmentLineParser(req.texts.length);
     let final: ResponseObject | undefined;
@@ -93,7 +94,7 @@ export class OpenAIProvider implements TranslationProvider {
           throw new ProviderHttpError("OpenAI", 0, ev.message ?? "stream error");
       }
     }
-    if (!final) throw new ProviderHttpError("OpenAI", 0, "串流在完成前結束");
+    if (!final) throw new ProviderHttpError("OpenAI", 0, t("errStreamEndedEarly"));
 
     const incompleteReason = final.status === "incomplete" ? final.incomplete_details?.reason : undefined;
     const reason = refused || incompleteReason === "content_filter" ? "refusal" : incompleteReason ? "max_tokens" : "complete";
