@@ -6,7 +6,7 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 
 - [ ] `npm run package` 通過，上傳 `release/open-llm-translator-<version>.zip`
 - [ ] `public/manifest.json` 的 `version` 比上一次上傳的高
-- [ ] `docs/privacy-policy.md` 已合併進 `main`（隱私權政策網址指向 `main` 上的檔案），`<contact email>` 已替換
+- [ ] `docs/privacy-policy.md` 已合併進 `main`，Pages 已部署，隱私權政策網址（見下）能在瀏覽器開啟，`<contact email>` 已替換
 - [ ] 測試用 API key 已建立，放在有花費上限的 workspace（見「Test instructions」）
 
 ---
@@ -118,10 +118,10 @@ Translates the text of the current web page with a large language model chosen b
 **Privacy policy URL**：
 
 ```
-https://github.com/YihongGao/open-llm-translator/blob/main/docs/privacy-policy.md
+https://yihonggao.github.io/open-llm-translator/privacy/
 ```
 
-這個網址要等 `docs/privacy-policy.md` 合併進 `main` 才有效，且檔案不能改名或搬移。之後改成獨立網頁時，記得同步更新 dashboard 的這個欄位。
+這個頁面由 `scripts/build-site.mjs` 從 `docs/privacy-policy.md` 產生，`pages.yml` 在政策檔合併進 `main` 後部署；要改政策只改 Markdown。不用 github.com 的 blob 網址，因為 github.com 對非瀏覽器的請求會回 503/429，商店的爬蟲打不開。
 
 ---
 
