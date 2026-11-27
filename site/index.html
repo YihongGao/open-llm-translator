@@ -20,9 +20,10 @@
   <div class="wrap top-in">
     <a class="brand" href="#"><img src="icons/icon-32.png" alt="" width="24" height="24"><span>Open LLM Translator</span></a>
     <nav aria-label="頁面導覽">
-      <a href="#cost">費用</a>
-      <a href="#safety">安全</a>
+      <a href="#bilingual">功能</a>
       <a href="#start">安裝</a>
+      <a href="#safety">安全</a>
+      <a href="#cost">費用</a>
     </nav>
     <a class="gh" href="https://github.com/YihongGao/open-llm-translator"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>GitHub</a>
   </div>
@@ -155,23 +156,18 @@
     </div>
   </section>
 
-  <section class="sheet wrap" id="free" aria-labelledby="free-h" translate="no">
-    <p class="sheet-no" aria-hidden="true">03<span>免費</span></p>
-    <div class="sheet-body">
-      <h2 id="free-h"><span class="nw">擴充功能免費，</span><span class="nw">翻譯費直接付給</span> <span class="nw">AI 服務商</span></h2>
-      <p class="sub">Open LLM Translator 本身不收錢，也不用註冊帳號。翻譯用的是你自己的 <span class="nw">API key</span>，服務商照 API 價格向你收費，錢不經過我們。</p>
-      <ul class="trio">
-        <li><h3>不用訂閱</h3><p>沒有月費。這個月沒翻，就一毛都<span class="nw">不用付</span>。</p></li>
-        <li><h3>支援主流 LLM 服務</h3><p>Anthropic（Claude）、OpenAI（GPT）、Google（Gemini），選一家就能用。</p></li>
-        <li><h3>一篇長文不到一美分</h3><p>用預設 model 翻一篇英文長文，<span class="nw">約 US$0.003–0.005</span>。<a href="#cost">看更多例子</a></p></li>
-      </ul>
-    </div>
-  </section>
-
   <section class="sheet wrap" id="cost" aria-labelledby="cost-h" translate="no">
-    <p class="sheet-no" aria-hidden="true">04<span>費用</span></p>
+    <p class="sheet-no" aria-hidden="true">03<span>費用</span></p>
     <div class="sheet-body">
-      <h2 id="cost-h"><span class="nw">一篇文章、一本書、</span><span class="nw">一個月，各要多少錢</span></h2>
+      <h2 id="cost-h"><span class="nw">擴充功能免費，</span><span class="nw">有用 AI 翻譯才需要付費</span></h2>
+      <ul class="trio">
+        <li><h3>開發者不收任何費用</h3><p>Open LLM Translator 免費使用，<span class="nw">不用訂閱</span>，也不用<span class="nw">註冊帳號</span>。</p></li>
+        <li><h3>費用來自你用的 AI</h3><p>翻譯用你自己的 <span class="nw">API key</span>，由 AI 服務商照用量向你收費，錢不經過我們。這個月沒翻譯，就一毛都<span class="nw">不用付</span>。</p></li>
+        <li><h3>支援主流 LLM 服務</h3><p>Anthropic（Claude）、OpenAI（GPT）、Google（Gemini），選一家就能用。</p></li>
+      </ul>
+
+      <details class="cost-more">
+      <summary><span><span class="nw">一篇文章、一本書、</span><span class="nw">一個月，各要多少錢</span></span></summary>
       <p class="sub">以下是英文翻成繁體中文的大概費用，用預設的 <span class="nw">Claude Haiku</span> 和高一級的 <span class="nw">Claude Sonnet</span> 來算。</p>
 
       <div class="receipts">
@@ -204,11 +200,12 @@
         <li><span class="nw">GPT-6 Luna</span> 和 Haiku 同價；<span class="nw">Gemini 3.5 Flash-Lite</span> 大約是 Haiku 的 <span class="nw">4 到 5 倍</span>。<a class="more" href="https://github.com/YihongGao/open-llm-translator/blob/main/README.zh-TW.md#費用"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>完整的 model 和價格列表</a></li>
       </ul>
       <p class="foot-note">估算方式：每個英文字約 1.3 個 token；每個英文字約譯成 <span class="nw">1.5 個中文字</span>，每個中文字約 1 到 2 個 token。翻譯指令有快取，增加的費用很少。以 2026 年 11 月的 API 價格計算（每百萬 token：Haiku input US$0.10、output US$0.50；Sonnet US$2、US$10）。實際費用依文章內容而定。</p>
+      </details>
     </div>
   </section>
 
   <section class="sheet wrap" id="safety" aria-labelledby="safety-h" translate="no">
-    <p class="sheet-no" aria-hidden="true">05<span>安全</span></p>
+    <p class="sheet-no" aria-hidden="true">04<span>安全</span></p>
     <div class="sheet-body">
       <h2 id="safety-h"><span class="nw">API key 不用上傳，</span><span class="nw">只留在你的電腦</span></h2>
       <ul class="trio">
@@ -225,7 +222,7 @@
   </section>
 
   <section class="sheet wrap" id="start" aria-labelledby="start-h" translate="no">
-    <p class="sheet-no" aria-hidden="true">06<span>安裝</span></p>
+    <p class="sheet-no" aria-hidden="true">05<span>安裝</span></p>
     <div class="sheet-body">
       <h2 id="start-h"><span class="nw">三個步驟，</span><span class="nw">開始雙語閱讀</span></h2>
       <ol class="steps">

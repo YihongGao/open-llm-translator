@@ -175,6 +175,15 @@ html.llmt-yt-on #movie_player .ctl .ext { opacity: 1; }
 #movie_player .ctl .pp:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
 html.llmt-yt-on .yt .state { color: var(--accent); border: 1px solid var(--accent); background: var(--accent-wash); }
 
+/* Cost: price examples, collapsed by default */
+.cost-more { margin-top: 48px; border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--line); }
+.cost-more > summary { display: flex; align-items: center; gap: 16px; padding: 16px 0; cursor: pointer; list-style: none; font: 700 clamp(17px, 1.6vw, 20px)/1.5 var(--f-cjk); }
+.cost-more > summary::-webkit-details-marker { display: none; }
+.cost-more > summary:hover { color: var(--accent); }
+.cost-more > summary::after { content: ""; flex: none; margin-left: auto; width: 9px; height: 9px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: translateY(-3px) rotate(45deg); transition: transform .2s; }
+.cost-more[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
+.cost-more[open] { padding-bottom: 24px; }
+@media (prefers-reduced-motion: reduce) { .cost-more > summary::after { transition: none; } }
 /* Cost: three receipts */
 .receipts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; }
 .receipt {
