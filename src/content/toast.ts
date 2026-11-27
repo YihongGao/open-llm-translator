@@ -21,12 +21,19 @@ const CSS = `
   box-sizing: border-box; width: min(360px, calc(100vw - 32px));
   padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
   background: var(--bg); color: var(--fg); box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  font: 14px/1.5 system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+  font: 14px/1.5 var(--font);
   display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: start;
 }
 @media (prefers-color-scheme: dark) {
   .box { --bg: #262c36; --fg: #f0f6fc; --muted: #9198a1; --border: #3d444d; --accent: #4493f8; --accent-fg: #ffffff; }
 }
+/* system-ui draws CJK text in the browser locale's font (on Windows it never falls through to the
+   next family), so each UI language lists its own CJK fonts ahead of system-ui; "Segoe UI" has no CJK
+   glyphs, so Windows keeps its Latin font. Keep in sync with popup.html and options.html. lang is set on .box. */
+.box { --font: "Segoe UI", "PingFang TC", "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif; }
+.box:lang(en) { --font: system-ui, -apple-system, sans-serif; }
+.box:lang(ja) { --font: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, "Noto Sans JP", system-ui, sans-serif; }
+.box:lang(zh-CN) { --font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
 .icon { font-size: 16px; line-height: 1.4; }
 .msg { font-weight: 600; word-break: break-word; }
 .detail { grid-column: 2; color: var(--muted); font-size: 12px; }
@@ -55,6 +62,7 @@ export function showToast(opts: ToastOptions): void {
 
   const box = document.createElement("div");
   box.className = "box";
+  box.lang = t("pageLang");
   box.setAttribute("role", "alert");
 
   const icon = document.createElement("span");

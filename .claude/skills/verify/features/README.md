@@ -42,5 +42,5 @@ Each feature file starts with an H1 title and one paragraph describing the user-
 - [Popup language and model](./popup-language-model.md): switch target language (re-translates the open page) and model (key warning, persisted).
 - [Error notices](./error-notices.md): missing key, invalid key, rate limit. Covers the toast, the ⚠ markers and retry on re-toggle.
 - [Options page](./options-page.md): write-only API key fields, 清除, model, language, 儲存, 測試連線. Proven by `scripts/journey-options-write-only-keys.mjs` and `scripts/journey-options-clear-key.mjs`.
-- [UI language](./ui-locale.md): popup, options page, toasts and command descriptions in en / ja / zh_CN / zh_TW by browser language, English for the rest. Proven by `scripts/journey-ui-locale.mjs`.
+- [UI language](./ui-locale.md): popup, options page, toasts and service-worker errors in en / ja / zh_CN / zh_TW, by the options page's UI language setting (default: follow the browser, English for other languages); command descriptions follow the browser only. Proven by `scripts/journey-ui-locale.mjs`, `scripts/journey-ui-language-setting.mjs` and `scripts/journey-ui-locale-fidelity.mjs`.
 - [YouTube bilingual subtitles](./youtube-subtitles.md): subtitle overlay on `youtube.com/watch`. Needs the live site and is not yet proven by a run.

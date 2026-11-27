@@ -6,9 +6,17 @@
     <style>
       :root {
         color-scheme: light dark;
-        font-family: system-ui, -apple-system, "PingFang TC", sans-serif;
+        /* system-ui draws CJK text in the browser locale's font (on Windows it never falls through to
+           the next family), so each UI language lists its own CJK fonts ahead of system-ui; "Segoe UI"
+           has no CJK glyphs, so Windows keeps its Latin font. Keep in sync with popup.html and toast.ts. */
+        --ui-font: "Segoe UI", "PingFang TC", "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
       }
+      :root:lang(en) { --ui-font: system-ui, -apple-system, sans-serif; }
+      :root:lang(ja) { --ui-font: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, "Noto Sans JP", system-ui, sans-serif; }
+      :root:lang(zh-CN) { --ui-font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
       body {
+        /* Set on body: Chromium's default body font-family would otherwise win over :root's. */
+        font-family: var(--ui-font);
         max-width: 560px;
         margin: 40px auto;
         padding: 0 16px;
@@ -122,6 +130,10 @@
 
       <label for="targetLang" data-i18n="optionsTargetLang">Target language</label>
       <select id="targetLang"></select>
+
+      <label for="uiLanguage" data-i18n="optionsUiLanguage">UI language</label>
+      <select id="uiLanguage"></select>
+      <p class="hint" data-i18n="optionsUiLangHint">Applies right away. A tab that is already translated switches the next time it is toggled or shows an error. The extension's description on chrome://extensions and in the Chrome Web Store, and the shortcut descriptions on chrome://extensions/shortcuts, always follow the browser's language.</p>
 
       <div class="actions">
         <button type="submit" data-i18n="optionsSave">Save</button>

@@ -179,6 +179,21 @@
   "optionsTargetLang": {
     "message": "Target language"
   },
+  "optionsUiLanguage": {
+    "message": "UI language"
+  },
+  "optionsUiLangAuto": {
+    "message": "Follow browser ($language$)",
+    "description": "First option of the UI language select; language is that language's own name, e.g. Follow browser (English)",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsUiLangHint": {
+    "message": "Applies right away. A tab that is already translated switches the next time it is toggled or shows an error. The extension's description on chrome://extensions and in the Chrome Web Store, and the shortcut descriptions on chrome://extensions/shortcuts, always follow the browser's language."
+  },
   "optionsSave": {
     "message": "Save"
   },

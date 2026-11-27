@@ -1,7 +1,7 @@
 // User settings persisted in chrome.storage.local (never .sync: the API key
 // must not leave this machine via Chrome Sync).
 
-import { t, uiLanguage, type MessageKey } from "./i18n";
+import { browserLanguage, parseUiLanguage, t, type MessageKey, type UiLanguageSetting } from "./i18n";
 
 export interface Settings {
   anthropicApiKey: string;
@@ -10,6 +10,8 @@ export interface Settings {
   model: string;
   /** BCP-47 tag, see TARGET_LANGUAGES. */
   targetLang: string;
+  /** Language of the extension's own UI; "auto" follows the browser. */
+  uiLanguage: UiLanguageSetting;
 }
 
 /**
@@ -37,7 +39,8 @@ export function defaultSettings(): Settings {
     // Haiku: ~20x cheaper than Sonnet with comparable quality on docs pages
     // (kube-scheduler A/B, 2026-11-26); Sonnet stays one click away.
     model: "claude-haiku-5-5",
-    targetLang: targetLangFor(uiLanguage()),
+    targetLang: targetLangFor(browserLanguage()),
+    uiLanguage: "auto",
   };
 }
 
@@ -91,8 +94,9 @@ export function apiKeyFor(settings: Settings, model = settings.model): string {
   return settings[providerOf(model).keySetting];
 }
 
-/** Fills a <select> with MODELS grouped by provider. */
+/** Fills a <select> with MODELS grouped by provider. Replaces its options, so call it again to relabel (and restore the value). */
 export function fillModelSelect(select: HTMLSelectElement): void {
+  select.replaceChildren();
   for (const p of PROVIDERS) {
     const group = document.createElement("optgroup");
     group.label = providerLabel(p);
@@ -122,7 +126,8 @@ export function languageName(tag: string): string {
 export async function loadSettings(): Promise<Settings> {
   const defaults = defaultSettings();
   const stored = await chrome.storage.local.get(Object.keys(defaults));
-  return { ...defaults, ...(stored as Partial<Settings>) };
+  const merged = { ...defaults, ...(stored as Partial<Settings>) };
+  return { ...merged, uiLanguage: parseUiLanguage(merged.uiLanguage) };
 }
 
 export async function saveSettings(patch: Partial<Settings>): Promise<void> {

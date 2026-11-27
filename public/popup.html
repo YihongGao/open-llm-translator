@@ -36,13 +36,22 @@
       * {
         box-sizing: border-box;
       }
+      /* system-ui draws CJK text in the browser locale's font (on Windows it never falls through to
+         the next family), so each UI language lists its own CJK fonts ahead of system-ui; "Segoe UI"
+         has no CJK glyphs, so Windows keeps its Latin font. Keep in sync with options.html and toast.ts. */
+      :root {
+        --ui-font: "Segoe UI", "PingFang TC", "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      }
+      :root:lang(en) { --ui-font: system-ui, -apple-system, sans-serif; }
+      :root:lang(ja) { --ui-font: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, "Noto Sans JP", system-ui, sans-serif; }
+      :root:lang(zh-CN) { --ui-font: "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
       body {
         width: 300px;
         margin: 0;
         padding: 14px;
         background: var(--bg);
         color: var(--fg);
-        font: 13px/1.5 system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+        font: 13px/1.5 var(--ui-font);
       }
       h1 {
         font-size: 14px;

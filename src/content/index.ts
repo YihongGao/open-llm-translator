@@ -2,7 +2,7 @@
 // toggle. Owns DOM scanning, viewport scheduling and rendering; all network
 // work happens in the background worker over a Port.
 
-import { t } from "../shared/i18n";
+import { parseUiLanguage, setUiLanguage, t } from "../shared/i18n";
 import { TARGET_LANGUAGES } from "../shared/settings";
 import {
   PORT_NAME,
@@ -469,6 +469,8 @@ function main(): void {
       }
       render(seg);
     } else if (ev.type === "segment-error") {
+      // The message is in the language the service worker used; match the strings we wrap it in.
+      setUiLanguage(parseUiLanguage(ev.uiLanguage));
       for (const id of ev.ids) {
         const seg = byId.get(id);
         if (!seg) continue;
@@ -591,6 +593,8 @@ function main(): void {
 
   // Whoever injected us sends the first toggle right after injection.
   chrome.runtime.onMessage.addListener((msg: ContentMessage, _sender, sendResponse) => {
+    // Content scripts cannot read storage, so the UI language arrives with the message.
+    if (msg?.type === "llmt-toggle" || msg?.type === "llmt-set-lang") setUiLanguage(parseUiLanguage(msg.uiLanguage));
     switch (msg?.type) {
       case "llmt-toggle":
         if (msg.feature === "subtitles") {

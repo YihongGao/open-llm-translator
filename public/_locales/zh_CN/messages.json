@@ -164,6 +164,21 @@
   "optionsTargetLang": {
     "message": "目标语言"
   },
+  "optionsUiLanguage": {
+    "message": "界面语言"
+  },
+  "optionsUiLangAuto": {
+    "message": "跟随浏览器（$language$）",
+    "description": "First option of the UI language select; language is that language's own name, e.g. Follow browser (English)",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsUiLangHint": {
+    "message": "立即生效。已在翻译的标签页会在下次切换翻译或出现错误时更新。chrome://extensions 和 Chrome 网上应用店中的扩展程序说明，以及 chrome://extensions/shortcuts 中的快捷键说明，始终跟随浏览器的语言。"
+  },
   "optionsSave": {
     "message": "保存"
   },

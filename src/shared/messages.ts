@@ -2,6 +2,8 @@
 // Content script opens one long-lived Port per page (PORT_NAME); translation
 // results stream back segment by segment over that port.
 
+import type { UiLanguageSetting } from "./i18n";
+
 export const PORT_NAME = "llmt-translate";
 
 export interface Segment {
@@ -54,6 +56,12 @@ export type TranslateEvent =
       scope: "page" | "segment";
       /** The fix is in the options page (offer an "open settings" action). */
       settings: boolean;
+      /**
+       * UI language `message` was written in. The content script may have been
+       * injected before the user changed the setting, so it adopts this before
+       * wrapping the message, keeping the outer text in the message's language.
+       */
+      uiLanguage: UiLanguageSetting;
     }
   | {
       type: "batch-done";
@@ -72,6 +80,8 @@ export type Feature = "page" | "subtitles";
 export interface ToggleMessage {
   type: "llmt-toggle";
   targetLang: string;
+  /** The user's UI language choice, so the content script's strings (toasts, tooltips) match the options page. */
+  uiLanguage: UiLanguageSetting;
   /** Defaults to "page". */
   feature?: Feature;
 }
@@ -82,6 +92,7 @@ export interface StatusMessage {
 export interface SetLanguageMessage {
   type: "llmt-set-lang";
   targetLang: string;
+  uiLanguage: UiLanguageSetting;
 }
 export type ContentMessage = ToggleMessage | StatusMessage | SetLanguageMessage;
 export interface TabState {

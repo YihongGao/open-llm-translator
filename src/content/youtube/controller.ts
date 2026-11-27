@@ -10,7 +10,7 @@
 // Independent from page translation: either can be on without the other.
 
 import { PORT_NAME, type TranslateEvent, type TranslateRequest } from "../../shared/messages";
-import { t } from "../../shared/i18n";
+import { parseUiLanguage, setUiLanguage, t } from "../../shared/i18n";
 import { TARGET_LANGUAGES } from "../../shared/settings";
 import {
   YT_COMMAND_EVENT,
@@ -326,6 +326,7 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
       line.translation = ev.text;
       update();
     } else if (ev.type === "segment-error") {
+      setUiLanguage(parseUiLanguage(ev.uiLanguage)); // see content/index.ts onEvent
       for (const id of ev.ids) {
         const line = lineOf(id);
         if (line) line.status = "error";

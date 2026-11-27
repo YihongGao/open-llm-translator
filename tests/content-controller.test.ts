@@ -110,6 +110,7 @@ describe("content controller", () => {
       message: "尚未設定 Anthropic API key",
       scope: "page",
       settings: true,
+      uiLanguage: "auto",
     });
 
     const markers = document.querySelectorAll("llmt-translation.llmt-error");

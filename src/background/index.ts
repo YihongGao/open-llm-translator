@@ -10,7 +10,7 @@ import {
   type TranslateEvent,
   type TranslateRequest,
 } from "../shared/messages";
-import { t } from "../shared/i18n";
+import { setUiLanguage, t } from "../shared/i18n";
 import { TARGET_LANGUAGES, loadSettings } from "../shared/settings";
 import { toggleTab } from "../shared/tab-control";
 import { isYouTubeUrl } from "../shared/youtube-bridge";
@@ -87,6 +87,7 @@ async function handleTranslate(
   signal: AbortSignal,
 ): Promise<void> {
   const settings = await loadSettings();
+  setUiLanguage(settings.uiLanguage);
   // The language travels with the request; only accept known tags, since the
   // name ends up in the system prompt.
   const targetLang = TARGET_LANGUAGES.some((l) => l.tag === req.targetLang) ? req.targetLang : settings.targetLang;
@@ -99,6 +100,7 @@ async function handleTranslate(
       message: missingKeyMessage(settings),
       scope: "page",
       settings: true,
+      uiLanguage: settings.uiLanguage,
     });
     emit({ type: "batch-done", batchId: req.batchId });
     return;
@@ -116,6 +118,7 @@ async function handleTranslate(
         provider,
         targetLang,
         model: settings.model,
+        uiLanguage: settings.uiLanguage,
         cache: {
           key: (text) => cacheKey(origin, settings.model, targetLang, text),
           getMany: cacheGetMany,
@@ -220,6 +223,7 @@ chrome.runtime.onMessage.addListener(
 
 async function testConnection(): Promise<TestConnectionResult> {
   const settings = await loadSettings();
+  setUiLanguage(settings.uiLanguage);
   const setup = createProvider(settings);
   if (!setup) return { ok: false, message: missingKeyMessage(settings) };
   try {

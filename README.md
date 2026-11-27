@@ -18,7 +18,7 @@ Bring your own API key for Anthropic (Claude), OpenAI (GPT) or Google (Gemini). 
 - **YouTube bilingual subtitles**: original and translated captions together in the player, including full screen. Captions are merged into full sentences first, so auto-generated captions translate cleanly.
 - **Target languages**: Traditional Chinese (Taiwan), Simplified Chinese, English, Japanese, Korean.
 
-The interface is available in English, Japanese, Simplified Chinese and Traditional Chinese and follows your browser's language; any other language shows English. A fresh install also starts with the target language matching your browser's language (English if it is not one of the five), and you can change it any time.
+The interface is available in English, Japanese, Simplified Chinese and Traditional Chinese and follows your browser's language by default; any other language shows English. To pick one yourself, use **UI language** on the options page (Follow browser, English, 日本語, 简体中文 or 繁體中文); it applies at once to the options page and the toolbar menu. A tab that is already translated switches the next time you toggle translation or it shows an error. The extension's description on `chrome://extensions` and in the Chrome Web Store, and the shortcut descriptions on `chrome://extensions/shortcuts`, always follow the browser's language. A fresh install also starts with the target language matching your browser's language (English if it is not one of the five), and you can change it any time.
 
 | Toolbar menu | YouTube subtitles |
 |---|---|

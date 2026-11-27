@@ -164,6 +164,21 @@
   "optionsTargetLang": {
     "message": "翻訳先の言語"
   },
+  "optionsUiLanguage": {
+    "message": "表示言語"
+  },
+  "optionsUiLangAuto": {
+    "message": "ブラウザの言語に合わせる（$language$）",
+    "description": "First option of the UI language select; language is that language's own name, e.g. Follow browser (English)",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsUiLangHint": {
+    "message": "すぐに反映されます。すでに翻訳中のタブは、次に切り替えたとき、またはエラーが出たときに切り替わります。chrome://extensions と Chrome ウェブストアでの拡張機能の説明、および chrome://extensions/shortcuts のショートカットの説明は、常にブラウザの言語で表示されます。"
+  },
   "optionsSave": {
     "message": "保存"
   },
