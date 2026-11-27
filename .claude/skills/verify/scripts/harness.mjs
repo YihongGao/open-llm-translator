@@ -223,11 +223,14 @@ export async function waitForPage(page, predicate, { timeout = 15000, label = "p
 }
 
 /**
- * @param {{ name: string, mock?: "ok"|"401"|"429"|false, settings?: object, headed?: boolean }} opts
+ * @param {{ name: string, mock?: "ok"|"401"|"429"|false, settings?: object, headed?: boolean, locale?: string }} opts
+ *   locale: the browser UI language (chrome.i18n), default "zh-TW" so the Chinese assertions hold on any OS.
+ *     Set through --lang: Chromium on Windows ignores Playwright's `locale` option for chrome.i18n (it only
+ *     changes navigator.language and Accept-Language), and otherwise follows the OS language. Any tag works, e.g. "ja", "fr".
  *   settings: written to chrome.storage.local before any page loads.
  *   Default: mock key + claude-haiku-5-5 + zh-TW. Pass { anthropicApiKey: "" } for the no-key path.
  */
-export async function launch({ name, mock = "ok", settings = {}, headed = !!process.env.HEADED } = {}) {
+export async function launch({ name, mock = "ok", settings = {}, headed = !!process.env.HEADED, locale = "zh-TW" } = {}) {
   if (!name) throw new Error("launch({ name }) is required: it names the artifact dir");
   const problems = buildProblems();
   if (problems.length) throw new Error(`refusing to launch:\n  - ${problems.join("\n  - ")}`);
@@ -245,7 +248,10 @@ export async function launch({ name, mock = "ok", settings = {}, headed = !!proc
     channel: "chromium",
     headless: !headed,
     viewport: { width: 1280, height: 900 },
-    args: [`--disable-extensions-except=${extDir}`, `--load-extension=${extDir}`],
+    locale,
+    // Linux picks its UI language from LANGUAGE rather than --lang; both are set so the run does not depend on the OS.
+    env: { ...process.env, LANGUAGE: locale.replace("-", "_") },
+    args: [`--disable-extensions-except=${extDir}`, `--load-extension=${extDir}`, `--lang=${locale}`],
   });
   const close = async () => {
     await ctx.close().catch(() => {});
@@ -303,10 +309,11 @@ export async function launch({ name, mock = "ok", settings = {}, headed = !!proc
         for (let i = 0; i < 40 && !(await h.isOpen()); i++) await sleep(100);
         if (!(await h.isOpen())) throw new Error("popup did not open (is the target tab active? call page.bringToFront())");
         // init() is async and rewrites the toggle label once it knows the tab
-        // state. The label stays the bare HTML default only when no shortcut
-        // is bound, so give up waiting after 1.5s.
+        // state. The label stays the bare default (in the UI language) only
+        // when no shortcut is bound, so give up waiting after 1.5s.
+        const bare = await helper.evaluate(() => chrome.i18n.getMessage("popupTranslatePage"));
         for (let i = 0; i < 15; i++) {
-          if ((await h.state().catch(() => null))?.toggle !== "翻譯此頁") break;
+          if ((await h.state().catch(() => null))?.toggle !== bare) break;
           await sleep(100);
         }
         return h;

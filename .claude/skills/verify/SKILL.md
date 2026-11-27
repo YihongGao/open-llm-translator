@@ -39,6 +39,7 @@ Run it with `node .claude/skills/verify/scripts/<file>.mjs`. Set `HEADED=1` to w
   - `"401"`: invalid key.
   - `"429"`: rate limit.
   - `false`: real API. This costs money and needs a real key passed in `settings`. Ask the user before using it.
+- `locale` (default `"zh-TW"`): the browser UI language that `chrome.i18n` follows, set with `--lang`. Pass `"en"`, `"ja"` or any tag. See [features/ui-locale.md](features/ui-locale.md).
 - `settings`: merged over the default `{ anthropicApiKey: "sk-ant-verify-mock", model: "claude-haiku-5-5", targetLang: "zh-TW" }`. Use `{ anthropicApiKey: "" }` for the missing-key path.
 
 OpenAI and Gemini requests are never mocked. They are aborted and logged in `run.calls` as `unmocked`. Prove UI paths with an Anthropic model.
