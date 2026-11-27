@@ -55,7 +55,7 @@ describe("landing page build", () => {
       (r) => !/^(?:https?:|mailto:)/.test(r),
     );
     expect(refs.length).toBeGreaterThan(0);
-    for (const ref of refs) {
+    for (const ref of refs.map((r) => r.split("#")[0]!)) {
       // Pages serves dist-site/ under /open-llm-translator/, so paths must stay inside it.
       const target = posix.normalize(posix.join(posix.dirname(page), ref));
       expect(target, `${page}: ${ref}`).not.toMatch(/^(?:\.\.|\/)/);
