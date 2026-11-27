@@ -101,6 +101,47 @@ describe("collectSegments", () => {
     expect(asInline.map((s) => s.text)).toEqual(["Get startedRead the blog"]);
   });
 
+  describe("paragraphs separated by <br><br> instead of <p> (pathofexile.com forum posts)", () => {
+    const POST = `<div class="box-content">
+<h3>Improvements to Core Item Drops</h3>
+<br>
+In 3.30 we fundamentally changed how Items are generated.<br><br>
+For currency, rarity <b>matters</b>.<br>A second line of the same paragraph.<br>
+<br>
+<br>
+So, that's the problem.</div>`;
+    const collect = () => collectSegments(document.body, { targetLang: "zh-TW", displayOf });
+    beforeEach(() => {
+      document.body.innerHTML = POST;
+    });
+
+    it("makes each paragraph its own segment; a single <br> stays inside the paragraph", () => {
+      expect(collect().map((s) => s.text)).toEqual([
+        "Improvements to Core Item Drops",
+        "In 3.30 we fundamentally changed how Items are generated.",
+        "For currency, rarity matters. A second line of the same paragraph.",
+        "So, that's the problem.",
+      ]);
+    });
+
+    it("puts the translation after the first break, which keeps the paragraph gap", () => {
+      const first = collect().find((s) => s.text.startsWith("In 3.30"))!;
+      const brs = document.querySelectorAll(".box-content > br");
+      expect(insertionPoint(first)).toEqual({ parent: document.querySelector(".box-content"), before: brs[2] });
+    });
+
+    it("is stable across rescans after translation nodes are inserted", () => {
+      const segs = collect();
+      for (const s of segs) {
+        const { parent, before } = insertionPoint(s);
+        parent.insertBefore(document.createElement("llmt-translation"), before);
+      }
+      const again = collect();
+      expect(again.map((s) => s.text)).toEqual(segs.map((s) => s.text));
+      expect(again.map((s) => s.anchor)).toEqual(segs.map((s) => s.anchor));
+    });
+  });
+
   it("leaves video players alone (their caption windows change every few seconds)", () => {
     document.body.innerHTML = `
       <div id="movie_player" class="html5-video-player">
