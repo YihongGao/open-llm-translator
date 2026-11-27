@@ -1,0 +1,452 @@
+{
+  "extDescription": {
+    "message": "Shows LLM translations below the original text (bilingual view)",
+    "description": "Extension description in the Chrome Web Store and chrome://extensions"
+  },
+  "cmdTogglePage": {
+    "message": "Toggle translation on this page",
+    "description": "Keyboard command description"
+  },
+  "cmdToggleSubtitles": {
+    "message": "Toggle YouTube bilingual subtitles",
+    "description": "Keyboard command description"
+  },
+  "pageLang": {
+    "message": "en",
+    "description": "BCP 47 tag of this catalog's language, set as <html lang> (the UI language itself may be one with no catalog, e.g. fr, which falls back to English)"
+  },
+  "labelModel": {
+    "message": "Model"
+  },
+  "openSettings": {
+    "message": "Open settings"
+  },
+  "providerLabel": {
+    "message": "$name$ ($product$)",
+    "description": "Provider with its model family, e.g. Anthropic (Claude)",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "product": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelOption": {
+    "message": "$name$ ($note$)",
+    "description": "Model dropdown entry; note is one of the modelNote* messages",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "note": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelNoteDefaultFast": {
+    "message": "default, cheap and fast"
+  },
+  "modelNoteSmoother": {
+    "message": "more fluent"
+  },
+  "modelNoteBestPriciest": {
+    "message": "best quality, most expensive"
+  },
+  "modelNoteCheapFast": {
+    "message": "cheap and fast"
+  },
+  "modelNoteBalanced": {
+    "message": "balanced"
+  },
+  "modelNoteFlagshipPriciest": {
+    "message": "flagship, most expensive"
+  },
+  "modelNoteFlagship": {
+    "message": "flagship"
+  },
+  "keyHintSaved": {
+    "message": "Saved. Paste a new key to replace it.",
+    "description": "Placeholder of an API key field that already has a key"
+  },
+  "keyHintSavedTail": {
+    "message": "Saved ($tail$). Paste a new key to replace it.",
+    "description": "Same, with the last characters of the saved key",
+    "placeholders": {
+      "tail": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupWarnNoKey": {
+    "message": "No API key set."
+  },
+  "popupWarnNoKeyFor": {
+    "message": "No API key set for $provider$.",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupTranslateTo": {
+    "message": "Translate to"
+  },
+  "popupTranslatePage": {
+    "message": "Translate this page"
+  },
+  "popupShowOriginal": {
+    "message": "Show original"
+  },
+  "popupSubsOn": {
+    "message": "Turn on bilingual subtitles"
+  },
+  "popupSubsOff": {
+    "message": "Turn off bilingual subtitles"
+  },
+  "popupWithShortcut": {
+    "message": "$label$ ($shortcut$)",
+    "description": "Button label followed by its keyboard shortcut",
+    "placeholders": {
+      "label": {
+        "content": "$1"
+      },
+      "shortcut": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSettings": {
+    "message": "⚙ Settings"
+  },
+  "popupShortcuts": {
+    "message": "Shortcuts",
+    "description": "Link to chrome://extensions/shortcuts"
+  },
+  "popupCannotTranslate": {
+    "message": "This page can't be translated"
+  },
+  "popupNoteRestrictedPages": {
+    "message": "Built-in browser pages and the Chrome Web Store don't allow extensions."
+  },
+  "popupNoteNotAllowed": {
+    "message": "Chrome doesn't allow extensions to run on this page."
+  },
+  "popupNoteNoShortcut": {
+    "message": "No shortcut is set. You can set one under \"Shortcuts\"."
+  },
+  "popupNoteNewModel": {
+    "message": "The new model will be used for segments translated from now on."
+  },
+  "optionsTitle": {
+    "message": "Open LLM Translator Settings",
+    "description": "Page title and heading"
+  },
+  "optionsModelHint": {
+    "message": "You only need the API key for the provider of the selected model."
+  },
+  "optionsClear": {
+    "message": "Clear"
+  },
+  "optionsClearAria": {
+    "message": "Clear $key$",
+    "description": "Accessible name of a clear button; key is e.g. \"Anthropic API key\"",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyStorageHint": {
+    "message": "API keys are stored only in chrome.storage.local on this computer and are not synced through Chrome Sync. A saved key is never shown in full again and can't be copied from here. To replace a key, paste a new one; leave a field empty to keep the existing key."
+  },
+  "optionsLimitsLead": {
+    "message": "We recommend creating a dedicated API key for this extension and setting a spending limit with the provider:",
+    "description": "Followed by links to the three providers' limit pages"
+  },
+  "optionsListSeparator": {
+    "message": ", ",
+    "description": "Between the provider links"
+  },
+  "optionsLimitsEnd": {
+    "message": ".",
+    "description": "After the last provider link"
+  },
+  "optionsDataNotice": {
+    "message": "When translating, the text of the segments to translate, the page title and the URL (domain and path only, no query string) are sent with your API key to the provider of the selected model (Anthropic, OpenAI or Google) and handled under that provider's API terms. Translations are cached on this computer and are not sent anywhere else."
+  },
+  "optionsTargetLang": {
+    "message": "Target language"
+  },
+  "optionsSave": {
+    "message": "Save"
+  },
+  "optionsTest": {
+    "message": "Test connection"
+  },
+  "optionsUsage": {
+    "message": "How to use: click the extension icon to open the menu, or press the shortcut (default Alt/Option+A) to toggle translation. You can change shortcuts at chrome://extensions/shortcuts."
+  },
+  "optionsActiveKeyLabel": {
+    "message": " (in use)",
+    "description": "Appended to the key field label of the provider the selected model uses"
+  },
+  "optionsSaved": {
+    "message": "Saved. Pages that are already open need translation toggled off and on again to use the new language."
+  },
+  "optionsConfirmDeleteKey": {
+    "message": "Delete the API key for $provider$? You will need to paste it again to use it.",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyDeleted": {
+    "message": "Deleted the API key for $provider$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTesting": {
+    "message": "Testing…"
+  },
+  "optionsTestOk": {
+    "message": "Success: $sample$",
+    "placeholders": {
+      "sample": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTestFail": {
+    "message": "Failed: $reason$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "errMissingKey": {
+    "message": "No API key set for $provider$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errNoTranslationParsed": {
+    "message": "The API responded, but no translation could be parsed"
+  },
+  "errKeyInvalid": {
+    "message": "$provider$ API key is invalid (401). Check it on the settings page",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errForbidden": {
+    "message": "$provider$ API key has no access to this model (403): $detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errModelNotFound": {
+    "message": "$provider$ can't find the model (404). Check the model on the settings page",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errRateLimit": {
+    "message": "$provider$ rate limit or quota exceeded (429). Try again later",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errBadRequest": {
+    "message": "$provider$ rejected the request (400): $detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errStreamInterrupted": {
+    "message": "$provider$ stream interrupted: $detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errApi": {
+    "message": "$provider$ API error $status$: $detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "status": {
+        "content": "$2"
+      },
+      "detail": {
+        "content": "$3"
+      }
+    }
+  },
+  "errConnect": {
+    "message": "Can't connect to the $provider$ API",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errEmptyResponse": {
+    "message": "The response has no content"
+  },
+  "errStreamEndedEarly": {
+    "message": "The stream ended before it completed"
+  },
+  "errAnthropicForbidden": {
+    "message": "API key has no access to this model (403)"
+  },
+  "errAnthropicModelNotFound": {
+    "message": "Model not found (404). Check the model on the settings page"
+  },
+  "errAnthropicRateLimit": {
+    "message": "Rate limit exceeded (429). Try again later"
+  },
+  "errAnthropicBadRequest": {
+    "message": "Request rejected (400): $detail$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errAnthropicApi": {
+    "message": "API error $status$: $detail$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errMissedComplete": {
+    "message": "The model skipped this segment"
+  },
+  "errMissedMaxTokens": {
+    "message": "The output hit the length limit, so this segment was cut off"
+  },
+  "errMissedRefusal": {
+    "message": "The model refused to translate this segment"
+  },
+  "contentConnectionLost": {
+    "message": "Connection to the background worker was lost"
+  },
+  "contentSegmentFailed": {
+    "message": "Translation failed: $message$ (click for details)",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastTranslationFailed": {
+    "message": "Translation failed: $message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRetryHint": {
+    "message": "After fixing it, turn translation off and on again to retry the failed segments."
+  },
+  "toastUnknownError": {
+    "message": "Unknown error"
+  },
+  "toastClose": {
+    "message": "Close"
+  },
+  "ytPlayerUnavailable": {
+    "message": "Can't connect to the YouTube player"
+  },
+  "ytReloadRetry": {
+    "message": "Reload the page, then turn on bilingual subtitles again."
+  },
+  "ytLiveUnsupported": {
+    "message": "Subtitles for live streams aren't supported yet"
+  },
+  "ytNoSubtitles": {
+    "message": "This video has no subtitles"
+  },
+  "ytNoneReceived": {
+    "message": "No subtitles received from YouTube"
+  },
+  "ytNoneReceivedHint": {
+    "message": "Try pressing CC in the player to turn on captions, or reload the page."
+  },
+  "ytAlreadyTarget": {
+    "message": "Subtitles are already in $language$, no translation needed",
+    "description": "language is the target language's own name, e.g. English or 日本語",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytAlreadyTargetHint": {
+    "message": "To translate subtitles in another language, choose that language in YouTube's subtitle menu."
+  },
+  "ytFetchFailed": {
+    "message": "Couldn't get the original subtitles"
+  },
+  "ytFetchFailedHttp": {
+    "message": "Couldn't get the original subtitles (HTTP $status$)",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytFetchFailedHint": {
+    "message": "Choose the original language in YouTube's subtitle menu and try again."
+  },
+  "ytEmpty": {
+    "message": "The subtitle track is empty"
+  },
+  "ytTranslateFailed": {
+    "message": "Subtitle translation failed: $message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytRetryHint": {
+    "message": "After fixing it, turn bilingual subtitles off and on again to retry."
+  }
+}

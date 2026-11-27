@@ -1,0 +1,435 @@
+{
+  "extDescription": {
+    "message": "原文の下に LLM 翻訳を表示します（対訳表示）"
+  },
+  "cmdTogglePage": {
+    "message": "このページの翻訳を切り替え"
+  },
+  "cmdToggleSubtitles": {
+    "message": "YouTube の対訳字幕を切り替え"
+  },
+  "pageLang": {
+    "message": "ja"
+  },
+  "labelModel": {
+    "message": "モデル"
+  },
+  "openSettings": {
+    "message": "設定を開く"
+  },
+  "providerLabel": {
+    "message": "$name$（$product$）",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "product": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelOption": {
+    "message": "$name$（$note$）",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "note": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelNoteDefaultFast": {
+    "message": "デフォルト・低価格で高速"
+  },
+  "modelNoteSmoother": {
+    "message": "より自然な訳"
+  },
+  "modelNoteBestPriciest": {
+    "message": "最高品質・最も高価"
+  },
+  "modelNoteCheapFast": {
+    "message": "低価格で高速"
+  },
+  "modelNoteBalanced": {
+    "message": "バランス型"
+  },
+  "modelNoteFlagshipPriciest": {
+    "message": "フラッグシップ・最も高価"
+  },
+  "modelNoteFlagship": {
+    "message": "フラッグシップ"
+  },
+  "keyHintSaved": {
+    "message": "保存済みです。変更するには新しいキーを貼り付けてください。"
+  },
+  "keyHintSavedTail": {
+    "message": "保存済み（$tail$）です。変更するには新しいキーを貼り付けてください。",
+    "placeholders": {
+      "tail": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupWarnNoKey": {
+    "message": "API キーが未設定です。"
+  },
+  "popupWarnNoKeyFor": {
+    "message": "$provider$の API キーが未設定です。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupTranslateTo": {
+    "message": "翻訳先"
+  },
+  "popupTranslatePage": {
+    "message": "このページを翻訳"
+  },
+  "popupShowOriginal": {
+    "message": "原文を表示"
+  },
+  "popupSubsOn": {
+    "message": "対訳字幕をオンにする"
+  },
+  "popupSubsOff": {
+    "message": "対訳字幕をオフにする"
+  },
+  "popupWithShortcut": {
+    "message": "$label$（$shortcut$）",
+    "placeholders": {
+      "label": {
+        "content": "$1"
+      },
+      "shortcut": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSettings": {
+    "message": "⚙ 設定"
+  },
+  "popupShortcuts": {
+    "message": "ショートカット"
+  },
+  "popupCannotTranslate": {
+    "message": "このページは翻訳できません"
+  },
+  "popupNoteRestrictedPages": {
+    "message": "ブラウザ内蔵ページと Chrome ウェブストアでは、拡張機能は使用できません。"
+  },
+  "popupNoteNotAllowed": {
+    "message": "Chrome ではこのページで拡張機能を実行できません。"
+  },
+  "popupNoteNoShortcut": {
+    "message": "ショートカットが未設定です。「ショートカット」で設定できます。"
+  },
+  "popupNoteNewModel": {
+    "message": "新しいモデルは、以降に翻訳する部分から使われます。"
+  },
+  "optionsTitle": {
+    "message": "Open LLM Translator の設定"
+  },
+  "optionsModelHint": {
+    "message": "選択したモデルのプロバイダーの API キーだけ入力すれば使えます。"
+  },
+  "optionsClear": {
+    "message": "削除"
+  },
+  "optionsClearAria": {
+    "message": "$key$ を削除",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyStorageHint": {
+    "message": "API キーはこのパソコンの chrome.storage.local にのみ保存され、Chrome 同期では同期されません。保存後はキー全体が再表示されることはなく、ここからコピーすることもできません。キーを変更するには新しいキーを貼り付けてください。空欄のままにすると、保存済みのキーが維持されます。"
+  },
+  "optionsLimitsLead": {
+    "message": "この拡張機能専用の API キーを作成し、プロバイダー側で利用上限を設定することをおすすめします："
+  },
+  "optionsListSeparator": {
+    "message": "、"
+  },
+  "optionsLimitsEnd": {
+    "message": "。"
+  },
+  "optionsDataNotice": {
+    "message": "翻訳時には、翻訳対象の文章、ページのタイトル、URL（ドメインとパスのみで、クエリ文字列は含みません）が、お客様の API キーを使って、選択したモデルのプロバイダー（Anthropic、OpenAI、Google のいずれか）に送信され、各プロバイダーの API 規約に従って処理されます。翻訳結果はこのパソコンにキャッシュされ、他の場所には送信されません。"
+  },
+  "optionsTargetLang": {
+    "message": "翻訳先の言語"
+  },
+  "optionsSave": {
+    "message": "保存"
+  },
+  "optionsTest": {
+    "message": "接続をテスト"
+  },
+  "optionsUsage": {
+    "message": "使い方：拡張機能のアイコンをクリックしてメニューを開くか、ショートカットキー（デフォルトは Alt/Option+A）で翻訳を切り替えます。ショートカットは chrome://extensions/shortcuts で変更できます。"
+  },
+  "optionsActiveKeyLabel": {
+    "message": "（使用中）"
+  },
+  "optionsSaved": {
+    "message": "保存しました（すでに開いているページでは、翻訳をいったんオフにしてからオンにすると新しい言語が反映されます）"
+  },
+  "optionsConfirmDeleteKey": {
+    "message": "$provider$の API キーを削除しますか？再度使うには、もう一度貼り付ける必要があります。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyDeleted": {
+    "message": "$provider$の API キーを削除しました",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTesting": {
+    "message": "テスト中…"
+  },
+  "optionsTestOk": {
+    "message": "成功：$sample$",
+    "placeholders": {
+      "sample": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTestFail": {
+    "message": "失敗：$reason$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "errMissingKey": {
+    "message": "$provider$の API キーが未設定です",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errNoTranslationParsed": {
+    "message": "API は応答しましたが、翻訳結果を解析できませんでした"
+  },
+  "errKeyInvalid": {
+    "message": "$provider$ の API キーが無効です（401）。設定ページで確認してください",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errForbidden": {
+    "message": "$provider$ の API キーにはこのモデルへのアクセス権がありません（403）：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errModelNotFound": {
+    "message": "$provider$ でモデルが見つかりません（404）。設定ページでモデルを確認してください",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errRateLimit": {
+    "message": "$provider$ のレート制限または利用枠を超えました（429）。しばらくしてからもう一度お試しください",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errBadRequest": {
+    "message": "$provider$ にリクエストを拒否されました（400）：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errStreamInterrupted": {
+    "message": "$provider$ のストリームが中断されました：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errApi": {
+    "message": "$provider$ API エラー $status$：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "status": {
+        "content": "$2"
+      },
+      "detail": {
+        "content": "$3"
+      }
+    }
+  },
+  "errConnect": {
+    "message": "$provider$ API に接続できません",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errEmptyResponse": {
+    "message": "応答に内容がありません"
+  },
+  "errStreamEndedEarly": {
+    "message": "ストリームが完了前に終了しました"
+  },
+  "errAnthropicForbidden": {
+    "message": "API キーにはこのモデルへのアクセス権がありません（403）"
+  },
+  "errAnthropicModelNotFound": {
+    "message": "モデルが見つかりません（404）。設定ページでモデルを確認してください"
+  },
+  "errAnthropicRateLimit": {
+    "message": "レート制限を超えました（429）。しばらくしてからもう一度お試しください"
+  },
+  "errAnthropicBadRequest": {
+    "message": "リクエストが拒否されました（400）：$detail$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errAnthropicApi": {
+    "message": "API エラー $status$：$detail$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errMissedComplete": {
+    "message": "モデルがこの部分を訳し漏らしました"
+  },
+  "errMissedMaxTokens": {
+    "message": "出力が長さの上限に達したため、この部分は途中で切れました"
+  },
+  "errMissedRefusal": {
+    "message": "モデルがこの部分の翻訳を拒否しました"
+  },
+  "contentConnectionLost": {
+    "message": "バックグラウンド処理との接続が切れました"
+  },
+  "contentSegmentFailed": {
+    "message": "翻訳に失敗しました：$message$（クリックで詳細を表示）",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastTranslationFailed": {
+    "message": "翻訳に失敗しました：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRetryHint": {
+    "message": "修正後、翻訳をいったんオフにしてからオンにすると、失敗した部分を再試行できます。"
+  },
+  "toastUnknownError": {
+    "message": "不明なエラー"
+  },
+  "toastClose": {
+    "message": "閉じる"
+  },
+  "ytPlayerUnavailable": {
+    "message": "YouTube プレーヤーに接続できません"
+  },
+  "ytReloadRetry": {
+    "message": "ページを再読み込みしてから、もう一度対訳字幕をオンにしてください。"
+  },
+  "ytLiveUnsupported": {
+    "message": "ライブ配信の字幕にはまだ対応していません"
+  },
+  "ytNoSubtitles": {
+    "message": "この動画には字幕がありません"
+  },
+  "ytNoneReceived": {
+    "message": "YouTube から字幕を受信できませんでした"
+  },
+  "ytNoneReceivedHint": {
+    "message": "プレーヤーで CC ボタンを押して字幕をオンにするか、ページを再読み込みしてください。"
+  },
+  "ytAlreadyTarget": {
+    "message": "字幕はすでに$language$なので、翻訳は不要です",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytAlreadyTargetHint": {
+    "message": "別の言語の字幕を翻訳するには、YouTube の字幕メニューでその言語を選んでください。"
+  },
+  "ytFetchFailed": {
+    "message": "元の字幕を取得できませんでした"
+  },
+  "ytFetchFailedHttp": {
+    "message": "元の字幕を取得できませんでした（HTTP $status$）",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytFetchFailedHint": {
+    "message": "YouTube の字幕メニューで元の言語を選び直して、もう一度お試しください。"
+  },
+  "ytEmpty": {
+    "message": "字幕の内容が空です"
+  },
+  "ytTranslateFailed": {
+    "message": "字幕の翻訳に失敗しました：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytRetryHint": {
+    "message": "修正後、対訳字幕をいったんオフにしてからオンにすると再試行できます。"
+  }
+}
