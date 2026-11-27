@@ -55,6 +55,20 @@ describe("check-dist locales", () => {
     expect(r.stderr).toContain("_locales/ja lacks message desc");
   });
 
+  it("ignores stray files in _locales", () => {
+    const dir = localized(manifest, { en: { desc: "a" } });
+    writeFileSync(path.join(dir, "_locales", ".DS_Store"), "");
+    expect(check(dir).code).toBe(0);
+  });
+
+  it("reports a locale folder without messages.json instead of crashing", () => {
+    const dir = localized(manifest, { en: { desc: "a" } });
+    mkdirSync(path.join(dir, "_locales", "ja"));
+    const r = check(dir);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("_locales/ja/messages.json is missing");
+  });
+
   it("rejects __MSG_ strings without default_locale", () => {
     const r = check(dist({ description: "__MSG_desc__" }));
     expect(r.code).toBe(1);

@@ -37,7 +37,13 @@ if (msgRefs.length || manifest.default_locale) {
   else {
     const base = await catalog(manifest.default_locale);
     for (const key of msgRefs) if (!base[key]) problems.push(`manifest references __MSG_${key}__, absent from the default locale`);
-    for (const locale of await readdir(`${dir}/_locales`)) {
+    for (const entry of await readdir(`${dir}/_locales`, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const locale = entry.name;
+      if (!existsSync(`${dir}/_locales/${locale}/messages.json`)) {
+        problems.push(`_locales/${locale}/messages.json is missing`);
+        continue;
+      }
       const other = await catalog(locale);
       for (const key of Object.keys(base)) if (!other[key]) problems.push(`_locales/${locale} lacks message ${key}`);
     }
