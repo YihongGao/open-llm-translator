@@ -89,7 +89,7 @@ Stable handles:
   - `html.llmt-hidden` while translation is toggled off
   - `llmt-toast` shadow root: `.msg`, `.detail`, `.action`, `.close`
 - Options page (a normal tab at `chrome-extension://<extId>/options.html`, so use Playwright locators):
-  - Inputs and selects: `#model`, `#anthropicApiKey`, `#openaiApiKey`, `#geminiApiKey`, `#targetLang`
+  - Inputs and selects: `#model`, `#anthropicApiKey`, `#openaiApiKey`, `#geminiApiKey`, `#targetLang`, `#imageModel` (Anthropic models only)
   - Buttons: role button `儲存`, role button `測試連線`, and one per provider named `清除 Anthropic API key` / `清除 OpenAI API key` / `清除 Gemini API key` (disabled when no key is stored; click opens a `confirm` dialog, so register `page.once("dialog", ...)` first). Journey: `journey-options-clear-key.mjs`
   - Status: `#status`
 - Fixture: `fixtures/article.html`, served at `run.fixture()`. Element ids are the probes:
@@ -97,6 +97,7 @@ Stable handles:
   - `btn`, `code`, `no-translate`: must not translate.
   - `far`: below the fold.
   - Add fixtures as new files in `fixtures/`, never edit a probe another journey relies on.
+- Image translation: fixtures `fixtures/manga.html` (`#page`) and `fixtures/manga-spread.html` (`#a`, `#b` under a transparent cover, `#icon`), overlay `llmt-image-layer` (open shadow root: `.region`, `.chip`, `.status`), mock regions `MOCK_IMAGE_REGIONS`, request helpers `hasImage` / `imageSizeOf`. The right-click is reached through the service worker's `globalThis.llmtTranslateImage(tabId, target)` debug hook (`target` is `{ kind: "src", srcUrl }` or `{ kind: "visible" }`). See [features/image-translation.md](features/image-translation.md).
 
 The keyboard shortcuts (`Alt+A`, `Alt+S`) cannot be driven: Chromium handles extension commands in browser UI, and CDP key events never reach it. Drive the popup instead, and report the shortcut path as not verified. The `chrome.commands.onCommand` handler reaches the same `toggleTab()` as the popup.
 

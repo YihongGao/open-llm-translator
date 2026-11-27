@@ -475,5 +475,94 @@
   },
   "ytRetryHint": {
     "message": "After fixing it, turn bilingual subtitles off and on again to retry."
+  },
+  "menuTranslateImage": {
+    "message": "Translate this image"
+  },
+  "menuTranslateVisibleImages": {
+    "message": "Translate images on screen"
+  },
+  "imageStatusTranslating": {
+    "message": "Translating…"
+  },
+  "imageStatusDone": {
+    "message": "$count$ text regions translated",
+    "description": "Chip on a translated image; count is the number of text regions",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageStatusPartial": {
+    "message": "$count$ text regions translated (visible part only)",
+    "description": "Like imageStatusDone, when only the visible part of the image was translated",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageStatusNone": {
+    "message": "No text found"
+  },
+  "imageStatusFailed": {
+    "message": "Failed",
+    "description": "Chip on an image whose translation failed; the reason is in a notice"
+  },
+  "imageShowOriginal": {
+    "message": "Show original",
+    "description": "Chip button: hide the translation boxes"
+  },
+  "imageShowTranslation": {
+    "message": "Show translation",
+    "description": "Chip button: show the translation boxes again"
+  },
+  "imageRemove": {
+    "message": "Remove translation",
+    "description": "Chip button: remove the translation from this image"
+  },
+  "toastImageFailed": {
+    "message": "Can't translate this image: $message$",
+    "description": "Notice when image translation cannot run or fails; message is the reason",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageErrNeedAnthropicKey": {
+    "message": "Image translation needs an Anthropic (Claude) API key"
+  },
+  "imageErrIframe": {
+    "message": "Images inside an iframe are not supported yet"
+  },
+  "imageErrNotFound": {
+    "message": "Can't find this image on the page"
+  },
+  "imageErrNotVisible": {
+    "message": "Too little of the image is visible. Scroll so more of it is on screen, then try again"
+  },
+  "imageErrNoneOnScreen": {
+    "message": "No translatable image on screen"
+  },
+  "imageErrCapture": {
+    "message": "Couldn't capture the page: $message$",
+    "description": "message is the browser's error",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageErrDeclined": {
+    "message": "The model declined to translate this image"
+  },
+  "optionsImageModel": {
+    "message": "Image translation model",
+    "description": "Options page label for the model used to translate images"
+  },
+  "optionsImageModelHint": {
+    "message": "Right-click an image, or the page, to translate images. Image translation supports Claude only and uses the Anthropic API key. The image you see, or a screenshot of it, is sent to Anthropic."
   }
 }

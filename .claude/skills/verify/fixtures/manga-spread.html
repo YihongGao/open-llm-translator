@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- Verification fixture for "translate images on screen": mimics a manga viewer (measured on vw.mangaz.com).
+     Two pages side by side, each the 900x1280 comic shown 300 px wide (natural size larger than shown), covered by a
+     transparent div, with the <img> cancelling contextmenu so a right-click never reaches Chrome's image context.
+     #icon is too small to translate. #a and #b can be re-pointed by a script (cross-origin case). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Verify fixture: manga spread</title>
+    <style>
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; }
+      #spread { position: relative; display: flex; width: 600px; margin: 20px 0 0 100px; }
+      #spread img { display: block; width: 300px; height: auto; }
+      .screen { position: absolute; inset: 0; background: transparent; }
+      #icon { display: block; width: 100px; height: 100px; margin: 10px 0 0 100px; }
+    </style>
+  </head>
+  <body>
+    <div id="spread">
+      <img id="a" class="image protect" src="manga.png" alt="" />
+      <img id="b" class="image protect" src="manga.png" alt="" />
+      <div class="screen"></div>
+    </div>
+    <img id="icon" src="manga.png" alt="" />
+    <script>
+      for (const img of document.querySelectorAll("img")) img.addEventListener("contextmenu", (e) => e.preventDefault());
+    </script>
+  </body>
+</html>

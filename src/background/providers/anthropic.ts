@@ -6,8 +6,8 @@ import type { ErrorInfo, ProviderEvent, ProviderRequest, TranslationProvider } f
 // Server-side refusal fallback: on a safety decline the API re-runs the request
 // on a fallback model within the same call. Claude Haiku 5.5 has no server-side
 // fallback, so the parameter is only sent for the models below.
-const FALLBACK_BETA = "server-side-fallback-2026-07-01";
-const MODELS_WITH_FALLBACK = new Set(["claude-sonnet-5-5", "claude-opus-5-5"]);
+export const FALLBACK_BETA = "server-side-fallback-2026-07-01";
+export const MODELS_WITH_FALLBACK =new Set(["claude-sonnet-5-5", "claude-opus-5-5"]);
 
 export class AnthropicProvider implements TranslationProvider {
   private readonly client: Anthropic;

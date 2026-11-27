@@ -458,5 +458,85 @@
   },
   "ytRetryHint": {
     "message": "修正後、対訳字幕をいったんオフにしてからオンにすると再試行できます。"
+  },
+  "menuTranslateImage": {
+    "message": "この画像を翻訳"
+  },
+  "menuTranslateVisibleImages": {
+    "message": "画面上の画像を翻訳"
+  },
+  "imageStatusTranslating": {
+    "message": "翻訳中…"
+  },
+  "imageStatusDone": {
+    "message": "$count$ 件のテキストを翻訳",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageStatusPartial": {
+    "message": "$count$ 件のテキストを翻訳（見えている部分のみ）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageStatusNone": {
+    "message": "テキストが見つかりません"
+  },
+  "imageStatusFailed": {
+    "message": "失敗しました"
+  },
+  "imageShowOriginal": {
+    "message": "原文を表示"
+  },
+  "imageShowTranslation": {
+    "message": "翻訳を表示"
+  },
+  "imageRemove": {
+    "message": "翻訳を削除"
+  },
+  "toastImageFailed": {
+    "message": "この画像を翻訳できません：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageErrNeedAnthropicKey": {
+    "message": "画像の翻訳には Anthropic（Claude）の API キーが必要です"
+  },
+  "imageErrIframe": {
+    "message": "iframe 内の画像にはまだ対応していません"
+  },
+  "imageErrNotFound": {
+    "message": "ページ上でこの画像が見つかりません"
+  },
+  "imageErrNotVisible": {
+    "message": "画像がほとんど見えていません。もっと画面に収まるようスクロールして、もう一度お試しください"
+  },
+  "imageErrNoneOnScreen": {
+    "message": "画面上に翻訳できる画像がありません"
+  },
+  "imageErrCapture": {
+    "message": "ページを取得できませんでした：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageErrDeclined": {
+    "message": "モデルがこの画像の翻訳を拒否しました"
+  },
+  "optionsImageModel": {
+    "message": "画像翻訳のモデル"
+  },
+  "optionsImageModelHint": {
+    "message": "画像または画面を右クリックして翻訳します。画像翻訳は Claude のみ対応で、Anthropic の API キーを使います。見えている画像、またはそのスクリーンショットが Anthropic に送信されます。"
   }
 }

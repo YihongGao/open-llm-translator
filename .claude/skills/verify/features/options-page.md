@@ -8,6 +8,7 @@ The settings page where the user enters an API key per provider, picks the model
 - `opt-save` 儲存 persists model, language and only the keys typed into their fields (trimmed); an empty key field keeps the stored key. Fields empty after saving. Shows 已儲存（已開啟的頁面需重新切換翻譯才會套用新語言）.
 - `opt-clear` 清除 next to a key deletes that stored key after a confirm. Proven by `scripts/journey-options-clear-key.mjs`.
 - `opt-test` 測試連線 saves first, then shows `成功：<translated sample>` or `失敗：<reason>`.
+- `opt-image-model` 圖片翻譯 model (`#imageModel`) lists the Anthropic models only, shows the stored `imageModel` (default `claude-sonnet-5-5`), and 儲存 persists it. Its effect on the request is proven by `scripts/journey-image-translation.mjs`.
 - `opt-active-key` the label of the key field the selected model uses is marked active.
 - `opt-ui-language` the UI language select applies and saves on change, without 儲存, and re-localizes the page in place. See [ui-locale.md](./ui-locale.md) (`loc-setting`).
 

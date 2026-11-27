@@ -458,5 +458,85 @@
   },
   "ytRetryHint": {
     "message": "修复后，关闭再重新开启双语字幕即可重试。"
+  },
+  "menuTranslateImage": {
+    "message": "翻译这张图片"
+  },
+  "menuTranslateVisibleImages": {
+    "message": "翻译屏幕上的图片"
+  },
+  "imageStatusTranslating": {
+    "message": "翻译中…"
+  },
+  "imageStatusDone": {
+    "message": "已翻译 $count$ 处文字",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageStatusPartial": {
+    "message": "已翻译 $count$ 处文字（仅可见部分）",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageStatusNone": {
+    "message": "没有找到文字"
+  },
+  "imageStatusFailed": {
+    "message": "翻译失败"
+  },
+  "imageShowOriginal": {
+    "message": "显示原图"
+  },
+  "imageShowTranslation": {
+    "message": "显示翻译"
+  },
+  "imageRemove": {
+    "message": "移除翻译"
+  },
+  "toastImageFailed": {
+    "message": "无法翻译这张图片：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageErrNeedAnthropicKey": {
+    "message": "图片翻译需要 Anthropic（Claude）的 API key"
+  },
+  "imageErrIframe": {
+    "message": "暂不支持 iframe 内的图片"
+  },
+  "imageErrNotFound": {
+    "message": "在页面上找不到这张图片"
+  },
+  "imageErrNotVisible": {
+    "message": "图片可见的部分太小，请滚动到能看见更多后再试一次"
+  },
+  "imageErrNoneOnScreen": {
+    "message": "屏幕上没有可翻译的图片"
+  },
+  "imageErrCapture": {
+    "message": "无法截取页面画面：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageErrDeclined": {
+    "message": "模型拒绝翻译这张图片"
+  },
+  "optionsImageModel": {
+    "message": "图片翻译 model"
+  },
+  "optionsImageModelHint": {
+    "message": "在图片或页面上右键即可翻译。图片翻译只支持 Claude，使用 Anthropic 的 API key，并会将你看到的图片或其截图发送给 Anthropic。"
   }
 }

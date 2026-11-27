@@ -69,9 +69,33 @@ export function userText(body) {
 /** Source segments ("[n] text" lines) a request sent for translation. */
 export const segmentsOf = (body) => [...userText(body).matchAll(/^\[\d+\] (.*)$/gm)].map((m) => m[1]);
 
+/** True for an image-translation request (a user message with an image block). */
+export const hasImage = (body) => (body?.messages?.at(-1)?.content ?? []).some?.((c) => c.type === "image") ?? false;
+
+/**
+ * Where the image mock puts its two regions, as fractions of the image that was sent.
+ * Shared with the journey so it can compute where the boxes must land.
+ */
+export const MOCK_IMAGE_REGIONS = [
+  { box: [0.1, 0.1, 0.4, 0.2], text: `${MOCK_PREFIX}region 1` },
+  { box: [0.55, 0.6, 0.75, 0.9], text: `${MOCK_PREFIX}region 2` },
+];
+
+/** The size the prompt states for the image ("this 422×600 image"). */
+export const imageSizeOf = (body) => {
+  const m = /this (\d+)×(\d+) image/.exec(userText(body));
+  return m ? { width: Number(m[1]), height: Number(m[2]) } : null;
+};
+
 function anthropicStream(body) {
   const text = userText(body);
-  const lines = [...text.matchAll(/^\[(\d+)\] (.*)$/gm)].map((m) => `[${m[1]}] ${MOCK_PREFIX}${m[2]}\n`);
+  const size = hasImage(body) ? imageSizeOf(body) : null;
+  const lines = size
+    ? MOCK_IMAGE_REGIONS.map(
+        (r, i) =>
+          `[${i + 1}] ${[r.box[0] * size.width, r.box[1] * size.height, r.box[2] * size.width, r.box[3] * size.height].map(Math.round).join(",")} | ${r.text}\n`,
+      )
+    : [...text.matchAll(/^\[(\d+)\] (.*)$/gm)].map((m) => `[${m[1]}] ${MOCK_PREFIX}${m[2]}\n`);
   return (
     sse("message_start", {
       message: {
@@ -129,7 +153,7 @@ function serveFixtures() {
       res.writeHead(404).end("not found");
       return;
     }
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    res.writeHead(200, { "content-type": path.extname(file) === ".png" ? "image/png" : "text/html; charset=utf-8" });
     res.end(await readFile(file));
   });
   return new Promise((resolve) =>

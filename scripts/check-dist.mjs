@@ -11,7 +11,7 @@
 //   - no remote or dynamic code: eval(, new Function(, importScripts(,
 //     import("http…") — MV3 forbids executing code not shipped in the package
 //   - no \uXXXX-escaped CJK text (reads as obfuscation to store reviewers)
-//   - no debug helper: llmtMeasurePrompts must be compiled out (__LLMT_DEBUG__)
+//   - no debug helpers: llmtMeasurePrompts and llmtTranslateImage must be compiled out (__LLMT_DEBUG__)
 import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 
@@ -57,11 +57,12 @@ for (const f of files.filter((f) => f.endsWith(".map"))) problems.push(`source m
 // store rejects as Red Titanium.
 const ESCAPED_CJK = /\\u[4-9][0-9A-Fa-f]{3}/;
 const REMOTE_CODE = [/\beval\(/, /\bnew Function\(/, /\bimportScripts\(/, /\bimport\(\s*["'`]https?:/];
-const DEBUG_HELPER = "llmtMeasurePrompts";
+const DEBUG_HELPERS = ["llmtMeasurePrompts", "llmtTranslateImage"];
 for (const f of files.filter((f) => f.endsWith(".js"))) {
   const src = await readFile(`${dir}/${f}`, "utf8");
   for (const re of REMOTE_CODE) if (re.test(src)) problems.push(`${f} matches ${re}`);
-  if (src.includes(DEBUG_HELPER)) problems.push(`${f} contains the debug helper ${DEBUG_HELPER}: gate it on __LLMT_DEBUG__`);
+  for (const helper of DEBUG_HELPERS)
+    if (src.includes(helper)) problems.push(`${f} contains the debug helper ${helper}: gate it on __LLMT_DEBUG__`);
   if (ESCAPED_CJK.test(src)) problems.push(`${f} has \\uXXXX-escaped CJK text: build with esbuild charset "utf8"`);
 }
 
