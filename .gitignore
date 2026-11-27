@@ -10,3 +10,6 @@ release/
 
 # verify skill evidence
 .verify-artifacts/
+
+# landing page build (npm run build:site)
+dist-site/

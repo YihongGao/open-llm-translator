@@ -15,6 +15,7 @@ npx vitest run tests/segmenter.test.ts            # one file
 npx vitest run tests/segmenter.test.ts -t "name"  # one test
 npm run check:dist   # store-rejection checks on dist/ (build first)
 npm run package      # typecheck + test + build + check:dist → release/*.zip
+npm run build:site   # landing page site/ + public/content.css + icon → dist-site/
 ```
 
 E2E (Playwright, real Chromium; build first with `npm run build:e2e`, which writes `dist-e2e/` with `<all_urls>` — never ship it):
@@ -36,6 +37,7 @@ Tests touching the DOM need `// @vitest-environment happy-dom` as the first line
 ## CI and release
 
 - `.github/workflows/security.yml`: CodeQL and dependency review.
+- `.github/workflows/pages.yml`: deploys the landing page to GitHub Pages on pushes to `main` that touch `site/`, `public/content.css`, `public/icons/` or `scripts/build-site.mjs`. The page (`site/`, Traditional Chinese, plain HTML/CSS/JS, no build step beyond copying) carries a mock article whose demo (`site/demo.js`) mimics the extension: same `<llmt-translation>` DOM, the shipped `content.css`, the same viewport scheduling. Keep it in step when that rendering changes. Its cost table and claims must stay traceable to `README.zh-TW.md` and `docs/privacy-policy.md`.
 - `.github/workflows/release.yml`: pushing a `v*.*.*` tag runs `npm run package`, attests the zip, and attaches it to a GitHub Release. The tag must equal the version in both `package.json` and `public/manifest.json`. Uploading to the Chrome Web Store stays manual.
 - Actions are pinned to commit SHAs with the version in a comment; Dependabot (`.github/dependabot.yml`) bumps them. Pin new actions the same way.
 - Changes to user-visible behavior (popup, options page, rendered translations, toasts, YouTube subtitles): also prove it in the real extension with the project `verify` skill (`.claude/skills/verify/`): run `npm run build:e2e`, then the matching journey from its feature map. Unit tests alone don't count as proof for these.
