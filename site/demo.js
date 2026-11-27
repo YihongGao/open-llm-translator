@@ -22,6 +22,22 @@ function announce(msg) {
   if (r) r.textContent = msg;
 }
 
+// Until the Chrome Web Store listing is live, the install buttons point at
+// #chrome-web-store and say so instead of going nowhere. Setting their href to
+// the listing URL turns this off.
+(() => {
+  const toast = document.querySelector("[data-store-toast]");
+  let timer;
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest?.('a[href="#chrome-web-store"]')) return;
+    e.preventDefault();
+    toast.hidden = false;
+    toast.textContent = "Chrome 線上應用程式商店上架中，上架後這個按鈕就能直接安裝。";
+    clearTimeout(timer);
+    timer = setTimeout(() => { toast.hidden = true; }, 5000);
+  });
+})();
+
 // Page translation (Alt+A).
 (() => {
   const page = document.querySelector("[data-demo-page]");
