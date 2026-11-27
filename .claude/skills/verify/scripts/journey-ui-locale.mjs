@@ -171,12 +171,14 @@ for (const c of CASES) await drive(c);
   try {
     const page = await run.newPage(run.fixture("article.html"));
     const popup = await run.openPopup();
+    // Read the popup before opening another tab: focusing the new tab closes the popup on Linux.
+    const popupState = await popup.state();
     const opt = await run.newPage(`chrome-extension://${run.extId}/options.html`);
     await opt.waitForFunction(() => document.querySelector("h1").textContent !== "");
     const observed = {
       uiLanguage: await run.sw.evaluate(() => chrome.i18n.getUILanguage()),
-      popupToggle: (await popup.state()).toggle,
-      popupTargetLang: (await popup.state()).targetLang,
+      popupToggle: popupState.toggle,
+      popupTargetLang: popupState.targetLang,
       optionsTitle: await opt.locator("h1").textContent(),
       optionsHtmlLang: await opt.evaluate(() => document.documentElement.lang),
     };
