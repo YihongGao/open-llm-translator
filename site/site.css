@@ -16,6 +16,8 @@
   --f-mono: "IBM Plex Mono", "Noto Sans TC", ui-monospace, monospace;
   --gutter: 24px;
 }
+/* The English page sets its headings in the Latin face; CJK falls back. */
+:root:lang(en) { --f-cjk: var(--f-sans); }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -54,6 +56,8 @@ p, li, dd { text-wrap: pretty; }
 .top nav a:hover { color: var(--ink); }
 .gh { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; font: 500 13.5px var(--f-mono); border: 1px solid var(--line); padding: 4px 10px; border-radius: 4px; background: var(--surface); color: var(--ink); }
 .gh:hover { border-color: var(--ink); color: var(--ink); }
+.lang-switch { font-size: 14.5px; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.lang-switch:hover { color: var(--ink); text-decoration: underline; }
 
 /* ---- Hero ---- */
 .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6.4fr); gap: 56px; padding-top: 36px; padding-bottom: 72px; align-items: start; }
@@ -250,7 +254,8 @@ html.llmt-yt-on .yt .state { color: var(--accent); border: 1px solid var(--accen
   :root { --gutter: 16px; }
   body { font-size: 16px; }
   .top-in { flex-wrap: wrap; height: auto; row-gap: 0; padding-top: 12px; }
-  .gh { margin-left: auto; }
+  .top-in { column-gap: 16px; }
+  .lang-switch { margin-left: auto; font-size: 14px; }
   .top nav { order: 3; width: 100%; margin: 0; padding: 6px 0 10px; gap: 4px 20px; font-size: 14px; }
   h1 { font-size: clamp(30px, 8.6vw, 38px); }
   .lede { font-size: 16.5px; }
@@ -272,6 +277,12 @@ html.llmt-yt-on .yt .state { color: var(--accent); border: 1px solid var(--accen
   .steps li { grid-template-columns: 40px minmax(0, 1fr); }
   #movie_player { --llmt-yt-size: 13px; }
   #movie_player .caption-window { font-size: 13px; }
+}
+/* Narrow phones: the GitHub button keeps its icon and its accessible name. */
+@media (max-width: 400px) {
+  .top-in { column-gap: 12px; }
+  .gh { padding: 4px 7px; }
+  .gh .gh-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 @media (max-width: 360px) {
   .brand span { font-size: 14px; }

@@ -2,7 +2,7 @@
 // Same DOM and CSS as the real extension (public/content.css): an
 // <llmt-translation> node inside the original element, "…" + .llmt-pending while
 // waiting, html.llmt-hidden to show the original only. No network, no LLM:
-// translations come from each element's data-zh attribute.
+// translations come from each element's data-tr attribute.
 //
 // A visitor who has the real extension installed owns Alt+A through
 // chrome.commands, so the page never sees that keydown and the real extension
@@ -16,6 +16,64 @@ for (const k of document.querySelectorAll("[data-alt]")) {
   if (mac) k.innerHTML = '<span aria-hidden="true">⌥</span><span class="sr-only">Option</span>';
 }
 
+// The page's own words, by <html lang>. Counts are filled in by the functions.
+const paragraphs = (n) => `${n} paragraph${n === 1 ? "" : "s"}`;
+const STRINGS = {
+  "zh-Hant-TW": {
+    translating: (done, total) => `翻譯中 ${done}/${total}`,
+    partial: (n) => `已翻譯 ${n} 段，往下捲會接著翻`,
+    translated: (n) => `已翻譯 ${n} 段`,
+    failed: (n) => `${n} 段翻譯失敗`,
+    chip: { off: "尚未翻譯", hidden: "只顯示原文" },
+    button: { off: "翻譯這篇", on: "只看原文", hidden: "顯示譯文" },
+    sayTranslating: "翻譯中",
+    sayHidden: "已隱藏譯文，只顯示原文",
+    sayShown: "已顯示譯文",
+    ext: {
+      intro: "偵測到你安裝的 Open LLM Translator，現在由它用你的 API key 翻譯這篇示範文章。",
+      translating: "你的擴充功能翻譯中",
+      done: (n) => `你的擴充功能已翻譯 ${n} 段`,
+      failed: (n) => `你的擴充功能有 ${n} 段翻譯失敗`,
+    },
+    pause: "暫停示範影片",
+    play: "播放示範影片",
+    ytButton: { on: "關閉雙語字幕", off: "開啟雙語字幕" },
+    ytState: { on: "雙語字幕：開", off: "雙語字幕：關" },
+    ytSay: { on: "已開啟雙語字幕", off: "已關閉雙語字幕" },
+  },
+  en: {
+    translating: (done, total) => `Translating ${done}/${total}`,
+    partial: (n) => `${paragraphs(n)} translated, scroll for more`,
+    translated: (n) => `${paragraphs(n)} translated`,
+    failed: (n) => `${paragraphs(n)} failed`,
+    chip: { off: "Not translated", hidden: "Original only" },
+    button: { off: "Translate", on: "Hide translation", hidden: "Show translation" },
+    sayTranslating: "Translating",
+    sayHidden: "Translation hidden, showing the original only",
+    sayShown: "Translation shown",
+    ext: {
+      intro: "Open LLM Translator is installed in this browser, so it is now translating this demo article with your API key. ",
+      translating: "Your extension is translating",
+      done: (n) => `Your extension translated ${paragraphs(n)}`,
+      failed: (n) => `Your extension couldn't translate ${paragraphs(n)}`,
+    },
+    pause: "Pause the demo video",
+    play: "Play the demo video",
+    ytButton: { on: "Turn off bilingual subtitles", off: "Turn on bilingual subtitles" },
+    ytState: { on: "Bilingual subtitles: on", off: "Bilingual subtitles: off" },
+    ytSay: { on: "Bilingual subtitles on", off: "Bilingual subtitles off" },
+  },
+};
+const UI = STRINGS[document.documentElement.lang] ?? STRINGS.en;
+
+// Remember a visitor's explicit language choice, so the root page sends them
+// back to it instead of guessing from the browser language (see lang.js).
+document.addEventListener("click", (e) => {
+  const lang = e.target.closest?.("[data-site-lang]")?.dataset.siteLang;
+  if (!lang) return;
+  try { localStorage.setItem("llmt-site-lang", lang); } catch {}
+});
+
 // Screen-reader announcements through the page's polite live region.
 function announce(msg) {
   const r = document.querySelector("[data-llmt-status]");
@@ -27,7 +85,7 @@ function announce(msg) {
   const page = document.querySelector("[data-demo-page]");
   if (!page) return;
   const html = document.documentElement;
-  const els = [...page.querySelectorAll("[data-zh]")];
+  const els = [...page.querySelectorAll("[data-tr]")];
   const DEMO_ATTR = "data-llmt-demo";
 
   let mode = "demo"; // demo → extension (one way)
@@ -40,9 +98,11 @@ function announce(msg) {
   const VIEWPORT_MARGIN = "600px 0px";
   const FLUSH_DELAY_MS = 120;
 
-  // Same rule as layoutFor() in src/content/segmenter.ts.
+  // Same rule as chooseLayout() in src/content/segmenter.ts.
   function layoutFor(text) {
     const t = text.trim().replace(/\s+/g, " ");
+    const cjk = (t.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu) ?? []).length;
+    if (cjk > t.length / 2) return t.length <= 16 ? "inline" : "block";
     const words = t.split(" ").length;
     return words <= 5 && t.length <= 48 && !/[.!?:;]\s/.test(t) ? "inline" : "block";
   }
@@ -57,12 +117,11 @@ function announce(msg) {
   function render() {
     if (mode === "extension") return renderExtension();
     let on;
-    if (queued > 0) on = `翻譯中 ${done}/${done + queued}`;
-    else if (done < els.length) on = `已翻譯 ${done} 段，往下捲會接著翻`;
-    else on = `已翻譯 ${done} 段`;
-    setChip({ off: "尚未翻譯", on, hidden: "只顯示原文" }[state], state);
-    for (const b of document.querySelectorAll("[data-llmt-label]"))
-      b.textContent = { off: "翻譯這篇", on: "只看原文", hidden: "顯示譯文" }[state];
+    if (queued > 0) on = UI.translating(done, done + queued);
+    else if (done < els.length) on = UI.partial(done);
+    else on = UI.translated(done);
+    setChip({ ...UI.chip, on }[state], state);
+    for (const b of document.querySelectorAll("[data-llmt-label]")) b.textContent = UI.button[state];
   }
 
   function setHidden(hidden) {
@@ -95,11 +154,11 @@ function announce(msg) {
       const id = setTimeout(() => {
         lineTimers.delete(id);
         node.classList.remove("llmt-pending");
-        node.textContent = el.dataset.zh;
+        node.textContent = el.dataset.tr;
         queued--;
         done++;
         render();
-        if (queued === 0) announce(`已翻譯 ${done} 段`);
+        if (queued === 0) announce(UI.translated(done));
       }, t);
       lineTimers.add(id);
     }
@@ -132,16 +191,16 @@ function announce(msg) {
     if (mode !== "demo") return;
     if (state === "off") {
       state = "on";
-      announce("翻譯中");
+      announce(UI.sayTranslating);
       for (const el of els) io.observe(el);
     } else if (state === "on") {
       state = "hidden";
       setHidden(true);
-      announce("已隱藏譯文，只顯示原文");
+      announce(UI.sayHidden);
     } else {
       state = "on";
       setHidden(false);
-      announce("已顯示譯文");
+      announce(UI.sayShown);
       // Re-observe what is still waiting, so segments scrolled near while
       // hidden get an intersection callback now.
       for (const el of els) {
@@ -167,20 +226,20 @@ function announce(msg) {
     const pending = nodes.filter((n) => n.classList.contains("llmt-pending")).length;
     const failed = nodes.filter((n) => n.classList.contains("llmt-error")).length;
     let phase, text;
-    if (html.classList.contains("llmt-hidden")) [phase, text] = ["hidden", "只顯示原文"];
-    else if (pending > 0 || nodes.length === 0) [phase, text] = ["translating", nodes.length ? `翻譯中 ${nodes.length - pending}/${nodes.length}` : "翻譯中"];
-    else if (failed > 0) [phase, text] = ["failed", `${failed} 段翻譯失敗`];
-    else [phase, text] = ["done", `已翻譯 ${nodes.length} 段`];
+    if (html.classList.contains("llmt-hidden")) [phase, text] = ["hidden", UI.chip.hidden];
+    else if (pending > 0 || nodes.length === 0) [phase, text] = ["translating", nodes.length ? UI.translating(nodes.length - pending, nodes.length) : UI.sayTranslating];
+    else if (failed > 0) [phase, text] = ["failed", UI.failed(failed)];
+    else [phase, text] = ["done", UI.translated(nodes.length)];
     setChip(text, phase === "hidden" ? "hidden" : "on");
     if (phase !== lastPhase) {
       lastPhase = phase;
       announce(
         intro +
         {
-          translating: "你的擴充功能翻譯中",
-          done: `你的擴充功能已翻譯 ${nodes.length} 段`,
-          failed: `你的擴充功能有 ${failed} 段翻譯失敗`,
-          hidden: "已隱藏譯文，只顯示原文",
+          translating: UI.ext.translating,
+          done: UI.ext.done(nodes.length),
+          failed: UI.ext.failed(failed),
+          hidden: UI.sayHidden,
         }[phase],
       );
       intro = "";
@@ -203,7 +262,7 @@ function announce(msg) {
     const note = document.querySelector("[data-ext-note]");
     note.hidden = false;
     if (hadFocus) note.focus();
-    intro = "偵測到你安裝的 Open LLM Translator，現在由它用你的 API key 翻譯這篇示範文章。";
+    intro = UI.ext.intro;
     renderExtension();
   }
 
@@ -244,12 +303,9 @@ function announce(msg) {
 (() => {
   const player = document.getElementById("movie_player");
   if (!player) return;
-  const cues = [
-    ["Twice a year, the keeper climbs all 214 steps to clean the lens by hand.", "每年兩次，看守人爬完全部 214 級階梯，親手擦亮透鏡。"],
-    ["A single fingerprint can scatter the beam and cut its range by a mile.", "一枚指紋就可能讓光束散開，照射距離少掉一英里。"],
-    ["So the cloth is cotton, the water is distilled, and nobody rushes.", "所以布用棉布，水用蒸餾水，而且沒有人趕時間。"],
-    ["By dusk, the light reaches ships nineteen miles out at sea.", "到了黃昏，燈光能照到十九英里外海上的船。"],
-  ];
+  // Each cue is a <p> in the page's template: the original as its text, the
+  // translation in data-tr.
+  const cues = [...player.querySelector("template[data-yt-cues]").content.querySelectorAll("[data-tr]")].map((p) => [p.textContent, p.dataset.tr]);
   const $ = (id) => document.getElementById(id);
   const overlay = player.querySelector(".llmt-yt-overlay");
   let i = 0, on = false, sec = 12, tick = 0;
@@ -269,7 +325,7 @@ function announce(msg) {
   function setPlaying(p) {
     playing = p;
     pp.textContent = p ? "❚❚" : "▶";
-    pp.setAttribute("aria-label", p ? "暫停示範影片" : "播放示範影片");
+    pp.setAttribute("aria-label", p ? UI.pause : UI.play);
   }
   setPlaying(playing);
   pp.addEventListener("click", () => setPlaying(!playing));
@@ -286,13 +342,14 @@ function announce(msg) {
   function render() {
     document.documentElement.classList.toggle("llmt-yt-on", on);
     overlay.hidden = !on;
-    for (const b of document.querySelectorAll("[data-yt-label]")) b.textContent = on ? "關閉雙語字幕" : "開啟雙語字幕";
-    for (const s of document.querySelectorAll("[data-yt-state]")) s.textContent = on ? "雙語字幕：開" : "雙語字幕：關";
+    const k = on ? "on" : "off";
+    for (const b of document.querySelectorAll("[data-yt-label]")) b.textContent = UI.ytButton[k];
+    for (const s of document.querySelectorAll("[data-yt-state]")) s.textContent = UI.ytState[k];
   }
   function toggle() {
     on = !on;
     render();
-    announce(on ? "已開啟雙語字幕" : "已關閉雙語字幕");
+    announce(UI.ytSay[on ? "on" : "off"]);
   }
   // Starts on, so visitors see bilingual captions without pressing anything.
   on = true;
