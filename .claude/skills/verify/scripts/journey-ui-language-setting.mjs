@@ -13,6 +13,28 @@ const check = (name, ok, detail) => {
 };
 const eq = (name, actual, expected) => check(name, actual === expected, { actual, expected });
 
+// Fonts Chromium actually drew the element's glyphs with (CDP), not the CSS it was asked for:
+// system-ui swallows CJK text in the browser locale's font, so a correct-looking stack can still
+// draw Japanese with Traditional Chinese glyphs. Font names are checked on Windows only, where the
+// stock fonts are known; elsewhere they are logged.
+async function renderedFonts(page, expression) {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send("DOM.enable");
+    await cdp.send("CSS.enable");
+    await cdp.send("DOM.getDocument", { depth: -1, pierce: true });
+    const { result } = await cdp.send("Runtime.evaluate", { expression });
+    const { nodeId } = await cdp.send("DOM.requestNode", { objectId: result.objectId });
+    const { fonts } = await cdp.send("CSS.getPlatformFontsForNode", { nodeId });
+    return fonts.map((f) => f.familyName);
+  } finally {
+    await cdp.detach();
+  }
+}
+const JA_FONT = /^(Yu Gothic|Meiryo|MS (P)?Gothic)/;
+const checkFonts = (name, fonts, ok) =>
+  process.platform === "win32" ? check(name, ok(fonts), fonts) : console.log(`INFO ${name}: ${JSON.stringify(fonts)}`);
+
 const JA = {
   h1: "Open LLM Translator の設定",
   htmlLang: "ja",
@@ -55,11 +77,8 @@ try {
   await run.screenshot(opt, "options-ja-under-zh-TW.png", { fullPage: true });
   eq("[ja] options <html lang>", await opt.evaluate(() => document.documentElement.lang), JA.htmlLang);
   eq("[ja] options <title>", await opt.title(), JA.h1);
-  // Chromium's CJK fallback for system-ui follows the browser locale (zh-TW here), so a Japanese
-  // page needs its own font stack or it draws Japanese with Traditional Chinese glyphs.
-  const fontOf = (p) => p.evaluate(() => getComputedStyle(document.body).fontFamily);
-  const ffOpt = await fontOf(opt);
-  check("[ja] options use the Japanese font stack, not the Traditional Chinese one", ffOpt.includes("Yu Gothic UI") && !ffOpt.includes("PingFang TC"), ffOpt);
+  const hintFonts = await renderedFonts(opt, 'document.querySelector(".hint")');
+  checkFonts("[ja] options draw Japanese with a Japanese font, not JhengHei", hintFonts, (f) => f.some((n) => JA_FONT.test(n)) && !f.some((n) => n.includes("JhengHei")));
   eq("[ja] the select shows 日本語", await opt.locator("#uiLanguage").inputValue(), "ja");
   eq("[ja] Follow browser option is relabelled", await opt.locator("#uiLanguage option").first().textContent(), JA.autoOption);
   eq("[ja] typed API key survived", await opt.locator("#openaiApiKey").inputValue(), "sk-typed-not-saved");
@@ -89,8 +108,9 @@ try {
   check("[ja] popup toggle", ps.toggle.startsWith(JA.toggle), ps.toggle);
   eq("[ja] popup <html lang>", await popup.eval((w, doc) => doc.documentElement.lang), JA.htmlLang);
   check("[ja] popup model options are Japanese", (await popup.eval((w, doc) => [...doc.querySelectorAll("#model option")].map((o) => o.textContent))).includes(JA.modelOption));
+  // The popup is not a Playwright page, so no CDP: check that its Japanese fonts come before system-ui.
   const ffPopup = await popup.eval((w, doc) => w.getComputedStyle(doc.body).fontFamily);
-  check("[ja] popup uses the Japanese font stack", ffPopup.includes("Yu Gothic UI") && !ffPopup.includes("PingFang TC"), ffPopup);
+  check("[ja] popup lists Japanese fonts ahead of system-ui", ffPopup.indexOf("Yu Gothic UI") >= 0 && ffPopup.indexOf("Yu Gothic UI") < ffPopup.indexOf("system-ui") && !ffPopup.includes("JhengHei"), ffPopup);
   await run.writeJson("popup-ja.json", ps);
   await popup.click("#toggle");
   const s = await waitForPage(page, (st) => st.toast?.message, { label: "401 toast (ja)" });
@@ -98,11 +118,9 @@ try {
   // That text came from the service worker's t(), which applied the setting for this request.
   check("[ja] the service worker's error text is Japanese", s.toast.message.includes(JA.toastKeyInvalid), s.toast);
   await run.screenshot(page, "toast-ja.png");
-  const toastFont = await page.evaluate(() => {
-    const box = document.querySelector("llmt-toast").shadowRoot.querySelector(".box");
-    return { lang: box.lang, font: getComputedStyle(box).fontFamily };
-  });
-  check("[ja] toast is lang=ja with the Japanese font stack", toastFont.lang === "ja" && toastFont.font.includes("Yu Gothic UI") && !toastFont.font.includes("PingFang TC"), toastFont);
+  eq("[ja] toast is lang=ja", await page.evaluate(() => document.querySelector("llmt-toast").shadowRoot.querySelector(".box").lang), "ja");
+  const toastFonts = await renderedFonts(page, 'document.querySelector("llmt-toast").shadowRoot.querySelector(".msg")');
+  checkFonts("[ja] toast draws Japanese with a Japanese font, not JhengHei", toastFonts, (f) => f.some((n) => JA_FONT.test(n)) && !f.some((n) => n.includes("JhengHei")));
 
   // --- a tab injected before the language changed follows the service worker's language --
   // `page` still runs the content script that was told "ja". Switch to English, then let
@@ -131,8 +149,8 @@ try {
   eq("[auto] options <html lang>", await opt.evaluate(() => document.documentElement.lang), ZH.htmlLang);
   eq("[auto] uiLanguage saved", (await run.storage()).uiLanguage, "auto");
   await run.screenshot(opt, "options-auto-under-zh-TW.png", { fullPage: true });
-  const ffAuto = await fontOf(opt);
-  check("[auto] options keep the Traditional Chinese font stack", ffAuto.includes("PingFang TC") && ffAuto.includes("Microsoft JhengHei"), ffAuto);
+  const autoFonts = await renderedFonts(opt, 'document.querySelector(".hint")');
+  checkFonts("[auto] options draw Traditional Chinese with Microsoft JhengHei UI, as before", autoFonts, (f) => f.includes("Microsoft JhengHei UI"));
 
   const page2 = await run.newPage(run.fixture("article.html"));
   const popup2 = await run.openPopup();

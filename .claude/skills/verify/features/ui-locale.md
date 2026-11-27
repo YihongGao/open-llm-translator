@@ -41,4 +41,5 @@ Preconditions:
 - The options page paints its English HTML fallback for a moment before `localizePage()` runs. Wait for a localized value, not for the page load. With a stored choice the page localizes twice, first in the browser's language and then in the choice, so wait for the choice's text. In 8 headless loads the first paint already showed the choice (storage answers in about 10 ms).
 - With target `en` on the English fixture nothing is sent for translation, so the journey picks another target before triggering the toast.
 - `<html lang>` is the catalog's language, not the browser's: under fr it is `en`, because the text is English.
+- A computed `font-family` does not prove which font drew the text. On Windows `system-ui` draws CJK in the browser locale's font and never falls through to the next family, so Japanese can look right in the CSS and still render with Microsoft JhengHei. Check the fonts actually used with CDP `CSS.getPlatformFontsForNode`, as `journey-ui-language-setting.mjs` does.
 - Opening chrome://extensions/shortcuts is not drivable, so the command descriptions are proven through `chrome.commands.getAll()`, the same data that page lists.
