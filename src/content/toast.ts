@@ -21,12 +21,18 @@ const CSS = `
   box-sizing: border-box; width: min(360px, calc(100vw - 32px));
   padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
   background: var(--bg); color: var(--fg); box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  font: 14px/1.5 system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+  font: 14px/1.5 var(--font);
   display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: start;
 }
 @media (prefers-color-scheme: dark) {
   .box { --bg: #262c36; --fg: #f0f6fc; --muted: #9198a1; --border: #3d444d; --accent: #4493f8; --accent-fg: #ffffff; }
 }
+/* The CJK fallback of system-ui follows the browser's locale, not the UI language, so each
+   language names its own fonts (keep in sync with popup.html and options.html). lang is set on .box. */
+.box { --font: system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; }
+.box:lang(en) { --font: system-ui, -apple-system, sans-serif; }
+.box:lang(ja) { --font: system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", Meiryo, "Noto Sans JP", sans-serif; }
+.box:lang(zh-CN) { --font: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
 .icon { font-size: 16px; line-height: 1.4; }
 .msg { font-weight: 600; word-break: break-word; }
 .detail { grid-column: 2; color: var(--muted); font-size: 12px; }
@@ -55,6 +61,7 @@ export function showToast(opts: ToastOptions): void {
 
   const box = document.createElement("div");
   box.className = "box";
+  box.lang = t("pageLang");
   box.setAttribute("role", "alert");
 
   const icon = document.createElement("span");

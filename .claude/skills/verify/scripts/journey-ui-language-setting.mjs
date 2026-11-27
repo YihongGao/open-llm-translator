@@ -55,6 +55,11 @@ try {
   await run.screenshot(opt, "options-ja-under-zh-TW.png", { fullPage: true });
   eq("[ja] options <html lang>", await opt.evaluate(() => document.documentElement.lang), JA.htmlLang);
   eq("[ja] options <title>", await opt.title(), JA.h1);
+  // Chromium's CJK fallback for system-ui follows the browser locale (zh-TW here), so a Japanese
+  // page needs its own font stack or it draws Japanese with Traditional Chinese glyphs.
+  const fontOf = (p) => p.evaluate(() => getComputedStyle(document.body).fontFamily);
+  const ffOpt = await fontOf(opt);
+  check("[ja] options use the Japanese font stack, not the Traditional Chinese one", ffOpt.includes("Yu Gothic UI") && !ffOpt.includes("PingFang TC"), ffOpt);
   eq("[ja] the select shows 日本語", await opt.locator("#uiLanguage").inputValue(), "ja");
   eq("[ja] Follow browser option is relabelled", await opt.locator("#uiLanguage option").first().textContent(), JA.autoOption);
   eq("[ja] typed API key survived", await opt.locator("#openaiApiKey").inputValue(), "sk-typed-not-saved");
@@ -84,6 +89,8 @@ try {
   check("[ja] popup toggle", ps.toggle.startsWith(JA.toggle), ps.toggle);
   eq("[ja] popup <html lang>", await popup.eval((w, doc) => doc.documentElement.lang), JA.htmlLang);
   check("[ja] popup model options are Japanese", (await popup.eval((w, doc) => [...doc.querySelectorAll("#model option")].map((o) => o.textContent))).includes(JA.modelOption));
+  const ffPopup = await popup.eval((w, doc) => w.getComputedStyle(doc.body).fontFamily);
+  check("[ja] popup uses the Japanese font stack", ffPopup.includes("Yu Gothic UI") && !ffPopup.includes("PingFang TC"), ffPopup);
   await run.writeJson("popup-ja.json", ps);
   await popup.click("#toggle");
   const s = await waitForPage(page, (st) => st.toast?.message, { label: "401 toast (ja)" });
@@ -91,6 +98,11 @@ try {
   // That text came from the service worker's t(), which applied the setting for this request.
   check("[ja] the service worker's error text is Japanese", s.toast.message.includes(JA.toastKeyInvalid), s.toast);
   await run.screenshot(page, "toast-ja.png");
+  const toastFont = await page.evaluate(() => {
+    const box = document.querySelector("llmt-toast").shadowRoot.querySelector(".box");
+    return { lang: box.lang, font: getComputedStyle(box).fontFamily };
+  });
+  check("[ja] toast is lang=ja with the Japanese font stack", toastFont.lang === "ja" && toastFont.font.includes("Yu Gothic UI") && !toastFont.font.includes("PingFang TC"), toastFont);
 
   // --- a tab injected before the language changed follows the service worker's language --
   // `page` still runs the content script that was told "ja". Switch to English, then let
@@ -119,6 +131,8 @@ try {
   eq("[auto] options <html lang>", await opt.evaluate(() => document.documentElement.lang), ZH.htmlLang);
   eq("[auto] uiLanguage saved", (await run.storage()).uiLanguage, "auto");
   await run.screenshot(opt, "options-auto-under-zh-TW.png", { fullPage: true });
+  const ffAuto = await fontOf(opt);
+  check("[auto] options keep the Traditional Chinese font stack", ffAuto.includes("PingFang TC") && ffAuto.includes("Microsoft JhengHei"), ffAuto);
 
   const page2 = await run.newPage(run.fixture("article.html"));
   const popup2 = await run.openPopup();

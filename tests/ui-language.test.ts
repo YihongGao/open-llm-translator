@@ -139,6 +139,13 @@ describe("content script strings", () => {
     expect(pageError("x", { uiLanguage: "ja" })).toBe("翻訳に失敗しました：x");
   });
 
+  it("set the toast's lang to the UI language so its font stack matches", async () => {
+    await start("ja");
+    pageError("x", { uiLanguage: "ja" });
+    const box = [...document.querySelectorAll("llmt-toast")].at(-1)!.shadowRoot!.querySelector(".box")!;
+    expect(box.getAttribute("lang")).toBe("ja");
+  });
+
   it("adopt the language a segment-error names over the one injected with (a stale tab)", async () => {
     await start("ja");
     expect(pageError("x", { uiLanguage: "en" })).toBe("Translation failed: x");
