@@ -3,7 +3,8 @@
 // A "segment" is a maximal run of inline content (text nodes + inline
 // elements) inside one block-level parent. A block with a nested list, e.g.
 // <li>Concepts<ul>…</ul></li>, yields the run "Concepts" and then recurses
-// into the <ul>. Each segment is identified by its *anchor* — the last node
+// into the <ul>. Two <br>s in a row also end a run (paragraphs written
+// without <p>, as on many forums). Each segment is identified by its *anchor* — the last node
 // of the run — which stays stable across rescans because our own inserted
 // nodes are ignored when runs are computed.
 
@@ -27,6 +28,9 @@ const INLINE_TAGS = new Set([
   "I", "IMG", "INS", "KBD", "LABEL", "MARK", "Q", "S", "SAMP", "SMALL", "SPAN", "STRONG",
   "SUB", "SUP", "TIME", "U", "VAR", "WBR",
 ]);
+
+const isBr = (n: Node) => n.nodeType === Node.ELEMENT_NODE && (n as Element).tagName.toUpperCase() === "BR";
+const isBlank = (n: Node) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? "").trim() === "";
 
 const BLOCK_SELECTOR =
   "address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hr,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
@@ -260,6 +264,16 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
         // display:none is not inherited, so it is always the element's own choice;
         // an inline-tagged one is dropped without splitting the sentence around it.
         if (INLINE_TAGS.has(c.tagName.toUpperCase()) && displayOf(c) === "none") continue;
+        // <br><br> is a paragraph break on pages without <p> (forum posts). The
+        // run keeps the first <br> as its anchor, so the translation lands
+        // between the two breaks and the paragraph gap stays the same.
+        let last = run.length - 1;
+        while (last >= 0 && isBlank(run[last]!)) last--;
+        if (isBr(c) && last >= 0 && isBr(run[last]!)) {
+          flush(el, run.slice(0, last + 1));
+          run = [];
+          continue;
+        }
         if (isInline(c)) {
           if (!hiddenOf(c)) run.push(c);
         } else {
