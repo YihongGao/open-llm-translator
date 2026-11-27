@@ -53,7 +53,7 @@ export class OpenAIProvider implements TranslationProvider {
       body: JSON.stringify({
         model: this.model,
         instructions: buildSystemPrompt(req.targetLang),
-        input: buildUserMessage(req.texts, req.page),
+        input: buildUserMessage(req.texts, req.page, req.targetLang),
         reasoning: { effort: REASONING_EFFORT[this.model] ?? "low" },
         max_output_tokens: 16000,
         stream: true,

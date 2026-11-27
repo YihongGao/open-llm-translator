@@ -34,7 +34,7 @@ export class AnthropicProvider implements TranslationProvider {
         // Explicit breakpoint on the static prefix: every batch of every page
         // shares it, so after the first request it is read at the cache rate.
         system: [{ type: "text", text: buildSystemPrompt(req.targetLang), cache_control: { type: "ephemeral" } }],
-        messages: [{ role: "user", content: buildUserMessage(req.texts, req.page) }],
+        messages: [{ role: "user", content: buildUserMessage(req.texts, req.page, req.targetLang) }],
         ...(withFallback ? { betas: [FALLBACK_BETA], fallbacks: "default" as const } : {}),
       },
       { signal },

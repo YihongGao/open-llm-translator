@@ -57,7 +57,7 @@ export class GeminiProvider implements TranslationProvider {
       body: JSON.stringify({
         model: this.model,
         system_instruction: buildSystemPrompt(req.targetLang),
-        input: buildUserMessage(req.texts, req.page),
+        input: buildUserMessage(req.texts, req.page, req.targetLang),
         generation_config: { thinking_level: THINKING_LEVEL[this.model] ?? "low", max_output_tokens: 16000 },
         stream: true,
         // Page text should not be retained server-side for later retrieval.
