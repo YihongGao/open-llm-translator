@@ -26,7 +26,7 @@
 
 ## 安裝
 
-**Chrome Web Store**：審核中，上架後會在這裡補上連結。
+**Chrome Web Store**：[Open LLM Translator](https://chromewebstore.google.com/detail/open-llm-translator/kfpgaeciomngjohpbdpenmnknimkccgp)
 
 **從 GitHub Release 手動安裝**：
 

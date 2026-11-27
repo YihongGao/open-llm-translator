@@ -26,7 +26,7 @@ The interface is available in English, Japanese, Simplified Chinese and Traditio
 
 ## Install
 
-**Chrome Web Store**: under review; the link will be added here once it is published.
+**Chrome Web Store**: [Open LLM Translator](https://chromewebstore.google.com/detail/open-llm-translator/kfpgaeciomngjohpbdpenmnknimkccgp)
 
 **From a GitHub Release** (manual install):
 
