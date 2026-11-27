@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en" class="llmt-yt-on">
+<head translate="no">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open LLM Translator | Free bilingual translation for Chrome</title>
+<meta name="description" content="A Chrome extension that shows a translation under each paragraph of a web page, so you can read both. Free, with no subscription: bring your own Claude, GPT or Gemini API key and pay only for what you use.">
+<link rel="alternate" hreflang="zh-Hant-TW" href="https://yihonggao.github.io/open-llm-translator/zh-tw/">
+<link rel="alternate" hreflang="en" href="https://yihonggao.github.io/open-llm-translator/en/">
+<link rel="alternate" hreflang="x-default" href="https://yihonggao.github.io/open-llm-translator/">
+<link rel="icon" href="../icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../content.css">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+<svg class="defs" aria-hidden="true"><symbol id="chrome-mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="#fff"/><path fill="#EA4335" d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0z"/><path fill="#34A853" d="M1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29z"/><path fill="#FBBC04" d="M15.273 7.636a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364z"/><circle cx="12" cy="12" r="4.364" fill="#1A73E8"/></symbol><symbol id="gh-mark" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol></svg>
+<a class="skip" href="#main" translate="no">Skip to main content</a>
+
+<header class="top" translate="no">
+  <div class="wrap top-in">
+    <a class="brand" href="#"><img src="../icons/icon-32.png" alt="" width="24" height="24"><span>Open LLM Translator</span></a>
+    <nav aria-label="Page sections">
+      <a href="#bilingual">Features</a>
+      <a href="#start">Install</a>
+      <a href="#safety">Safety</a>
+      <a href="#cost">Cost</a>
+    </nav>
+    <a class="lang-switch" href="../zh-tw/" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-site-lang="zh-tw">繁體中文</a>
+    <a class="gh" href="https://github.com/YihongGao/open-llm-translator"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg><span class="gh-text">GitHub</span></a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero wrap" aria-labelledby="hero-h">
+    <div class="pitch" translate="no">
+      <p class="eyebrow">Chrome extension · Bilingual reading</p>
+      <h1 id="hero-h">Bilingual translation for Chrome. Free, no subscription.</h1>
+      <p class="lede">Translate web pages and YouTube subtitles with one keystroke, and read the original and the translation together.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://chromewebstore.google.com/detail/open-llm-translator/kfpgaeciomngjohpbdpenmnknimkccgp"><svg class="gh-mark" aria-hidden="true"><use href="#chrome-mark"/></svg>Add to Chrome</a>
+        <a class="btn" href="https://github.com/YihongGao/open-llm-translator"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>Source on GitHub</a>
+      </div>
+
+      <dl class="ledger" aria-label="Cost summary">
+        <div><dt>Extension</dt><dd>Free</dd></div>
+        <div><dt>Subscription</dt><dd>None</dd></div>
+        <div><dt>One long article <span class="nw">(default model)</span></dt><dd>about US$0.002–0.003</dd></div>
+      </dl>
+    </div>
+
+    <div class="demo" id="demo" role="group" aria-label="Web page translation demo">
+      <div class="try" translate="no">
+        <p class="try-label">Try it now: <span class="nw">press <kbd data-alt>Alt</kbd><span aria-hidden="true">+</span><kbd>A</kbd></span><span class="ext-hint" data-ext-hint hidden>, or click the extension icon in the toolbar</span></p>
+        <span class="state" data-demo-state>Not translated</span>
+        <button type="button" class="btn small" data-llmt-toggle data-llmt-label>Translate</button>
+      </div>
+      <p class="ext-note" data-ext-note tabindex="-1" translate="no" hidden>Open LLM Translator is installed, so the translations below come from your copy of the extension and your own <span class="nw">API key</span>, and count toward your usage. Only the demo article on this page is translated.</p>
+
+      <div class="frame">
+        <div class="chrome" aria-hidden="true" translate="no">
+          <svg viewBox="0 0 16 16" width="12" height="12"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor"/></svg>
+          <span class="url">tidepool-notes.example/zh-tw/posts/tokens</span>
+          <img class="ext" src="../icons/icon-32.png" alt="" width="18" height="18">
+        </div>
+
+        <article class="site" lang="zh-Hant-TW" data-demo-page>
+          <div class="site-top">
+            <span class="site-logo" translate="no"><i></i>潮池筆記</span>
+            <span class="site-nav">
+              <a href="#" tabindex="-1" data-tr="Basics">基礎</a>
+              <a href="#" tabindex="-1" data-tr="Prompting">提問技巧</a>
+              <a href="#" tabindex="-1" data-tr="About">關於</a>
+            </span>
+          </div>
+          <div class="site-body">
+            <p class="crumbs" data-tr="Internals · 6 min read">原理・閱讀時間 6 分鐘</p>
+            <h2 data-tr="Tokens: the unit the model actually sees">Token：模型真正看到的單位</h2>
+            <p class="site-lede" data-tr="Every prompt you send is turned into a sequence of integer IDs before the model reads a single word. Many of the strange problems you hit in production start at this step.">你送出的每個 prompt，在模型讀到任何一個字之前，都會先轉成一串整數 ID。你在正式環境遇到的許多怪問題，都是從這一步開始的。</p>
+            <h3 data-tr="How text becomes tokens">文字怎麼變成 token</h3>
+            <p data-tr="Most tokenizers today use byte-pair encoding (BPE). Training starts from raw bytes and repeatedly merges the most frequent adjacent pair into a new token, until the vocabulary reaches its target size, usually between 50,000 and 200,000 entries.">現在大多數的 tokenizer 用的是 byte-pair encoding（BPE）。訓練時從原始位元組開始，反覆把最常相鄰出現的一對合併成新的 token，直到詞彙表達到目標大小，通常在 5 萬到 20 萬之間。</p>
+            <p data-tr="Common English words end up as a single token, usually with the leading space attached, so “ the” and “the” are different IDs. Rare words, typos and long numbers are split into several pieces, and where the splits fall is not always intuitive.">常見的英文單字最後會變成單一 token，而且通常連著前面的空白，所以「 the」和「the」是不同的 ID。少見的字、錯字和長數字會被切成好幾塊，切在哪裡也不一定合乎直覺。</p>
+            <h3 data-tr="What this explains">這能解釋什麼</h3>
+            <p data-tr="Character-level tasks are hard because the model never sees characters. Counting letters or reversing a string means reasoning about pieces it cannot see inside, and arithmetic on long numbers goes wrong when the digits are split unevenly.">字元層級的任務很難，因為模型從來沒看過字元。數字母、把字串倒過來，都得對著看不到內部的區塊推理；長數字的算術也會因為數字被切得長短不一而出錯。</p>
+            <p data-tr="Whitespace matters too. One extra space at the end of a prompt can change the output, because it changes which token the model expects next.">空白也有影響。prompt 結尾多一個空白，就可能改變輸出，因為它改變了模型預期接下來出現的 token。</p>
+            <p class="site-note" data-tr="Tip: when an output looks strange, first run the prompt through that model's own tokenizer and look at the pieces it is actually split into.">小提醒：遇到奇怪的輸出，先把 prompt 丟進該模型自己的 tokenizer，看看實際被切成哪些塊。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet wrap" id="bilingual" aria-labelledby="bi-h" translate="no">
+    <p class="sheet-no" aria-hidden="true">01<span>Web</span></p>
+    <div class="sheet-body">
+      <h2 id="bi-h">Read the original and the translation together</h2>
+      <p class="sub">Press <span class="nw"><span data-alt>Alt</span>+A</span> on a page in another language. Each translation goes under its paragraph, and the original stays exactly as it was.</p>
+      <div class="bi-grid">
+        <ul class="pair stack">
+          <li>
+            <h3>Spot a bad translation</h3>
+            <p>If a line reads oddly, glance up at the original. No switching tabs, no guessing.</p>
+          </li>
+          <li>
+            <h3>Practice a language you're learning</h3>
+            <p>Learning Chinese, Japanese or Korean? Read the original first, and drop to the English line when you get stuck. The original never goes away; the English sits underneath it.</p>
+          </li>
+        </ul>
+        <figure class="closeup" aria-label="Close-up: one paragraph of the demo article, with the translation on the line below">
+          <div class="closeup-paper site" lang="zh-Hant-TW">
+            <p class="closeup-url" aria-hidden="true" lang="en">Close-up</p>
+            <h3>文字怎麼變成 token<span class="closeup-tr" lang="en">How text becomes tokens</span></h3>
+            <p>常見的英文單字最後會變成單一 token，而且通常連著前面的空白，所以「 the」和「the」是不同的 ID。<span class="closeup-tr" lang="en">Common English words end up as a single token, usually with the leading space attached, so “ the” and “the” are different IDs.</span></p>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet wrap" id="youtube" aria-labelledby="yt-h" translate="no">
+    <p class="sheet-no" aria-hidden="true">02<span>Video</span></p>
+    <div class="sheet-body">
+      <h2 id="yt-h">Bilingual YouTube subtitles</h2>
+      <p class="sub">Press <span class="nw"><span data-alt>Alt</span>+S</span> on a YouTube video. The original and translated subtitles appear together in the player, including in full screen.</p>
+      <div class="yt">
+        <div class="yt-copy">
+          <p>Listen to the original and glance at the English line when you lose the thread. It doubles as listening practice.</p>
+          <div class="try">
+            <span class="state" data-yt-state>Bilingual subtitles: on</span>
+            <button type="button" class="btn small" data-yt-toggle data-yt-label>Turn off bilingual subtitles</button>
+          </div>
+        </div>
+        <div id="movie_player" role="group" aria-label="YouTube bilingual subtitles demo, illustrated scene">
+          <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect width="1600" height="900" fill="#28394a"/>
+            <rect y="430" width="1600" height="470" fill="#1b2a38"/>
+            <circle cx="360" cy="300" r="70" fill="#e8d9b0" opacity=".85"/>
+            <path d="M0 600 L420 560 L640 610 L640 900 L0 900Z" fill="#141e28"/>
+            <rect x="430" y="250" width="70" height="330" fill="#d9dcd6"/>
+            <rect x="430" y="330" width="70" height="40" fill="#8a3b32"/>
+            <rect x="430" y="450" width="70" height="40" fill="#8a3b32"/>
+            <rect x="418" y="226" width="94" height="28" fill="#2f3d48"/>
+            <rect x="440" y="196" width="50" height="32" fill="#f4e7b2"/>
+            <path d="M430 196 L465 168 L500 196Z" fill="#2f3d48"/>
+            <path d="M490 212 L1600 120 L1600 300Z" fill="#f4e7b2" opacity=".18"/>
+            <path d="M0 700 Q400 680 800 705 T1600 690 L1600 900 L0 900Z" fill="#10202d" opacity=".7"/>
+            <path d="M1160 640 l90 0 l-14 22 l-62 0z" fill="#0c151d"/>
+            <rect x="1198" y="600" width="4" height="40" fill="#0c151d"/>
+          </svg>
+          <template data-yt-cues>
+            <p data-tr="Twice a year, the keeper climbs all 214 steps to clean the lens by hand.">每年兩次，看守人爬完全部 214 級階梯，親手擦亮透鏡。</p>
+            <p data-tr="A single fingerprint can scatter the beam and cut its range by a mile.">一枚指紋就可能讓光束散開，照射距離少掉一英里。</p>
+            <p data-tr="So the cloth is cotton, the water is distilled, and nobody rushes.">所以布用棉布，水用蒸餾水，而且沒有人趕時間。</p>
+            <p data-tr="By dusk, the light reaches ships nineteen miles out at sea.">到了黃昏，燈光能照到十九英里外海上的船。</p>
+          </template>
+          <div class="caption-window" lang="zh-Hant-TW"><span id="yt-native"></span></div>
+          <div class="llmt-yt-overlay">
+            <div class="llmt-yt-row" lang="zh-Hant-TW"><span class="llmt-yt-line llmt-yt-src" id="yt-src"></span></div>
+            <div class="llmt-yt-row"><span class="llmt-yt-line llmt-yt-tr" id="yt-tr"></span></div>
+          </div>
+          <div class="ctl"><div class="prog"><i id="yt-prog"></i></div><button type="button" class="pp" data-yt-play aria-label="Pause the demo video">❚❚</button><span id="yt-time">0:12 / 8:40</span><span class="cc">CC</span><img class="ext" src="../icons/icon-32.png" alt="" width="18" height="18"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet wrap" id="cost" aria-labelledby="cost-h" translate="no">
+    <p class="sheet-no" aria-hidden="true">03<span>Cost</span></p>
+    <div class="sheet-body">
+      <h2 id="cost-h">The extension is free. You pay only when you translate with AI.</h2>
+      <ul class="trio">
+        <li><h3>The developer charges nothing</h3><p>Open LLM Translator is free to use, with no subscription and no account.</p></li>
+        <li><h3>You pay for the AI you use</h3><p>Translations run on your own <span class="nw">API key</span>. The AI provider bills you for what you use, and the money never passes through us. A month without translating costs nothing.</p></li>
+        <li><h3>Works with the major LLM providers</h3><p>Anthropic (Claude), OpenAI (GPT) or Google (Gemini). You only need one.</p></li>
+      </ul>
+
+      <details class="cost-more">
+      <summary><span>What an article, a book or a month costs</span></summary>
+      <p class="sub">Rough costs of translating Chinese, Japanese or Korean into English, with the default <span class="nw">Claude Haiku</span> and the next tier up, <span class="nw">Claude Sonnet</span>.</p>
+
+      <div class="receipts">
+        <figure class="receipt">
+          <figcaption><span class="r-title">A long article</span><span class="r-meta">About 3,000 English words</span></figcaption>
+          <dl>
+            <div><dt>Haiku (default)</dt><dd>about US$0.002–0.003</dd></div>
+            <div><dt>Sonnet</dt><dd>about US$0.05–0.06</dd></div>
+          </dl>
+        </figure>
+        <figure class="receipt">
+          <figcaption><span class="r-title">A book</span><span class="r-meta">About 100,000 English words</span></figcaption>
+          <dl>
+            <div><dt>Haiku (default)</dt><dd>about US$0.08–0.10</dd></div>
+            <div><dt>Sonnet</dt><dd>about US$1.6–1.9</dd></div>
+          </dl>
+        </figure>
+        <figure class="receipt">
+          <figcaption><span class="r-title">A month of heavy reading</span><span class="r-meta">10 long articles a day, about 900,000 English words</span></figcaption>
+          <dl>
+            <div><dt>Haiku (default)</dt><dd>about US$0.7–0.9</dd></div>
+            <div><dt>Sonnet</dt><dd>about US$14–17</dd></div>
+          </dl>
+        </figure>
+      </div>
+
+      <ul class="notes">
+        <li>Translations are cached on your computer, so the same text on the same site isn't billed again.</li>
+        <li>Measured: a full page of technical documentation (about 75 paragraphs) cost about US$0.0013 with Haiku.</li>
+        <li><span class="nw">GPT-6 Luna</span> is priced the same as Haiku; <span class="nw">Gemini 3.5 Flash-Lite</span> costs about <span class="nw">4 to 5 times</span> as much. <a class="more" href="https://github.com/YihongGao/open-llm-translator/blob/main/README.md#cost"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>Full list of models and prices</a></li>
+      </ul>
+      <p class="foot-note">How these are estimated: one English word corresponds to about 1.5 Chinese, Japanese or Korean characters, each character is 1 to 2 tokens, and each English word is about 1.3 tokens. The translation instructions are cached, so they add little. Prices are November 2026 API prices per million tokens: Haiku input US$0.10 and output US$0.50; Sonnet US$2 and US$10. Actual cost depends on the text.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="sheet wrap" id="safety" aria-labelledby="safety-h" translate="no">
+    <p class="sheet-no" aria-hidden="true">04<span>Safety</span></p>
+    <div class="sheet-body">
+      <h2 id="safety-h">Your API key stays on your computer. It goes only to your AI provider.</h2>
+      <ul class="trio">
+        <li><h3>Web pages can't read your key</h3><p>The key does not sync through Chrome, and neither web pages nor other extensions can read it.</p></li>
+        <li><h3>No server in between</h3><p>Nothing is sent until you translate. Then your browser sends the paragraphs on screen, the page title and the page address (without the query string) straight to the provider you chose. We collect no analytics or usage data.</p></li>
+        <li><h3>Open source</h3><p>The code is on GitHub under the Apache-2.0 license, for anyone to read.</p></li>
+      </ul>
+      <p class="aside">For an extra layer of safety, create a separate key just for this extension and set a spending limit with your provider.</p>
+      <p class="links">
+        <a class="more" href="https://github.com/YihongGao/open-llm-translator/blob/main/docs/api-key-security.md"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>How your API key is protected</a>
+        <a class="more" href="https://github.com/YihongGao/open-llm-translator/blob/main/docs/privacy-policy.md"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>Privacy policy</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="sheet wrap" id="start" aria-labelledby="start-h" translate="no">
+    <p class="sheet-no" aria-hidden="true">05<span>Install</span></p>
+    <div class="sheet-body">
+      <h2 id="start-h">Three steps to bilingual reading</h2>
+      <ol class="steps">
+        <li>
+          <h3>Install the extension</h3>
+          <p>Install it from the Chrome Web Store.</p>
+          <p class="step-cta"><a class="btn primary" href="https://chromewebstore.google.com/detail/open-llm-translator/kfpgaeciomngjohpbdpenmnknimkccgp"><svg class="gh-mark" aria-hidden="true"><use href="#chrome-mark"/></svg>Add to Chrome</a></p>
+        </li>
+        <li>
+          <h3>Paste your API key</h3>
+          <p>Right-click the extension icon and choose Options. Pick a model, paste that provider's key and click <span class="nw">Test connection</span>. No key yet? Get one from <a href="https://console.anthropic.com/settings/keys">Anthropic</a>, <a href="https://platform.openai.com/api-keys">OpenAI</a> or <a href="https://aistudio.google.com/apikey">Google AI Studio</a>.</p>
+        </li>
+        <li>
+          <h3>Press <span class="nw"><span data-alt>Alt</span>+A</span> on a page in another language</h3>
+          <p>Or click the extension icon and choose Translate this page. Press <span class="nw"><span data-alt>Alt</span>+A</span> again to show only the original. Translations are in your browser's language by default, and you can change that in Options.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="foot" translate="no">
+  <div class="wrap foot-in">
+    <p class="foot-name"><img src="../icons/icon-32.png" alt="" width="20" height="20">Open LLM Translator · Apache-2.0</p>
+    <nav aria-label="Footer links">
+      <a href="https://github.com/YihongGao/open-llm-translator"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>GitHub</a>
+      <a href="https://github.com/YihongGao/open-llm-translator/blob/main/docs/privacy-policy.md"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>Privacy policy</a>
+      <a href="https://github.com/YihongGao/open-llm-translator/issues/new/choose"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg>Report an issue</a>
+    </nav>
+  </div>
+</footer>
+
+<p class="sr-only" aria-live="polite" data-llmt-status translate="no"></p>
+<script src="../demo.js"></script>
+</body>
+</html>
