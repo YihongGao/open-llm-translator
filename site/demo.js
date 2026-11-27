@@ -6,8 +6,8 @@
 //
 // A visitor who has the real extension installed owns Alt+A through
 // chrome.commands, so the page never sees that keydown and the real extension
-// translates the mock article instead. The demo watches for that and hands over
-// (see "Extension mode" below).
+// translates the page instead, mock article included. The demo watches for
+// that and hands over (see "Extension mode" below).
 
 // Chrome on macOS reports "macOS" in userAgentData.platform and "MacIntel" in
 // navigator.platform; check both, case-insensitively.
@@ -30,10 +30,12 @@ const STRINGS = {
     sayHidden: "已隱藏譯文，只顯示原文",
     sayShown: "已顯示譯文",
     ext: {
-      intro: "偵測到你安裝的 Open LLM Translator，現在由它用你的 API key 翻譯這篇示範文章。",
+      intro: "偵測到你安裝的 Open LLM Translator，現在由它用你的 API key 翻譯這一頁。",
       translating: "你的擴充功能翻譯中",
       done: (n) => `你的擴充功能已翻譯 ${n} 段`,
       failed: (n) => `你的擴充功能有 ${n} 段翻譯失敗`,
+      same: "示範文章已經是你的目標語言",
+      saySame: "示範文章已經是你的目標語言，擴充功能沒有翻它",
     },
     pause: "暫停示範影片",
     play: "播放示範影片",
@@ -52,10 +54,12 @@ const STRINGS = {
     sayHidden: "Translation hidden, showing the original only",
     sayShown: "Translation shown",
     ext: {
-      intro: "Open LLM Translator is installed in this browser, so it is now translating this demo article with your API key. ",
+      intro: "Open LLM Translator is installed in this browser, so it is now translating this page with your API key. ",
       translating: "Your extension is translating",
       done: (n) => `Your extension translated ${paragraphs(n)}`,
       failed: (n) => `Your extension couldn't translate ${paragraphs(n)}`,
+      same: "Already in your language",
+      saySame: "The demo article is already in your target language, so the extension left it as is",
     },
     pause: "Pause the demo video",
     play: "Play the demo video",
@@ -215,18 +219,25 @@ function announce(msg) {
   // ---- Extension mode ------------------------------------------------------
   // The real extension's nodes carry no DEMO_ATTR, and it flips
   // html.llmt-hidden on its own. Either sign means the visitor's installed
-  // extension is now translating the mock article with their own key.
-  const foreignNodes = () => document.querySelectorAll(`llmt-translation:not([${DEMO_ATTR}])`);
-  const extensionPresent = () => foreignNodes().length > 0 || html.classList.contains("llmt-hidden") !== demoHidden;
+  // extension is now translating the page with their own key. It translates
+  // the whole page; the chip counts the mock article only.
+  const foreignNodes = (root) => [...root.querySelectorAll(`llmt-translation:not([${DEMO_ATTR}])`)];
+  const isPending = (n) => n.classList.contains("llmt-pending");
+  const extensionPresent = () => foreignNodes(document).length > 0 || html.classList.contains("llmt-hidden") !== demoHidden;
 
   let lastPhase = "";
   let intro = ""; // said once, together with the first phase
   function renderExtension() {
-    const nodes = [...foreignNodes()];
-    const pending = nodes.filter((n) => n.classList.contains("llmt-pending")).length;
+    const nodes = foreignNodes(page);
+    const pending = nodes.filter(isPending).length;
     const failed = nodes.filter((n) => n.classList.contains("llmt-error")).length;
+    // The extension queues every on-screen segment, article included, in one
+    // pass. Nothing in the article once the rest has settled means it had
+    // nothing to translate: the article is already in the target language.
+    const settled = (all) => all.length > 0 && !all.some(isPending);
     let phase, text;
     if (html.classList.contains("llmt-hidden")) [phase, text] = ["hidden", UI.chip.hidden];
+    else if (nodes.length === 0 && settled(foreignNodes(document))) [phase, text] = ["same", UI.ext.same];
     else if (pending > 0 || nodes.length === 0) [phase, text] = ["translating", nodes.length ? UI.translating(nodes.length - pending, nodes.length) : UI.sayTranslating];
     else if (failed > 0) [phase, text] = ["failed", UI.failed(failed)];
     else [phase, text] = ["done", UI.translated(nodes.length)];
@@ -239,6 +250,7 @@ function announce(msg) {
           translating: UI.ext.translating,
           done: UI.ext.done(nodes.length),
           failed: UI.ext.failed(failed),
+          same: UI.ext.saySame,
           hidden: UI.sayHidden,
         }[phase],
       );
@@ -272,10 +284,10 @@ function announce(msg) {
     } else renderExtension();
   });
   mo.observe(html, { attributes: true, attributeFilter: ["class"] });
-  // Only the mock article: everything else is translate="no", so the real
-  // extension never writes there, and the chip and live region (which this
-  // observer's own callback updates) stay out of the loop.
-  mo.observe(page, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class"] });
+  // The whole body, since the extension writes anywhere outside translate="no".
+  // The callback's own chip and live-region writes come back here once and stop:
+  // setChip skips identical markup and announce() runs only on a phase change.
+  mo.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class"] });
 
   addEventListener("keydown", (e) => {
     // e.code, not e.key: ⌥A on macOS types "å".

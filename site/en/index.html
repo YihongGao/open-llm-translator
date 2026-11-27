@@ -17,9 +17,9 @@
 </head>
 <body>
 <svg class="defs" aria-hidden="true"><symbol id="chrome-mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="#fff"/><path fill="#EA4335" d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0z"/><path fill="#34A853" d="M1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29z"/><path fill="#FBBC04" d="M15.273 7.636a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364z"/><circle cx="12" cy="12" r="4.364" fill="#1A73E8"/></symbol><symbol id="gh-mark" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol></svg>
-<a class="skip" href="#main" translate="no">Skip to main content</a>
+<a class="skip" href="#main">Skip to main content</a>
 
-<header class="top" translate="no">
+<header class="top">
   <div class="wrap top-in">
     <a class="brand" href="#"><img src="../icons/icon-32.png" alt="" width="24" height="24"><span>Open LLM Translator</span></a>
     <nav aria-label="Page sections">
@@ -28,14 +28,14 @@
       <a href="#safety">Safety</a>
       <a href="#cost">Cost</a>
     </nav>
-    <a class="lang-switch" href="../zh-tw/" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-site-lang="zh-tw">繁體中文</a>
+    <a class="lang-switch" translate="no" href="../zh-tw/" hreflang="zh-Hant-TW" lang="zh-Hant-TW" data-site-lang="zh-tw">繁體中文</a>
     <a class="gh" href="https://github.com/YihongGao/open-llm-translator"><svg class="gh-mark" aria-hidden="true"><use href="#gh-mark"/></svg><span class="gh-text">GitHub</span></a>
   </div>
 </header>
 
 <main id="main">
   <section class="hero wrap" aria-labelledby="hero-h">
-    <div class="pitch" translate="no">
+    <div class="pitch">
       <p class="eyebrow">Chrome extension · Bilingual reading</p>
       <h1 id="hero-h">Bilingual translation for Chrome. Free, no subscription.</h1>
       <p class="lede">Translate web pages and YouTube subtitles with one keystroke, and read the original and the translation together.</p>
@@ -57,7 +57,7 @@
         <span class="state" data-demo-state>Not translated</span>
         <button type="button" class="btn small" data-llmt-toggle data-llmt-label>Translate</button>
       </div>
-      <p class="ext-note" data-ext-note tabindex="-1" translate="no" hidden>Open LLM Translator is installed, so the translations below come from your copy of the extension and your own <span class="nw">API key</span>, and count toward your usage. Only the demo article on this page is translated.</p>
+      <p class="ext-note" data-ext-note tabindex="-1" translate="no" hidden>Open LLM Translator is installed, so the translations on this page come from your copy of the extension and your own <span class="nw">API key</span>, and count toward your usage. Text already in your target language is not sent.</p>
 
       <div class="frame">
         <div class="chrome" aria-hidden="true" translate="no">
@@ -92,7 +92,7 @@
     </div>
   </section>
 
-  <section class="sheet wrap" id="bilingual" aria-labelledby="bi-h" translate="no">
+  <section class="sheet wrap" id="bilingual" aria-labelledby="bi-h">
     <p class="sheet-no" aria-hidden="true">01<span>Web</span></p>
     <div class="sheet-body">
       <h2 id="bi-h">Read the original and the translation together</h2>
@@ -108,7 +108,7 @@
             <p>Learning Chinese, Japanese or Korean? Read the original first, and drop to the English line when you get stuck. The original never goes away; the English sits underneath it.</p>
           </li>
         </ul>
-        <figure class="closeup" aria-label="Close-up: one paragraph of the demo article, with the translation on the line below">
+        <figure class="closeup" translate="no" aria-label="Close-up: one paragraph of the demo article, with the translation on the line below">
           <div class="closeup-paper site" lang="zh-Hant-TW">
             <p class="closeup-url" aria-hidden="true" lang="en">Close-up</p>
             <h3>文字怎麼變成 token<span class="closeup-tr" lang="en">How text becomes tokens</span></h3>
@@ -119,7 +119,7 @@
     </div>
   </section>
 
-  <section class="sheet wrap" id="youtube" aria-labelledby="yt-h" translate="no">
+  <section class="sheet wrap" id="youtube" aria-labelledby="yt-h">
     <p class="sheet-no" aria-hidden="true">02<span>Video</span></p>
     <div class="sheet-body">
       <h2 id="yt-h">Bilingual YouTube subtitles</h2>
@@ -127,12 +127,12 @@
       <div class="yt">
         <div class="yt-copy">
           <p>Listen to the original and glance at the English line when you lose the thread. It doubles as listening practice.</p>
-          <div class="try">
+          <div class="try" translate="no">
             <span class="state" data-yt-state>Bilingual subtitles: on</span>
             <button type="button" class="btn small" data-yt-toggle data-yt-label>Turn off bilingual subtitles</button>
           </div>
         </div>
-        <div id="movie_player" role="group" aria-label="YouTube bilingual subtitles demo, illustrated scene">
+        <div id="movie_player" translate="no" role="group" aria-label="YouTube bilingual subtitles demo, illustrated scene">
           <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
             <rect width="1600" height="900" fill="#28394a"/>
             <rect y="430" width="1600" height="470" fill="#1b2a38"/>
@@ -166,7 +166,7 @@
     </div>
   </section>
 
-  <section class="sheet wrap" id="cost" aria-labelledby="cost-h" translate="no">
+  <section class="sheet wrap" id="cost" aria-labelledby="cost-h">
     <p class="sheet-no" aria-hidden="true">03<span>Cost</span></p>
     <div class="sheet-body">
       <h2 id="cost-h">The extension is free. You pay only when you translate with AI.</h2>
@@ -214,7 +214,7 @@
     </div>
   </section>
 
-  <section class="sheet wrap" id="safety" aria-labelledby="safety-h" translate="no">
+  <section class="sheet wrap" id="safety" aria-labelledby="safety-h">
     <p class="sheet-no" aria-hidden="true">04<span>Safety</span></p>
     <div class="sheet-body">
       <h2 id="safety-h">Your API key stays on your computer. It goes only to your AI provider.</h2>
@@ -231,7 +231,7 @@
     </div>
   </section>
 
-  <section class="sheet wrap" id="start" aria-labelledby="start-h" translate="no">
+  <section class="sheet wrap" id="start" aria-labelledby="start-h">
     <p class="sheet-no" aria-hidden="true">05<span>Install</span></p>
     <div class="sheet-body">
       <h2 id="start-h">Three steps to bilingual reading</h2>
@@ -254,7 +254,7 @@
   </section>
 </main>
 
-<footer class="foot" translate="no">
+<footer class="foot">
   <div class="wrap foot-in">
     <p class="foot-name"><img src="../icons/icon-32.png" alt="" width="20" height="20">Open LLM Translator · Apache-2.0</p>
     <nav aria-label="Footer links">

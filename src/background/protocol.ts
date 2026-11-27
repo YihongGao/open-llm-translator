@@ -65,14 +65,23 @@ export function buildSystemPrompt(targetLang: string): string {
 /** Longest page title included in the prompt (code points). */
 export const MAX_TITLE_CHARS = 200;
 
-export function buildUserMessage(texts: readonly string[], page: PageContext): string {
+export function buildUserMessage(texts: readonly string[], page: PageContext, targetLang: string): string {
   const lines = texts.map((t, i) => `[${i + 1}] ${toSingleLine(t)}`);
   // The content script already caps the title; repeated here because the
   // request comes from a page-controlled context.
   const title = [...toSingleLine(page.title)].slice(0, MAX_TITLE_CHARS).join("");
-  return [`Page title: ${title}`, `Page URL: ${pageUrlForPrompt(page.url)}`, "", "<segments>", ...lines, "</segments>"].join(
-    "\n",
-  );
+  return [
+    `Page title: ${title}`,
+    `Page URL: ${pageUrlForPrompt(page.url)}`,
+    "",
+    "<segments>",
+    ...lines,
+    "</segments>",
+    "",
+    // The system prompt alone lost to page context: Japanese requests from a
+    // Chinese-titled /zh-tw/ page came back in Chinese (Haiku 5.5, 5 of 5).
+    `Translate every segment into ${languageName(targetLang)}.`,
+  ].join("\n");
 }
 
 /**

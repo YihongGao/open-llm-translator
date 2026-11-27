@@ -23,7 +23,7 @@ content script (injected on click)            background service worker
 1. The content script (`src/content/index.ts`) segments the page, translates only what is in the viewport, rescans on DOM mutation, and batches segments (at most 3000 characters or 40 segments per batch).
 2. It opens one long-lived `Port` per page and sends `translate` requests. Results stream back as `segment` / `segment-error` / `batch-done` events. Wire types are in `src/shared/messages.ts`.
 3. The background worker (`src/background/index.ts`) caps concurrent API requests at 3 across all tabs, aborts work when the port disconnects, and calls `runBatch` in `translator.ts`.
-4. `translator.ts` dedupes, checks the IndexedDB cache (key = SHA-256 of origin + model + target language + text), and sends misses to the provider. Every segment receives either a translation or an error.
+4. `translator.ts` dedupes, checks the IndexedDB cache (key = SHA-256 of a revision + origin + model + target language + text; bumping the revision drops translations a prompt fix made wrong), and sends misses to the provider. Every segment receives either a translation or an error.
 5. `protocol.ts` builds the prompt and parses the streamed output line by line.
 
 ## Files
