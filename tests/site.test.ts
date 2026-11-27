@@ -98,6 +98,19 @@ describe("landing page build", () => {
     const [zh, en] = Object.values(LANG_PAGES).map(read);
     expect(skeleton(en!)).toEqual(skeleton(zh!));
   });
+
+  // A visitor's installed extension translates the page like any other, so
+  // one whose target differs from the page's language can read all of it.
+  // translate="no" is kept only where the demo writes (it would feed its own
+  // observer) or where a translation is already shown or simulated.
+  it.each(Object.values(LANG_PAGES))("%s leaves only demo parts out of the real extension's reach", (page) => {
+    const excluded = [...read(page).matchAll(/<([a-z]+)([^>]*)\btranslate="no"/g)].map(
+      ([, tag, rest]) => `${tag} ${/(?:class|id)="([\w-]+)/.exec(rest!)?.[1] ?? ""}`.trim(),
+    );
+    expect(excluded.sort()).toEqual(
+      ["head", "a lang-switch", "div try", "div try", "p ext-note", "div chrome", "span site-logo", "figure closeup", "div movie_player", "p sr-only"].sort(),
+    );
+  });
 });
 
 describe("pickSiteLang", () => {
