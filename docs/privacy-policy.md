@@ -34,7 +34,7 @@ How the provider stores or uses this data is governed by your agreement with tha
 
 | Data | Where | Purpose |
 |---|---|---|
-| Your API keys, selected model, target language | `chrome.storage.local` | Settings. Not synced through Chrome Sync, and not readable by web pages or content scripts |
+| Your API keys, selected model, target language, interface language | `chrome.storage.local` | Settings. Not synced through Chrome Sync, and not readable by web pages or content scripts |
 | Translations | IndexedDB inside the extension | Cache, so the same text is not translated (and billed) twice. Each entry holds the translated text, the model name and a timestamp, under a hashed key |
 
 This data stays on your device. Removing the extension deletes all of it.
@@ -84,7 +84,7 @@ Open LLM Translator（以下稱「本擴充功能」）用大型語言模型（L
 
 ## 存在您電腦上的資料
 
-- **API key、所選 model、目標語言**：存在 `chrome.storage.local`，不經 Chrome Sync 同步，網頁與 content script 都讀不到。
+- **API key、所選 model、目標語言、介面語言**：存在 `chrome.storage.local`，不經 Chrome Sync 同步，網頁與 content script 都讀不到。
 - **譯文快取**：存在本擴充功能的 IndexedDB，避免同一段文字重複翻譯和計費。每筆只有譯文、model 名稱和時間，key 是雜湊值。
 
 這些資料只留在您的電腦上，移除本擴充功能就會一併刪除。

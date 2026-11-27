@@ -9,6 +9,7 @@ The settings page where the user enters an API key per provider, picks the model
 - `opt-clear` 清除 next to a key deletes that stored key after a confirm. Proven by `scripts/journey-options-clear-key.mjs`.
 - `opt-test` 測試連線 saves first, then shows `成功：<translated sample>` or `失敗：<reason>`.
 - `opt-active-key` the label of the key field the selected model uses is marked active.
+- `opt-ui-language` the UI language select applies and saves on change, without 儲存, and re-localizes the page in place. See [ui-locale.md](./ui-locale.md) (`loc-setting`).
 
 ## How to get to it (user POV)
 

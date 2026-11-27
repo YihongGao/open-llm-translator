@@ -1,5 +1,5 @@
 // Per-batch pipeline: dedupe -> cache lookup -> provider stream -> cache write.
-// Its only chrome.* use is chrome.i18n through t(); everything else is injected
+// Its only chrome.* use is chrome.i18n.getUILanguage through t(); everything else is injected
 // (deps) so it can be unit-tested with fakes.
 
 import { t, type MessageKey } from "../shared/i18n";
