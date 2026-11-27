@@ -179,6 +179,21 @@
   "optionsTargetLang": {
     "message": "Target language"
   },
+  "optionsUiLanguage": {
+    "message": "UI language"
+  },
+  "optionsUiLangAuto": {
+    "message": "Follow browser ($language$)",
+    "description": "First option of the UI language select; language is that language's own name, e.g. Follow browser (English)",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsUiLangHint": {
+    "message": "Applies right away. The shortcut descriptions on chrome://extensions/shortcuts and the Chrome Web Store description always follow the browser's language."
+  },
   "optionsSave": {
     "message": "Save"
   },

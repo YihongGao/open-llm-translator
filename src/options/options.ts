@@ -1,4 +1,13 @@
-import { localizePage, t } from "../shared/i18n";
+import {
+  UI_LOCALES,
+  UI_LOCALE_LABELS,
+  browserLanguage,
+  localeFor,
+  localizePage,
+  parseUiLanguage,
+  setUiLanguage,
+  t,
+} from "../shared/i18n";
 import type { TestConnectionResult } from "../shared/messages";
 import {
   PROVIDERS,
@@ -22,6 +31,7 @@ localizePage();
 const form = $<HTMLFormElement>("form");
 const model = $<HTMLSelectElement>("model");
 const targetLang = $<HTMLSelectElement>("targetLang");
+const uiLanguage = $<HTMLSelectElement>("uiLanguage");
 const status = $<HTMLSpanElement>("status");
 const testBtn = $<HTMLButtonElement>("test");
 /**
@@ -33,14 +43,40 @@ const keyInputs = PROVIDERS.map((p) => {
   const input = $<HTMLInputElement>(p.keySetting);
   const label = document.querySelector<HTMLLabelElement>(`label[for="${input.id}"]`)!;
   const clearBtn = document.querySelector<HTMLButtonElement>(`.clear-key[data-for="${p.keySetting}"]`)!;
-  // The label reads "Anthropic API key", the same in every UI language.
-  clearBtn.setAttribute("aria-label", t("optionsClearAria", label.textContent ?? ""));
-  label.dataset.activeLabel = t("optionsActiveKeyLabel");
-  return { provider: p, input, example: input.placeholder, clearBtn };
+  return { provider: p, input, label, example: input.placeholder, clearBtn };
 });
 
-fillModelSelect(model);
 for (const l of TARGET_LANGUAGES) targetLang.add(new Option(l.label, l.tag));
+
+/** Last settings read from or written to storage; what the key placeholders mirror. */
+let stored: Settings | undefined;
+
+/** Text that is not in the markup, rebuilt whenever the UI language changes. Selections stay. */
+function fillGeneratedText(): void {
+  const selectedModel = model.value;
+  fillModelSelect(model);
+  model.value = selectedModel;
+  const chosen = uiLanguage.value || "auto";
+  uiLanguage.replaceChildren(
+    new Option(t("optionsUiLangAuto", UI_LOCALE_LABELS[localeFor(browserLanguage())]), "auto"),
+    ...UI_LOCALES.map((l) => new Option(UI_LOCALE_LABELS[l], l)),
+  );
+  uiLanguage.value = chosen;
+  for (const { label, clearBtn } of keyInputs) {
+    // The label reads "Anthropic API key", the same in every UI language.
+    clearBtn.setAttribute("aria-label", t("optionsClearAria", label.textContent ?? ""));
+    label.dataset.activeLabel = t("optionsActiveKeyLabel");
+  }
+  if (stored) showStoredKeys(stored);
+}
+
+/** Re-renders the page in the current UI language, in place: typed key fields and selections are untouched. */
+function relocalize(): void {
+  localizePage();
+  fillGeneratedText();
+}
+
+fillGeneratedText();
 
 function show(message: string, kind: "ok" | "err" | "" = ""): void {
   status.textContent = message;
@@ -66,14 +102,32 @@ async function save(): Promise<void> {
   const typed = Object.fromEntries(keyInputs.map(({ provider, input }) => [provider.keySetting, input.value])) as Record<KeySetting, string>;
   await saveSettings({ model: model.value, targetLang: targetLang.value, ...typedKeyPatch(typed) });
   for (const { input } of keyInputs) input.value = "";
-  showStoredKeys(await loadSettings());
+  stored = await loadSettings();
+  showStoredKeys(stored);
 }
 
 void loadSettings().then((s) => {
+  stored = s;
+  uiLanguage.value = s.uiLanguage;
+  // The first paint used the browser's language; apply the user's choice (a no-op for "auto").
+  if (s.uiLanguage !== "auto") {
+    setUiLanguage(s.uiLanguage);
+    relocalize();
+  }
   model.value = s.model;
   targetLang.value = s.targetLang;
   markActiveKey();
   showStoredKeys(s);
+});
+
+// Applies and saves at once, like the toolbar menu's selects. Only this setting is written:
+// unsaved model, language and key edits stay as typed.
+uiLanguage.addEventListener("change", () => {
+  const value = parseUiLanguage(uiLanguage.value);
+  setUiLanguage(value);
+  relocalize();
+  show("");
+  void saveSettings({ uiLanguage: value });
 });
 
 model.addEventListener("change", markActiveKey);
@@ -87,6 +141,7 @@ for (const { provider, input, example, clearBtn } of keyInputs) {
   clearBtn.addEventListener("click", () => {
     if (!confirm(t("optionsConfirmDeleteKey", providerLabel(provider)))) return;
     void clearApiKey(provider).then(() => {
+      if (stored) stored = { ...stored, [provider.keySetting]: "" };
       input.value = "";
       input.placeholder = example;
       clearBtn.disabled = true;

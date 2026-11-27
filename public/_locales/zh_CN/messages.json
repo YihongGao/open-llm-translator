@@ -164,6 +164,21 @@
   "optionsTargetLang": {
     "message": "目标语言"
   },
+  "optionsUiLanguage": {
+    "message": "界面语言"
+  },
+  "optionsUiLangAuto": {
+    "message": "跟随浏览器（$language$）",
+    "description": "First option of the UI language select; language is that language's own name, e.g. Follow browser (English)",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsUiLangHint": {
+    "message": "立即生效。chrome://extensions/shortcuts 中的快捷键说明和 Chrome 应用商店的说明始终跟随浏览器的语言。"
+  },
   "optionsSave": {
     "message": "保存"
   },
