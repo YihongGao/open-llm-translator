@@ -7,7 +7,7 @@
 //
 // No API key is stored, so the popup warning and the in-page missing-key toast
 // both show. The mock API is never reached.
-import { launch, waitForPage } from "./harness.mjs";
+import { launch, segmentsOf, waitForPage } from "./harness.mjs";
 
 const EN = {
   ui: "en",
@@ -59,7 +59,7 @@ const ZH_CN = {
   title: "Open LLM Translator 设置",
   translateTo: "翻译为",
   toggle: "翻译此页",
-  warn: "尚未设置 Anthropic（Claude） 的 API 密钥。",
+  warn: "尚未设置 Anthropic（Claude）的 API 密钥。",
   settings: "⚙ 设置",
   shortcuts: "快捷键",
   save: "保存",
@@ -68,7 +68,7 @@ const ZH_CN = {
   clearAria: "清除 Anthropic API key",
   activeLabel: "（当前使用）",
   modelOption: "Claude Haiku 5.5（默认，便宜、快速）",
-  toast: "翻译失败：尚未设置 Anthropic（Claude） 的 API 密钥",
+  toast: "翻译失败：尚未设置 Anthropic（Claude）的 API 密钥",
   toastAction: "打开设置",
   cmdPage: "切换此页翻译",
   cmdSubs: "切换 YouTube 双语字幕",
@@ -189,6 +189,30 @@ for (const c of CASES) await drive(c);
   }
 }
 
+// A fresh English-UI profile defaults to target English. On an English page nothing needs
+// translating, so the toggle must say why instead of doing nothing.
+{
+  const run = await launch({ name: "ui-locale-en-page-already-target", locale: "en", settings: { targetLang: null } });
+  try {
+    const page = await run.newPage(run.fixture("article.html"));
+    const popup = await run.openPopup();
+    eq("[en-page] fresh profile starts on en", (await popup.state()).targetLang, "en");
+    await popup.click("#toggle");
+    const s = await waitForPage(page, (st) => st.toast?.message, { label: "already-in-target toast" });
+    eq("[en-page] toast message", s.toast.message, "This page already appears to be in English");
+    check("[en-page] toast says where to pick another language", s.toast.detail?.includes("Translate to"), s.toast);
+    check("[en-page] nothing was sent for translation", run.calls.flatMap((c) => segmentsOf(c.body)).length === 0, run.calls.length);
+    await run.screenshot(page, "toast-en-page-already-target.png");
+    await run.writeJson("result-en-page.json", results.filter((r) => r.name.startsWith("[en-page]")));
+    console.log(`ARTIFACTS ${run.artifacts}`);
+  } catch (err) {
+    check("[en-page] journey ran to completion", false, String(err?.stack ?? err));
+  } finally {
+    await run.close();
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log(failed.length ? `${failed.length} check(s) failed` : "all checks passed");
+process.exitCode = failed.length ? 1 : 0;
 process.exit(failed.length ? 1 : 0);
