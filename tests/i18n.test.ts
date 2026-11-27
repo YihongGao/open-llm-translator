@@ -1,10 +1,11 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { describeHttpError } from "../src/background/providers/http";
 import { missingKeyMessage } from "../src/background/providers/registry";
 import { localizePage, t } from "../src/shared/i18n";
-import { DEFAULT_SETTINGS, MODELS, PROVIDERS, fillModelSelect, keyFieldHint, providerLabel } from "../src/shared/settings";
+import { MODELS, PROVIDERS, fillModelSelect, keyFieldHint, providerLabel } from "../src/shared/settings";
+import { defaultSettings, loadSettings, targetLangFor } from "../src/shared/settings";
 import { CATALOGS, expand, i18nStub, useLocale, type Locale } from "./helpers/i18n";
 
 const locales = Object.keys(CATALOGS) as Locale[];
@@ -19,6 +20,10 @@ const placeholderNames = (e: { message: string }) => [...e.message.matchAll(/\$(
   return o;
 };
 
+let stored: Record<string, unknown> = {};
+beforeEach(() => {
+  (globalThis as unknown as { chrome: Record<string, unknown> }).chrome.storage = { local: { get: async () => ({ ...stored }) } };
+});
 afterEach(() => useLocale("zh_TW"));
 
 describe("catalogs", () => {
@@ -96,9 +101,9 @@ describe("localized strings reach the UI", () => {
   it("provider errors and the missing-key message follow the language", () => {
     useLocale("en");
     expect(describeHttpError("OpenAI", new TypeError("x"))).toEqual({ message: "Can't connect to the OpenAI API", settings: false });
-    expect(missingKeyMessage({ ...DEFAULT_SETTINGS, model: "gemini-4-carbon" })).toBe("No API key set for Google (Gemini)");
+    expect(missingKeyMessage({ ...defaultSettings(), model: "gemini-4-carbon" })).toBe("No API key set for Google (Gemini)");
     useLocale("ja");
-    expect(missingKeyMessage({ ...DEFAULT_SETTINGS, model: "gemini-4-carbon" })).toBe("Google（Gemini）の API キーが未設定です");
+    expect(missingKeyMessage({ ...defaultSettings(), model: "gemini-4-carbon" })).toBe("Google（Gemini）の API キーが未設定です");
   });
 
   it("the saved-key placeholder follows the language", () => {
@@ -110,6 +115,31 @@ describe("localized strings reach the UI", () => {
   it("provider labels use the catalog", () => {
     useLocale("ja");
     expect(PROVIDERS.map(providerLabel)).toEqual(["Anthropic（Claude）", "OpenAI（GPT）", "Google（Gemini）"]);
+  });
+});
+
+describe("default target language", () => {
+  it.each([
+    ["zh-TW", "zh-TW"], ["zh-HK", "zh-TW"], ["zh-MO", "zh-TW"], ["zh-Hant", "zh-TW"], ["zh_TW", "zh-TW"],
+    ["zh-CN", "zh-CN"], ["zh-SG", "zh-CN"], ["zh", "zh-CN"], ["zh-Hans", "zh-CN"],
+    ["en", "en"], ["en-US", "en"], ["en-GB", "en"], ["ja", "ja"], ["ko", "ko"],
+    ["fr", "en"], ["de-DE", "en"], ["", "en"],
+  ])("UI language %s starts with %s", (ui, expected) => {
+    expect(targetLangFor(ui)).toBe(expected);
+  });
+
+  it("follows the browser UI language when nothing is stored", async () => {
+    stored = {};
+    useLocale("ja");
+    expect((await loadSettings()).targetLang).toBe("ja");
+    useLocale("fr");
+    expect((await loadSettings()).targetLang).toBe("en");
+  });
+
+  it("a stored target language always wins", async () => {
+    stored = { targetLang: "ko" };
+    useLocale("ja");
+    expect((await loadSettings()).targetLang).toBe("ko");
   });
 });
 
@@ -128,6 +158,14 @@ describe("localizePage", () => {
     useLocale("zh_TW");
     localizePage();
     expect(document.documentElement.lang).toBe("zh-TW");
+  });
+
+  it("zh_CN renders Simplified Chinese; zh-HK falls back to zh_TW", () => {
+    useLocale("zh-CN");
+    expect(t("popupSettings")).toBe("⚙ 设置");
+    expect(t("providerLabel", "Anthropic", "Claude")).toBe("Anthropic（Claude）");
+    useLocale("zh-HK");
+    expect(t("popupSettings")).toBe("⚙ 設定");
   });
 
   it("an unsupported UI language falls back to English, <html lang> included", () => {

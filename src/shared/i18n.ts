@@ -14,6 +14,11 @@ export function t(key: MessageKey, ...subs: string[]): string {
   return chrome.i18n.getMessage(key, subs);
 }
 
+/** The browser's UI language as a BCP-47 tag, e.g. "zh-TW" (not the catalog in use: see `pageLang`). */
+export function uiLanguage(): string {
+  return chrome.i18n.getUILanguage();
+}
+
 /**
  * Fills an extension page from its markup: `data-i18n` sets textContent,
  * `data-i18n-aria-label` and `data-i18n-title` set those attributes. The

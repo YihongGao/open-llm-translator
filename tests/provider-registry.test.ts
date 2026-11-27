@@ -3,9 +3,9 @@ import { AnthropicProvider } from "../src/background/providers/anthropic";
 import { GeminiProvider } from "../src/background/providers/gemini";
 import { OpenAIProvider } from "../src/background/providers/openai";
 import { createProvider, isAbort, missingKeyMessage } from "../src/background/providers/registry";
-import { DEFAULT_SETTINGS, apiKeyFor, providerOf, type Settings } from "../src/shared/settings";
+import { apiKeyFor, defaultSettings, providerOf, type Settings } from "../src/shared/settings";
 
-const keys: Settings = { ...DEFAULT_SETTINGS, anthropicApiKey: "a", openaiApiKey: "o", geminiApiKey: "g" };
+const keys: Settings = { ...defaultSettings(), anthropicApiKey: "a", openaiApiKey: "o", geminiApiKey: "g" };
 
 describe("provider selection", () => {
   it.each([
@@ -21,7 +21,7 @@ describe("provider selection", () => {
   });
 
   it("asks for the selected provider's key even when another provider has one", () => {
-    const s = { ...DEFAULT_SETTINGS, anthropicApiKey: "a", model: "gemini-3.5-flash-lite" };
+    const s = { ...defaultSettings(), anthropicApiKey: "a", model: "gemini-3.5-flash-lite" };
     expect(createProvider(s)).toBeUndefined();
     expect(missingKeyMessage(s)).toBe("尚未設定 Google（Gemini） 的 API key");
   });

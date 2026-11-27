@@ -1,7 +1,7 @@
 // User settings persisted in chrome.storage.local (never .sync: the API key
 // must not leave this machine via Chrome Sync).
 
-import { t, type MessageKey } from "./i18n";
+import { t, uiLanguage, type MessageKey } from "./i18n";
 
 export interface Settings {
   anthropicApiKey: string;
@@ -12,15 +12,29 @@ export interface Settings {
   targetLang: string;
 }
 
-export const DEFAULT_SETTINGS: Settings = {
-  anthropicApiKey: "",
-  openaiApiKey: "",
-  geminiApiKey: "",
-  // Haiku: ~20x cheaper than Sonnet with comparable quality on docs pages
-  // (kube-scheduler A/B, 2026-11-26); Sonnet stays one click away.
-  model: "claude-haiku-5-5",
-  targetLang: "zh-TW",
-};
+/**
+ * Target language a fresh install starts with: the browser's UI language
+ * mapped onto TARGET_LANGUAGES. Chinese splits by script and region
+ * (Traditional for TW/HK/MO, Simplified otherwise); anything unsupported is English.
+ */
+export function targetLangFor(uiLang: string): string {
+  const [lang = "", ...rest] = uiLang.toLowerCase().split(/[-_]/);
+  if (lang === "zh") return rest.some((p) => ["tw", "hk", "mo", "hant"].includes(p)) ? "zh-TW" : "zh-CN";
+  return TARGET_LANGUAGES.find((l) => l.tag === lang)?.tag ?? "en";
+}
+
+/** Defaults for every setting the user has not stored. Computed, because the language default depends on the browser. */
+export function defaultSettings(): Settings {
+  return {
+    anthropicApiKey: "",
+    openaiApiKey: "",
+    geminiApiKey: "",
+    // Haiku: ~20x cheaper than Sonnet with comparable quality on docs pages
+    // (kube-scheduler A/B, 2026-11-26); Sonnet stays one click away.
+    model: "claude-haiku-5-5",
+    targetLang: targetLangFor(uiLanguage()),
+  };
+}
 
 export type ProviderId = "anthropic" | "openai" | "gemini";
 
@@ -101,8 +115,9 @@ export function languageName(tag: string): string {
 }
 
 export async function loadSettings(): Promise<Settings> {
-  const stored = await chrome.storage.local.get(Object.keys(DEFAULT_SETTINGS));
-  return { ...DEFAULT_SETTINGS, ...(stored as Partial<Settings>) };
+  const defaults = defaultSettings();
+  const stored = await chrome.storage.local.get(Object.keys(defaults));
+  return { ...defaults, ...(stored as Partial<Settings>) };
 }
 
 export async function saveSettings(patch: Partial<Settings>): Promise<void> {

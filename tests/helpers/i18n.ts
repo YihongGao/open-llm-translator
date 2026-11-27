@@ -4,6 +4,7 @@
 
 import en from "../../public/_locales/en/messages.json";
 import ja from "../../public/_locales/ja/messages.json";
+import zh_CN from "../../public/_locales/zh_CN/messages.json";
 import zh_TW from "../../public/_locales/zh_TW/messages.json";
 
 interface Entry {
@@ -12,12 +13,19 @@ interface Entry {
 }
 type Catalog = Record<string, Entry>;
 
-export const CATALOGS = { en, ja, zh_TW } as const satisfies Record<string, Catalog>;
+export const CATALOGS = { en, ja, zh_CN, zh_TW } as const satisfies Record<string, Catalog>;
 export type Locale = keyof typeof CATALOGS;
 
-/** The catalog Chrome uses for a UI language tag (zh-TW and zh_TW alike); undefined when there is none, so the default locale applies. */
+/**
+ * The catalog Chrome uses for a UI language tag (zh-TW and zh_TW alike): the exact locale, then its
+ * parent (zh-HK and zh-MO -> zh_TW, as observed in Chromium) or language (en-US -> en); undefined when
+ * there is none, so the default locale applies.
+ */
 function catalogFor(tag: string): Catalog | undefined {
-  return (CATALOGS as Record<string, Catalog>)[tag.replace("-", "_")];
+  const [lang = ""] = tag.split(/[-_]/);
+  const all = CATALOGS as Record<string, Catalog>;
+  const exact = tag.replace("-", "_");
+  return all[exact] ?? all[{ zh_HK: "zh_TW", zh_MO: "zh_TW" }[exact] ?? lang];
 }
 
 /** `$name$` placeholders (case-insensitive) become their `content` (`$1`..`$9` take the substitutions); `$$` is a literal `$`. */

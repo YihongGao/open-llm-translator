@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isRestrictedUrl, toggleTab } from "../src/shared/tab-control";
+import { i18nStub } from "./helpers/i18n";
 
 describe("isRestrictedUrl", () => {
   it.each([
@@ -22,6 +23,7 @@ describe("toggleTab", () => {
     const calls: string[] = [];
     let sent = 0;
     vi.stubGlobal("chrome", {
+      i18n: i18nStub(),
       storage: {
         local: {
           get: async () => ({}),
