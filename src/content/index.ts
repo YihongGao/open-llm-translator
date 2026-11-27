@@ -7,6 +7,7 @@ import { TARGET_LANGUAGES } from "../shared/settings";
 import {
   PORT_NAME,
   type ContentMessage,
+  type ImageMessage,
   type Segment,
   type TabState,
   type TranslateEvent,
@@ -24,6 +25,7 @@ import {
   type Layout,
   type SegmentCandidate,
 } from "./segmenter";
+import { IMAGE_LAYER_TAG, handleImageMessage, isImageMessage } from "./image-overlay";
 import { hideToast, showToast } from "./toast";
 import { isYouTubeUrl } from "../shared/youtube-bridge";
 import { createSubtitleController } from "./youtube/controller";
@@ -592,7 +594,9 @@ function main(): void {
   const subtitles = isYouTubeUrl(location.href) ? createSubtitleController() : null;
 
   // Whoever injected us sends the first toggle right after injection.
-  chrome.runtime.onMessage.addListener((msg: ContentMessage, _sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((msg: ContentMessage | ImageMessage, _sender, sendResponse) => {
+    // Image translation is its own feature (right-click on an <img>); it never turns page translation on.
+    if (isImageMessage(msg)) return handleImageMessage(msg, sendResponse);
     // Content scripts cannot read storage, so the UI language arrives with the message.
     if (msg?.type === "llmt-toggle" || msg?.type === "llmt-set-lang") setUiLanguage(parseUiLanguage(msg.uiLanguage));
     switch (msg?.type) {
@@ -623,7 +627,7 @@ function main(): void {
 function isOurs(el: Element): boolean {
   return (
     el.tagName.toUpperCase() === TRANSLATION_TAG ||
-    el.closest(`${TRANSLATION_TAG.toLowerCase()}, .${OVERLAY_CLASS}`) !== null
+    el.closest(`${TRANSLATION_TAG.toLowerCase()}, ${IMAGE_LAYER_TAG}, .${OVERLAY_CLASS}`) !== null
   );
 }
 

@@ -90,6 +90,7 @@ describe("check-dist", () => {
     ["eval", {}, { "content.js": "eval(x)" }, "matches"],
     ["remote import", {}, { "content.js": 'import("https://x.example/a.js")' }, "matches"],
     ["debug helper", {}, { "background.js": "globalThis.llmtMeasurePrompts=async()=>{}" }, "debug helper"],
+    ["image debug helper", {}, { "background.js": "globalThis.llmtTranslateImage=async()=>{}" }, "debug helper llmtTranslateImage"],
     ["escaped CJK", {}, { "popup.js": 'const s = "\\u7ffb\\u8b6f";' }, "escaped CJK"],
   ] as const)("rejects %s", (_name, manifest, files, message) => {
     const r = check(dist(manifest, files));

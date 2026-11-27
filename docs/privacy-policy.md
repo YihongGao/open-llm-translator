@@ -1,6 +1,6 @@
 # Privacy Policy — Open LLM Translator
 
-_Last updated: 2026-11-26_
+_Last updated: 2026-11-27_
 
 Open LLM Translator ("the extension") translates web pages with a large language model (LLM) and shows each translation below the original text. This policy explains what data the extension handles and where it goes.
 
@@ -8,7 +8,7 @@ The extension has no server of its own. The developer does not receive, collect,
 
 ## What is sent, and to whom
 
-Only when you start a translation (by clicking the toolbar button or pressing the keyboard shortcut) on a tab, the extension sends the following to the LLM provider of the model you selected, using **your own API key**:
+Only when you start a translation (by clicking the toolbar button or pressing the keyboard shortcut) on a tab, or translate an image (see below), the extension sends the following to the LLM provider of the model you selected, using **your own API key**:
 
 | Data | Details |
 |---|---|
@@ -16,11 +16,12 @@ Only when you start a translation (by clicking the toolbar button or pressing th
 | Page title | Up to 200 characters, used as translation context |
 | Page address | Origin and path only (for example `https://example.com/docs/intro`). Query strings and fragments are removed before sending |
 | Video subtitles (YouTube only) | When you turn on bilingual subtitles on a YouTube video: the video's caption text, a few minutes ahead of playback, with the video title as the page title. The video ID is not sent: the address is reduced to `https://www.youtube.com/watch` |
+| Image (only when you translate an image) | When you choose "Translate this image" or "Translate images on screen" (up to 4 images on screen): the image you see, either read from the page, or, when the page does not allow that or the image is partly off screen, a screenshot of its visible part taken from the tab you are looking at. Either way it is scaled down and re-encoded as JPEG. The model reads the text in it. Sent to Anthropic only, with your own key, whatever model you selected for pages. The page title and address are not sent with it. Nothing sent is stored by the extension, and the result is not cached |
 | Technical request headers (Anthropic only) | The official Anthropic SDK adds `X-Stainless-*` headers to each request: the SDK version, the JavaScript runtime and its version, the operating system, and the CPU architecture |
 
 To get the captions, the extension reads the caption data that YouTube's player downloads in that tab. When the player shows captions already in your target language, the extension downloads the original-language captions from YouTube itself, in the same way the player does. This happens only while subtitles are on.
 
-Depending on the model you selected, the data goes to exactly one of these providers:
+Depending on the model you selected, the data goes to exactly one of these providers (images always go to Anthropic):
 
 | Provider | Endpoint | Provider's terms |
 |---|---|---|
@@ -34,7 +35,7 @@ How the provider stores or uses this data is governed by your agreement with tha
 
 | Data | Where | Purpose |
 |---|---|---|
-| Your API keys, selected model, target language, interface language | `chrome.storage.local` | Settings. Not synced through Chrome Sync, and not readable by web pages or content scripts |
+| Your API keys, selected models (page and image), target language, interface language | `chrome.storage.local` | Settings. Not synced through Chrome Sync, and not readable by web pages or content scripts |
 | Translations | IndexedDB inside the extension | Cache, so the same text is not translated (and billed) twice. Each entry holds the translated text, the model name and a timestamp, under a hashed key |
 
 This data stays on your device. Removing the extension deletes all of it.
@@ -44,7 +45,7 @@ This data stays on your device. Removing the extension deletes all of it.
 - It does not collect analytics, telemetry, or usage statistics.
 - It does not sell or transfer your data to anyone other than the LLM provider you chose, and only to perform the translation you asked for.
 - It does not use your data for advertising, creditworthiness, or any purpose unrelated to translation.
-- It does not run on pages until you start a translation (or turn on subtitles) on them.
+- It does not run on pages until you start a translation, turn on subtitles, or translate an image on them. The right-click menu entries appear on images and on pages but do nothing until you choose one.
 
 The extension's handling of user data complies with the [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq), including the Limited Use requirements.
 
@@ -60,7 +61,7 @@ Questions: luciferstut@gmail.com
 
 # 隱私權政策（繁體中文）
 
-_最後更新：2026-11-26_
+_最後更新：2026-11-27_
 
 Open LLM Translator（以下稱「本擴充功能」）用大型語言模型（LLM）翻譯網頁，並把譯文顯示在原文下方。本政策說明本擴充功能處理哪些資料、送到哪裡。
 
@@ -77,14 +78,15 @@ Open LLM Translator（以下稱「本擴充功能」）用大型語言模型（L
 | 頁面網址 | 只含網域與路徑（例如 `https://example.com/docs/intro`），送出前會移除查詢字串與 `#` 之後的部分 |
 | 影片字幕（僅 YouTube） | 您在 YouTube 影片開啟雙語字幕時：影片的字幕文字（翻譯播放位置前方幾分鐘的內容），並以影片標題作為頁面標題。不會送出影片 ID：網址只剩 `https://www.youtube.com/watch` |
 | 請求的技術標頭（僅 Anthropic） | Anthropic 官方 SDK 會在每個請求加上 `X-Stainless-*` 標頭：SDK 版本、JavaScript 執行環境與版本、作業系統、CPU 架構 |
+| 圖片（僅在您翻譯圖片時） | 您選「翻譯這張圖片」或「翻譯畫面上的圖片」（畫面上最多 4 張）時：您看到的圖片，由頁面讀出，或在頁面不允許、或圖片有一部分在畫面外時，改用您正在看的分頁上該圖片可見部分的截圖；兩者都會縮小並重新編碼為 JPEG，由模型讀出其中的文字。只會用您自己的 key 送到 Anthropic，不論您為網頁選了哪個 model。不會連同頁面標題或網址一起送出。本擴充功能不會儲存送出的內容，結果也不會快取 |
 
 為了取得字幕，本擴充功能會讀取 YouTube 播放器在該分頁下載的字幕資料。播放器顯示的字幕已經是目標語言時，本擴充功能會用和播放器相同的方式，向 YouTube 下載原文字幕。只有在字幕開啟期間才會這樣做。
 
-依您選的 model，資料只會送到以下其中一家：Anthropic（`api.anthropic.com`）、OpenAI（`api.openai.com`）、Google（`generativelanguage.googleapis.com`）。服務商如何保存與使用這些資料，依您和該服務商之間的 API 條款而定。沒有開始翻譯的頁面，不會送出任何資料。
+依您選的 model，資料只會送到以下其中一家（圖片一律送到 Anthropic）：Anthropic（`api.anthropic.com`）、OpenAI（`api.openai.com`）、Google（`generativelanguage.googleapis.com`）。服務商如何保存與使用這些資料，依您和該服務商之間的 API 條款而定。沒有開始翻譯的頁面，不會送出任何資料。
 
 ## 存在您電腦上的資料
 
-- **API key、所選 model、目標語言、介面語言**：存在 `chrome.storage.local`，不經 Chrome Sync 同步，網頁與 content script 都讀不到。
+- **API key、所選 model（網頁與圖片）、目標語言、介面語言**：存在 `chrome.storage.local`，不經 Chrome Sync 同步，網頁與 content script 都讀不到。
 - **譯文快取**：存在本擴充功能的 IndexedDB，避免同一段文字重複翻譯和計費。每筆只有譯文、model 名稱和時間，key 是雜湊值。
 
 這些資料只留在您的電腦上，移除本擴充功能就會一併刪除。
@@ -94,7 +96,7 @@ Open LLM Translator（以下稱「本擴充功能」）用大型語言模型（L
 - 不蒐集分析、遙測或使用統計。
 - 除了為完成您要求的翻譯而送到您選的服務商之外，不出售、不轉交資料給任何人。
 - 不把資料用於廣告、信用評估或任何與翻譯無關的用途。
-- 在您開始翻譯（或開啟字幕）之前，不會在頁面上執行。
+- 在您開始翻譯、開啟字幕或翻譯圖片之前，不會在頁面上執行。右鍵選單項目會出現在圖片上與頁面上，但您不選就什麼都不會做。
 
 ## 聯絡方式
 

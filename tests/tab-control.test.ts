@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isRestrictedUrl, toggleTab } from "../src/shared/tab-control";
+import { ensureContentScript, isRestrictedUrl, toggleTab } from "../src/shared/tab-control";
 import { i18nStub } from "./helpers/i18n";
 
 describe("isRestrictedUrl", () => {
@@ -61,5 +61,39 @@ describe("toggleTab", () => {
     });
     await expect(toggleTab(1)).rejects.toThrow("denied");
     expect(calls.some((c) => c.endsWith("content.js"))).toBe(false);
+  });
+});
+
+describe("ensureContentScript", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function stub(executeScript: () => Promise<void>) {
+    const calls: string[] = [];
+    vi.stubGlobal("chrome", {
+      i18n: i18nStub(),
+      storage: { local: { setAccessLevel: async () => void calls.push("setAccessLevel") } },
+      tabs: { sendMessage: async () => void calls.push("sendMessage") },
+      scripting: {
+        insertCSS: async () => void calls.push("insertCSS"),
+        executeScript: async () => {
+          calls.push("executeScript");
+          await executeScript();
+        },
+      },
+    });
+    return calls;
+  }
+
+  it("shields storage, then injects the CSS and the script, and sends nothing (nothing is toggled)", async () => {
+    const calls = stub(async () => {});
+    expect(await ensureContentScript(7)).toBe(true);
+    expect(calls).toEqual(["setAccessLevel", "insertCSS", "executeScript"]);
+  });
+
+  it("is false on a page that cannot be scripted", async () => {
+    stub(async () => {
+      throw new Error("Cannot access chrome:// URL");
+    });
+    expect(await ensureContentScript(7)).toBe(false);
   });
 });

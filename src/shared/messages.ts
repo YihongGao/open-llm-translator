@@ -112,3 +112,72 @@ export interface TestConnectionMessage {
   type: "llmt-test-connection";
 }
 export type TestConnectionResult = { ok: true; sample: string } | { ok: false; message: string };
+
+// ---------------------------------------------------------------------------
+// Image translation (right-click on an <img>, or on the page for the images on screen). Background -> content over
+// chrome.tabs.sendMessage to the top frame; only "llmt-image-locate" is answered.
+
+/** CSS px, relative to the viewport. */
+export interface ViewRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** What to translate: the image a context-menu click carries, or whatever images are on screen. */
+export type ImageTarget = { kind: "src"; srcUrl: string } | { kind: "visible" };
+
+/** The image's own pixels, read in the page (JPEG, long edge capped), when the page allows it. */
+export interface OriginalImage {
+  base64: string;
+  width: number;
+  height: number;
+}
+
+export interface LocatedImage {
+  jobId: string;
+  /** The element's box and the part of it inside the viewport. */
+  image: ViewRect;
+  visible: ViewRect;
+  /** Absent: crop the screenshot instead. Present only for an image that is fully visible. */
+  original?: OriginalImage;
+}
+
+export type ImageLocateResult =
+  | { ok: true; viewport: { width: number; height: number }; images: LocatedImage[] }
+  | { ok: false; reason: "not-found" | "not-visible" | "no-images" };
+
+/** One translated text region; box in fractions (0-1) of the image element's box, already padded. */
+export interface ImageRegion {
+  /** Where the translation is laid out, in fractions of the image box. */
+  box: [x0: number, y0: number, x1: number, y1: number];
+  /** Polygon painted over the original text, in fractions of the image box: the bubble's inside. */
+  cover: [x: number, y: number][];
+  text: string;
+  /** CSS colour sampled around the text in the captured image, and a readable text colour on it. */
+  fill: string;
+  ink: string;
+  /** Lay the text out top-to-bottom (target zh/ja and the box is clearly taller than wide, measured in pixels). */
+  vertical: boolean;
+}
+
+export type ImageMessage =
+  /** Content scripts cannot read storage, so the UI language travels with the messages that start or end a job. */
+  | { type: "llmt-image-locate"; target: ImageTarget; uiLanguage: UiLanguageSetting }
+  /** The screenshot is taken: the overlay may show its status chip now. */
+  | { type: "llmt-image-captured"; jobId: string }
+  | { type: "llmt-image-region"; jobId: string; region: ImageRegion }
+  /**
+   * `partial`: only part of the image was visible, so only that part was translated.
+   * With an `error` and a jobId the job failed; with an empty jobId there is no
+   * job (image not found, iframe) and the content script only shows the notice.
+   */
+  | {
+      type: "llmt-image-end";
+      jobId: string;
+      count: number;
+      partial: boolean;
+      error?: { message: string; settings: boolean };
+      uiLanguage: UiLanguageSetting;
+    };

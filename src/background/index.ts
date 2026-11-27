@@ -4,6 +4,7 @@
 
 import {
   PORT_NAME,
+  type ImageTarget,
   type OpenOptionsMessage,
   type TestConnectionMessage,
   type TestConnectionResult,
@@ -20,27 +21,11 @@ import { createProvider, isAbort, missingKeyMessage } from "./providers/registry
 import { CacheWarmupGate, withWarmup } from "./cache-warmup";
 import { estimateCostUsd } from "./pricing";
 import { redactSecrets } from "./redact";
+import { withSlot } from "./concurrency";
+import { registerImageMenu, targetForClick, translateImages } from "./image-translate";
 
 const warmupGate = new CacheWarmupGate();
 import { runBatch, type BatchStats } from "./translator";
-
-// ---------------------------------------------------------------------------
-// Concurrency: cap simultaneous API requests across all tabs.
-
-const MAX_CONCURRENT_REQUESTS = 3;
-let running = 0;
-const waiters: Array<() => void> = [];
-
-async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
-  if (running >= MAX_CONCURRENT_REQUESTS) await new Promise<void>((r) => waiters.push(r));
-  running++;
-  try {
-    return await fn();
-  } finally {
-    running--;
-    waiters.shift()?.();
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Translation over a long-lived port (one per page).
@@ -205,6 +190,26 @@ chrome.commands.onCommand.addListener((command, tab) => {
     });
   }
 });
+
+// ---------------------------------------------------------------------------
+// Right-click "translate this image" / "translate images on screen". The click grants activeTab for the tab,
+// which allows injection and captureVisibleTab.
+
+chrome.runtime.onInstalled.addListener(registerImageMenu);
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  const target = targetForClick(info);
+  if (target && tab) void translateImages(tab, target, info.frameId);
+});
+
+if (__LLMT_DEBUG__) {
+  // Context menus are browser UI that automation cannot click: E2E runs reach
+  // the same handler through here. Absent from release builds.
+  (globalThis as { llmtTranslateImage?: (tabId: number, target: ImageTarget) => Promise<void> }).llmtTranslateImage = async (
+    tabId,
+    target,
+  ) => translateImages(await chrome.tabs.get(tabId), target);
+}
 
 // ---------------------------------------------------------------------------
 // Options page "Test connection".

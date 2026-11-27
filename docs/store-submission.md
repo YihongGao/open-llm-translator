@@ -48,6 +48,9 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 • 只翻播放位置前方幾分鐘，看多少翻多少
 • 和網頁翻譯分開：可以只翻字幕，或只翻留言
 
+【圖片翻譯】
+在圖片上按右鍵，選「翻譯這張圖片」（例如漫畫頁）；若閱讀器擋掉圖片選單，改在頁面上按右鍵選「翻譯畫面上的圖片」：Claude 讀出每個對話框的文字，譯文直接畫在對話框上，可一鍵切回原圖。需要 Anthropic API key；會將圖片或其截圖傳送給 Anthropic。
+
 【使用方式】
 點工具列圖示開啟選單，按「翻譯此頁」；或直接按快捷鍵 Alt+A（macOS 為 Option+A）。
 在 YouTube 影片頁，選單會多一個「開啟雙語字幕」，快捷鍵 Alt+S（macOS 為 Option+S）。
@@ -77,7 +80,7 @@ YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標
 **Single purpose description**
 
 ```
-Translates the text of the current web page with a large language model chosen by the user and shows each translation directly below the original paragraph, so the page can be read bilingually. On YouTube video pages, the same translation can be applied to the video's subtitles, shown bilingually in the player.
+Translates the text of the current web page with a large language model chosen by the user and shows each translation directly below the original paragraph, so the page can be read bilingually. On YouTube video pages, the same translation can be applied to the video's subtitles, shown bilingually in the player. On any page, an image can be translated from its right-click menu: the text in the image is translated and drawn over it.
 ```
 
 **Permission justification**
@@ -86,6 +89,7 @@ Translates the text of the current web page with a large language model chosen b
 |---|---|
 | `activeTab` | When the user clicks the toolbar button or presses the keyboard shortcut, the extension gets temporary access to the current tab so it can read the paragraphs to translate and insert the translations below them. It has no access to other tabs, and no access before the user acts. |
 | `scripting` | Used only after the user acts. When the user starts a translation, it injects the packaged content.js and content.css into the active tab with chrome.scripting.executeScript and insertCSS. When the user turns on bilingual subtitles on a YouTube video, it also injects the packaged youtube-hook.js into the page's main world. While subtitles are on, that script: (1) wraps XMLHttpRequest.prototype.open and send to copy the caption responses (/api/timedtext) that the player downloads, without changing any request or response; (2) clicks the player's CC button so that the player requests captions (off and on again if CC is already on), and turns CC off afterwards if it turned CC on; (3) if the player's captions are already in the target language, fetches the original-language track from YouTube's /api/timedtext in the page's own context. When subtitles are off, every request passes through unchanged. No content scripts run automatically on any site. |
+| `contextMenus` | Adds two entries to the right-click menu: "Translate this image" on images, and "Translate images on screen" on pages (some comic viewers cover images with transparent layers and cancel right-clicks on them, so the image entry cannot appear there). Choosing one is the user's request to translate those images: the extension then reads the image from the page, or takes a screenshot of the visible part of the tab (allowed by activeTab, which the click grants), sends it to the Anthropic API with the user's own key, and draws the returned translations over the image. The entries do nothing until the user chooses one. It shows no install warning. |
 | `storage` | Stores the user's settings (selected model, target language, interface language) and the API keys the user enters, in chrome.storage.local only (never synced). Access is restricted to extension pages with setAccessLevel(TRUSTED_CONTEXTS). |
 | Host permission `https://api.anthropic.com/*` | Sends the text to translate to the Anthropic API with the user's own API key, only when the user has selected a Claude model. |
 | Host permission `https://api.openai.com/*` | Sends the text to translate to the OpenAI API with the user's own API key, only when the user has selected a GPT model. |
@@ -150,6 +154,8 @@ The UI follows the browser's language: English, Japanese, Simplified or Traditio
 7. To test YouTube subtitles, open https://www.youtube.com/watch?v=arj7oStGLkU (a TED talk with English subtitles).
 8. Click the toolbar icon and press "Turn on bilingual subtitles" (開啟雙語字幕), or press Alt+S (Option+S on macOS).
    The English subtitles and their Traditional Chinese translation appear at the bottom of the player.
+
+9. To test image translation, open any page with a comic or manga image, right-click the image and choose "Translate this image" (翻譯這張圖片), or right-click the page and choose "Translate images on screen" (翻譯畫面上的圖片). Translations are drawn over the speech bubbles; the chip at the image's top-right corner switches between the original and the translation. It uses the Anthropic key from step 3 (the image model is under "Image translation model" in the options).
 
 Without an API key, the popup shows "No API key set for Anthropic (Claude)." (尚未設定 Anthropic（Claude） 的 API key。), and the page shows the same notice with an "Open settings" (開啟設定) button.
 ```

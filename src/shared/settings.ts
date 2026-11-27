@@ -12,6 +12,8 @@ export interface Settings {
   targetLang: string;
   /** Language of the extension's own UI; "auto" follows the browser. */
   uiLanguage: UiLanguageSetting;
+  /** Claude model that reads images (right-click "translate this image"); one of IMAGE_MODELS. */
+  imageModel: string;
 }
 
 /**
@@ -41,6 +43,9 @@ export function defaultSettings(): Settings {
     model: "claude-haiku-5-5",
     targetLang: targetLangFor(browserLanguage()),
     uiLanguage: "auto",
+    // Sonnet, not the text default Haiku: on comic pages (spike, 2026-11) Haiku's
+    // boxes and translations were weaker, and vertical text was not tested with it.
+    imageModel: "claude-sonnet-5-5",
   };
 }
 
@@ -84,6 +89,14 @@ export const MODELS: ReadonlyArray<{ id: string; name: string; note: MessageKey;
   { id: "gemini-4-carbon", name: "Gemini 4 Carbon", note: "modelNoteFlagship", provider: "gemini" },
 ];
 
+/** Models that can translate images: image translation supports Claude only. */
+export const IMAGE_MODELS = MODELS.filter((m) => m.provider === "anthropic");
+
+/** `id` when it is an image model, else the default (a removed model may still be in storage). */
+export function resolveImageModel(id: string): string {
+  return IMAGE_MODELS.some((m) => m.id === id) ? id : defaultSettings().imageModel;
+}
+
 /** Provider serving `model`; unknown ids (e.g. a removed model still in storage) fall back to Anthropic. */
 export function providerOf(model: string): Provider {
   const id = MODELS.find((m) => m.id === model)?.provider ?? "anthropic";
@@ -94,13 +107,15 @@ export function apiKeyFor(settings: Settings, model = settings.model): string {
   return settings[providerOf(model).keySetting];
 }
 
-/** Fills a <select> with MODELS grouped by provider. Replaces its options, so call it again to relabel (and restore the value). */
-export function fillModelSelect(select: HTMLSelectElement): void {
+/** Fills a <select> with `models` (default: all of MODELS) grouped by provider. Replaces its options, so call it again to relabel (and restore the value). */
+export function fillModelSelect(select: HTMLSelectElement, models: typeof MODELS = MODELS): void {
   select.replaceChildren();
   for (const p of PROVIDERS) {
+    const own = models.filter((x) => x.provider === p.id);
+    if (!own.length) continue;
     const group = document.createElement("optgroup");
     group.label = providerLabel(p);
-    for (const m of MODELS.filter((x) => x.provider === p.id))
+    for (const m of own)
       group.append(new Option(t("modelOption", m.name, t(m.note)), m.id));
     select.append(group);
   }

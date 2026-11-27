@@ -52,17 +52,29 @@ export async function toggleTab(tabId: number, feature: Feature = "page"): Promi
   if (state) return { ok: true, active: featureActive(state, feature) };
 
   // No receiver yet: inject on demand, then deliver the first toggle.
-  // Every content-script injection passes through here, so this is where the
-  // API key is shielded from it. Fail closed: if this throws, nothing is injected.
+  if (!(await ensureContentScript(tabId))) return { ok: false, reason: "restricted" };
+  const after = await send(tabId, msg);
+  return { ok: true, active: after ? featureActive(after, feature) : true };
+}
+
+/**
+ * Injects the content script and its CSS into the tab's top frame. The script
+ * only registers its listeners; nothing is translated until a message asks.
+ * Safe to call again (the script guards against a second load; the CSS is
+ * inserted twice, which is harmless). False when the page cannot be scripted.
+ *
+ * Every content-script injection passes through here, so this is where the
+ * API key is shielded from it. Fail closed: if setAccessLevel throws, nothing is injected.
+ */
+export async function ensureContentScript(tabId: number): Promise<boolean> {
   await chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
   try {
     await chrome.scripting.insertCSS({ target: { tabId }, files: ["content.css"] });
     await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+    return true;
   } catch {
-    return { ok: false, reason: "restricted" };
+    return false;
   }
-  const after = await send(tabId, msg);
-  return { ok: true, active: after ? featureActive(after, feature) : true };
 }
 
 export async function setTabLanguage(tabId: number, targetLang: string): Promise<void> {

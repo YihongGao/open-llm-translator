@@ -13,11 +13,13 @@ import {
   PROVIDERS,
   clearApiKey,
   TARGET_LANGUAGES,
+  IMAGE_MODELS,
   fillModelSelect,
   keyFieldHint,
   loadSettings,
   providerLabel,
   providerOf,
+  resolveImageModel,
   saveSettings,
   typedKeyPatch,
   type KeySetting,
@@ -32,6 +34,7 @@ const form = $<HTMLFormElement>("form");
 const model = $<HTMLSelectElement>("model");
 const targetLang = $<HTMLSelectElement>("targetLang");
 const uiLanguage = $<HTMLSelectElement>("uiLanguage");
+const imageModel = $<HTMLSelectElement>("imageModel");
 const status = $<HTMLSpanElement>("status");
 const testBtn = $<HTMLButtonElement>("test");
 /**
@@ -56,6 +59,9 @@ function fillGeneratedText(): void {
   const selectedModel = model.value;
   fillModelSelect(model);
   model.value = selectedModel;
+  const selectedImageModel = imageModel.value;
+  fillModelSelect(imageModel, IMAGE_MODELS);
+  imageModel.value = selectedImageModel;
   const chosen = uiLanguage.value || "auto";
   uiLanguage.replaceChildren(
     new Option(t("optionsUiLangAuto", UI_LOCALE_LABELS[localeFor(browserLanguage())]), "auto"),
@@ -100,7 +106,7 @@ function showStoredKeys(stored: Settings): void {
 
 async function save(): Promise<void> {
   const typed = Object.fromEntries(keyInputs.map(({ provider, input }) => [provider.keySetting, input.value])) as Record<KeySetting, string>;
-  await saveSettings({ model: model.value, targetLang: targetLang.value, ...typedKeyPatch(typed) });
+  await saveSettings({ model: model.value, targetLang: targetLang.value, imageModel: imageModel.value, ...typedKeyPatch(typed) });
   for (const { input } of keyInputs) input.value = "";
   stored = await loadSettings();
   showStoredKeys(stored);
@@ -116,6 +122,7 @@ void loadSettings().then((s) => {
   }
   model.value = s.model;
   targetLang.value = s.targetLang;
+  imageModel.value = resolveImageModel(s.imageModel);
   markActiveKey();
   showStoredKeys(s);
 });

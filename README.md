@@ -16,6 +16,7 @@ Bring your own API key for Anthropic (Claude), OpenAI (GPT) or Google (Gemini). 
 - **Works on dynamic pages**: content loaded later and single-page apps are picked up automatically.
 - **Local cache**: the same text on the same site is never translated (or billed) twice.
 - **YouTube bilingual subtitles**: original and translated captions together in the player, including full screen. Captions are merged into full sentences first, so auto-generated captions translate cleanly.
+- **Image translation (Claude)**: right-click an image, such as a manga or comic page, and choose **Translate this image**. On viewers that cover images and block the image menu, right-click the page and choose **Translate images on screen** instead. Claude reads the text in each speech bubble and the translation is drawn over it, with a button to flip back to the original. It sends the image, or a screenshot of it, to Anthropic.
 - **Target languages**: Traditional Chinese (Taiwan), Simplified Chinese, English, Japanese, Korean.
 
 The interface is available in English, Japanese, Simplified Chinese and Traditional Chinese and follows your browser's language by default; any other language shows English. To pick one yourself, use **UI language** on the options page (Follow browser, English, 日本語, 简体中文 or 繁體中文); it applies at once to the options page and the toolbar menu. A tab that is already translated switches the next time you toggle translation or it shows an error. The extension's description on `chrome://extensions` and in the Chrome Web Store, and the shortcut descriptions on `chrome://extensions/shortcuts`, always follow the browser's language. A fresh install also starts with the target language matching your browser's language (English if it is not one of the five), and you can change it any time.
@@ -50,7 +51,8 @@ gh attestation verify open-llm-translator-<version>.zip --repo YihongGao/open-ll
    Worried about your key being stolen? Web pages, other extensions and the developer cannot read it, and it never leaves your computer except to go to the provider. See [How your API key is protected](docs/api-key-security.md) for what is and is not covered. As an extra safeguard, create a key just for this extension and set a spending limit with the provider ([Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google](https://aistudio.google.com/spend)), so even a leaked key cannot cost much.
 2. Right-click the extension icon and choose **Options**. Pick a model, paste the key for that provider, and click **Test connection**.
 3. On any page, click the extension icon and press **Translate this page**, or press `Alt+A` (`Option+A` on macOS). Press it again to show only the original.
-4. On a YouTube video, the menu also offers **Turn on bilingual subtitles**, shortcut `Alt+S` (`Option+S` on macOS). Subtitles and page translation are separate switches, so you can translate only the subtitles or only the comments. Subtitles stay on when you move to another video in the same tab; after a page reload, turn them on again.
+4. To translate an image, right-click it and choose **Translate this image**. This needs an Anthropic API key whatever model you picked for pages; the image model is set under **Image translation model** in the options (default Claude Sonnet 5.5). Many manga sites cover the pages with invisible layers and cancel right-clicks on them, so the image menu never appears there. Right-click the page and choose **Translate images on screen**: every image with at least 160 px visible on both sides is translated (up to 4, largest first). Where the page allows it, the image is read at its original resolution, which reads small text better than a screenshot. Scroll so most of an image is on screen first: if part of it is off screen, only the visible part is translated. A chip at the image's top-right corner switches between the original and the translation, and ✕ removes the translation.
+5. On a YouTube video, the menu also offers **Turn on bilingual subtitles**, shortcut `Alt+S` (`Option+S` on macOS). Subtitles and page translation are separate switches, so you can translate only the subtitles or only the comments. Subtitles stay on when you move to another video in the same tab; after a page reload, turn them on again.
 
 The target language must differ from the page's own language: on an English page with English as the target nothing is translated, and a notice tells you to pick another language under **Translate to** in the toolbar menu. You can change the target language and model from the toolbar menu at any time; a translated page is re-translated right away. Shortcuts can be changed at `chrome://extensions/shortcuts`.
 
@@ -70,9 +72,12 @@ For scale, translating a full technical documentation page (about 75 paragraphs)
 
 Reasoning ("thinking") is set to the lowest level each model allows, because those tokens are billed as output.
 
+Translating an image costs one request of about 2,500 input tokens plus the text it returns, roughly half a cent to one cent per page with Claude Sonnet 5.5 (input tokens measured on comic pages; output not measured). Image results are not cached: translating the same image again is billed again.
+
 ## Privacy
 
 - Nothing is sent until you start a translation on a tab. Then only the paragraphs on screen, the page title and the page address (without query string) go to the provider you selected, with your key.
+- Image translation sends data only when you choose **Translate this image** or **Translate images on screen**: the image you see goes to Anthropic, with your key, either as the image itself (downscaled, re-encoded as JPEG, read from the page when the page allows it) or, when it does not or the image is partly off screen, as a screenshot of the part that is on screen (anything the page draws over it, such as a sticky header, is in the shot). Nothing is stored.
 - There is no developer server. No analytics or telemetry.
 - Your API key is stored only on your device (`chrome.storage.local`). It is not synced through Chrome Sync, and web pages and other extensions cannot read it. What this does and does not protect against: [How your API key is protected](docs/api-key-security.md).
 - OpenAI and Gemini requests are sent with `store: false`.
@@ -84,6 +89,7 @@ Full details: [Privacy Policy](docs/privacy-policy.md).
 - Translations are plain text: links and bold text inside a paragraph are not carried into the translation.
 - Buttons, code blocks, editable fields and content marked `translate="no"` are not translated.
 - Content inside iframes and Shadow DOM is not translated.
+- Image translation supports Claude only, works on images in the top page (not inside iframes), and translates only the part of the image that is on screen. Box positions come from the model and can be slightly off; sound effects are skipped. Results are not cached.
 - Hidden content (dropdown menus, accordions, scroll-in animations) is translated within about a second of becoming visible.
 - The translation cache is never pruned. Removing the extension deletes it.
 - Page text is treated as data, not instructions, but a page could still try to manipulate how its own text is translated. The effect stays limited to translations on that site.
