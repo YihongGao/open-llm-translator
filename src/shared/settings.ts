@@ -19,7 +19,12 @@ export interface Settings {
  */
 export function targetLangFor(uiLang: string): string {
   const [lang = "", ...rest] = uiLang.toLowerCase().split(/[-_]/);
-  if (lang === "zh") return rest.some((p) => ["tw", "hk", "mo", "hant"].includes(p)) ? "zh-TW" : "zh-CN";
+  if (lang === "zh") {
+    // A script subtag decides before the region: zh-Hans-HK is Simplified.
+    if (rest.includes("hans")) return "zh-CN";
+    if (rest.includes("hant")) return "zh-TW";
+    return rest.some((p) => ["tw", "hk", "mo"].includes(p)) ? "zh-TW" : "zh-CN";
+  }
   return TARGET_LANGUAGES.find((l) => l.tag === lang)?.tag ?? "en";
 }
 
