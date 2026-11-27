@@ -141,7 +141,7 @@ This extension needs the user's own LLM API key. A test key for Anthropic with a
 The UI follows the browser's language: English, Japanese, Simplified or Traditional Chinese, and English for any other language. The steps below use the English labels; the Traditional Chinese labels are in parentheses.
 
 1. Right-click the toolbar icon and choose "Options" (選項).
-2. In "Model", keep the default "Claude Haiku 5.5".
+2. In "Model", keep the default "Claude Haiku 5.5". Set "Target language" to "繁體中文（台灣）" (a fresh install starts on the browser's language, English here, and an English page is not translated into English).
 3. Paste the key into "Anthropic API key", click "Save" (儲存), then "Test connection" (測試連線). A sample translation appears next to the buttons.
 4. Open an English article, for example https://kubernetes.io/docs/concepts/overview/
 5. Click the toolbar icon and press "Translate this page" (翻譯此頁), or press Alt+A (Option+A on macOS).
