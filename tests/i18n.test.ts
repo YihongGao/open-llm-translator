@@ -53,7 +53,7 @@ describe("catalogs", () => {
     }
   });
 
-  it("uses full-width punctuation only in ja and zh_TW", () => {
+  it("keeps full-width punctuation out of en", () => {
     for (const [key, entry] of Object.entries(CATALOGS.en)) expect(entry.message, key).not.toMatch(/[，。：；（）？！、]/);
   });
 });
@@ -122,6 +122,7 @@ describe("default target language", () => {
   it.each([
     ["zh-TW", "zh-TW"], ["zh-HK", "zh-TW"], ["zh-MO", "zh-TW"], ["zh-Hant", "zh-TW"], ["zh_TW", "zh-TW"],
     ["zh-CN", "zh-CN"], ["zh-SG", "zh-CN"], ["zh", "zh-CN"], ["zh-Hans", "zh-CN"],
+    ["zh-Hans-HK", "zh-CN"], ["zh-Hant-CN", "zh-TW"],
     ["en", "en"], ["en-US", "en"], ["en-GB", "en"], ["ja", "ja"], ["ko", "ko"],
     ["fr", "en"], ["de-DE", "en"], ["", "en"],
   ])("UI language %s starts with %s", (ui, expected) => {

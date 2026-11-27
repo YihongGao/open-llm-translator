@@ -18,14 +18,15 @@ export type Locale = keyof typeof CATALOGS;
 
 /**
  * The catalog Chrome uses for a UI language tag (zh-TW and zh_TW alike): the exact locale, then its
- * parent (zh-HK and zh-MO -> zh_TW, as observed in Chromium) or language (en-US -> en); undefined when
- * there is none, so the default locale applies.
+ * parent or language (en-US -> en). As observed in Chromium, zh-HK and zh-MO map to zh_TW and every
+ * other Chinese tag (zh, zh-SG, ...) to zh_CN. undefined when there is none, so the default locale applies.
  */
 function catalogFor(tag: string): Catalog | undefined {
   const [lang = ""] = tag.split(/[-_]/);
   const all = CATALOGS as Record<string, Catalog>;
   const exact = tag.replace("-", "_");
-  return all[exact] ?? all[{ zh_HK: "zh_TW", zh_MO: "zh_TW" }[exact] ?? lang];
+  const zh = { zh_HK: "zh_TW", zh_MO: "zh_TW" }[exact] ?? "zh_CN";
+  return all[exact] ?? all[lang === "zh" ? zh : lang];
 }
 
 /** `$name$` placeholders (case-insensitive) become their `content` (`$1`..`$9` take the substitutions); `$$` is a literal `$`. */

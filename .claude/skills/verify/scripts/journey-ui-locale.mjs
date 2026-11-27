@@ -1,6 +1,7 @@
-// Journey: the whole UI follows the browser UI language. English and Japanese
-// render in popup, options page, page toast and keyboard-command descriptions;
-// an unsupported language (fr) falls back to English.
+// Journey: the whole UI follows the browser UI language. English, Japanese and
+// Simplified Chinese render in popup, options page, page toast and keyboard-command
+// descriptions; zh-HK gets Traditional Chinese; an unsupported language (fr) falls
+// back to English; a fresh profile's target language follows the UI language.
 // Usage: node .claude/skills/verify/scripts/journey-ui-locale.mjs
 // Exit 0 = every check passed. Evidence in the printed artifacts dirs (one per language).
 //

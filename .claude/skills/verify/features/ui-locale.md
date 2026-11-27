@@ -8,7 +8,7 @@ Every user-facing string (popup, options page, in-page toasts and error tooltips
 - `loc-options` the options page's title, labels, hints, buttons, clear-button `aria-label`, the "(in use)" marker (CSS pseudo-content fed from the catalog) and the save/test/delete status messages follow the language.
 - `loc-toast` the in-page error toast (content script) and the provider error text inside it (service worker) follow the language.
 - `loc-commands` `chrome.commands.getAll()` descriptions and the manifest description follow the language.
-- `loc-fallback` a browser language with no catalog (fr) shows English everywhere. zh-HK gets zh_TW from Chrome (observed, not English); the journey asserts it.
+- `loc-fallback` a browser language with no catalog (fr) shows English everywhere. zh-HK gets zh_TW from Chrome (observed, not English; the journey asserts it), and other Chinese tags such as zh-SG get zh_CN (measured: `getUILanguage()` zh-SG gives page language zh-CN).
 - `loc-default-target` a fresh profile's popup "Translate to" starts on the language that matches the UI language.
 - Not localized, by design: the LLM prompt, `console.*` logs, and the language names in the target-language picker (each is shown in its own language).
 
@@ -33,7 +33,7 @@ Preconditions:
 
 ## Gotchas
 
-- Playwright's `locale` context option does not change `chrome.i18n` on Windows: it sets `navigator.language` and `Accept-Language` only, and the extension UI stays in the OS language. The harness passes `--lang=<locale>` as well, which does (checked on Windows), and sets `LANGUAGE` for Linux, which reads its UI language from the environment (not checked locally; the journey fails loudly on its first check if a platform ignores both). Do not drop them.
+- Playwright's `locale` context option does not change `chrome.i18n` on Windows: it sets `navigator.language` and `Accept-Language` only, and the extension UI stays in the OS language. The harness passes `--lang=<locale>` as well, which does (checked on Windows), and sets `LANGUAGE` for Linux. On Linux, Chromium (`ui/base/l10n/l10n_util.cc`) reads the UI language from the environment variables `LANGUAGE`, `LC_ALL`, `LC_MESSAGES` and `LANG`, and `--lang` applies on Windows. The journey fails loudly on its first check if a platform ignores both. Do not drop them.
 - `chrome.commands.getAll()` also returns an `_execute_action` entry with an empty description. Index by command name.
 - The options page paints its English HTML fallback for a moment before `localizePage()` runs. Wait for a localized value, not for the page load.
 - With target `en` on the English fixture nothing is sent for translation, so the journey picks another target before triggering the toast.
