@@ -35,7 +35,8 @@ export function getTabState(tabId: number): Promise<TabState | null> {
 }
 
 export async function toggleTab(tabId: number, feature: Feature = "page"): Promise<ToggleResult> {
-  const msg: ContentMessage = { type: "llmt-toggle", targetLang: (await loadSettings()).targetLang, feature };
+  const { targetLang, uiLanguage } = await loadSettings();
+  const msg: ContentMessage = { type: "llmt-toggle", targetLang, uiLanguage, feature };
   if (feature === "subtitles") {
     // The page hook reads the player's caption requests; it must run in the
     // page's main world, where the player's XMLHttpRequest lives. Idempotent,
@@ -65,5 +66,5 @@ export async function toggleTab(tabId: number, feature: Feature = "page"): Promi
 }
 
 export async function setTabLanguage(tabId: number, targetLang: string): Promise<void> {
-  await send(tabId, { type: "llmt-set-lang", targetLang });
+  await send(tabId, { type: "llmt-set-lang", targetLang, uiLanguage: (await loadSettings()).uiLanguage });
 }

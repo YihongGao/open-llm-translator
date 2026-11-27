@@ -1,6 +1,6 @@
 // Toolbar popup: quick settings + translate/restore for the current tab.
 
-import { localizePage, t } from "../shared/i18n";
+import { localizePage, setUiLanguage, t } from "../shared/i18n";
 import {
   TARGET_LANGUAGES,
   apiKeyFor,
@@ -55,6 +55,12 @@ async function init(): Promise<void> {
     shortcutLabels(),
   ]);
   const shortcut = shortcuts.page;
+  // The first paint above used the browser's language; apply the user's choice (a no-op for "auto").
+  if (settings.uiLanguage !== "auto") {
+    setUiLanguage(settings.uiLanguage);
+    localizePage();
+    fillModelSelect(model);
+  }
   targetLang.value = settings.targetLang;
   model.value = settings.model;
   const updateWarn = () => {

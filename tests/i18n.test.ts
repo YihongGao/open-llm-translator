@@ -3,10 +3,12 @@ import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { describeHttpError } from "../src/background/providers/http";
 import { missingKeyMessage } from "../src/background/providers/registry";
-import { localizePage, t } from "../src/shared/i18n";
+import { CATALOGS, localizePage, t } from "../src/shared/i18n";
 import { MODELS, PROVIDERS, fillModelSelect, keyFieldHint, providerLabel } from "../src/shared/settings";
 import { defaultSettings, loadSettings, targetLangFor } from "../src/shared/settings";
-import { CATALOGS, expand, i18nStub, useLocale, type Locale } from "./helpers/i18n";
+import { useLocale } from "./helpers/i18n";
+
+type Locale = keyof typeof CATALOGS;
 
 const locales = Object.keys(CATALOGS) as Locale[];
 const keys = Object.keys(CATALOGS.en);
@@ -58,13 +60,6 @@ describe("catalogs", () => {
   });
 });
 
-describe("getMessage stub", () => {
-  it("follows Chrome: named placeholders, $$, missing key", () => {
-    expect(expand({ message: "a $X$ b $$ c", placeholders: { x: { content: "$1" } } }, ["1"])).toBe("a 1 b $ c");
-    expect(i18nStub("en").getMessage("doesNotExist")).toBe("");
-  });
-});
-
 describe("t", () => {
   it("renders the UI language", () => {
     useLocale("en");
@@ -96,6 +91,16 @@ describe("localized strings reach the UI", () => {
     const zh = document.createElement("select");
     fillModelSelect(zh);
     expect(zh.querySelector("option")!.textContent).toBe("Claude Haiku 5.5（預設，便宜、快）");
+  });
+
+  it("filling the model select again relabels it instead of appending", () => {
+    useLocale("en");
+    const select = document.createElement("select");
+    fillModelSelect(select);
+    useLocale("ja");
+    fillModelSelect(select);
+    expect(select.options).toHaveLength(MODELS.length);
+    expect(select.querySelector("optgroup")!.label).toBe("Anthropic（Claude）");
   });
 
   it("provider errors and the missing-key message follow the language", () => {
