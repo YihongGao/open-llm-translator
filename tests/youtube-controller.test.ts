@@ -4,6 +4,7 @@
 // script) and a fake background Port: enable -> captions -> translate -> show.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { TranslateEvent, TranslateRequest } from "../src/shared/messages";
+import { i18nStub } from "./helpers/i18n";
 import { YT_COMMAND_EVENT, YT_HOOK_EVENT, type HookCommand, type TrackInfo } from "../src/shared/youtube-bridge";
 
 // --- fake background ---------------------------------------------------------
@@ -11,6 +12,7 @@ const posted: TranslateRequest[] = [];
 let toPage: ((ev: TranslateEvent) => void) | null = null;
 let disconnects = 0;
 (globalThis as unknown as { chrome: unknown }).chrome = {
+  i18n: i18nStub(),
   runtime: {
     connect: () => ({
       postMessage: (m: TranslateRequest) => posted.push(m),

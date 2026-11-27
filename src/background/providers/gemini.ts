@@ -2,6 +2,7 @@
 // projects; generateContent is now labelled legacy).
 // https://ai.google.dev/api/interactions-api/create-interaction
 
+import { t } from "../../shared/i18n";
 import { SegmentLineParser, buildSystemPrompt, buildUserMessage } from "../protocol";
 import { ProviderHttpError, ensureOk, readSse } from "./http";
 import type { ProviderEvent, ProviderRequest, TranslationProvider } from "./types";
@@ -65,7 +66,7 @@ export class GeminiProvider implements TranslationProvider {
       signal,
     });
     await ensureOk("Gemini", res);
-    if (!res.body) throw new ProviderHttpError("Gemini", 0, "回應沒有內容");
+    if (!res.body) throw new ProviderHttpError("Gemini", 0, t("errEmptyResponse"));
 
     const parser = new SegmentLineParser(req.texts.length);
     let final: Interaction | undefined;
@@ -96,7 +97,7 @@ export class GeminiProvider implements TranslationProvider {
           throw new ProviderHttpError("Gemini", 0, ev.error?.message ?? ev.error?.code ?? "stream error");
       }
     }
-    if (!final) throw new ProviderHttpError("Gemini", 0, "串流在完成前結束");
+    if (!final) throw new ProviderHttpError("Gemini", 0, t("errStreamEndedEarly"));
     if (final.status === "failed" || final.status === "cancelled")
       throw new ProviderHttpError("Gemini", 0, `interaction ${final.status}`);
 

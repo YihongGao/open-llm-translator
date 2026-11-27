@@ -1,6 +1,8 @@
 // A single notice in the page's top-right corner. Rendered in a Shadow DOM so
 // page CSS cannot restyle it and our CSS cannot leak into the page.
 
+import { t } from "../shared/i18n";
+
 export interface ToastOptions {
   message: string;
   detail?: string;
@@ -64,7 +66,7 @@ export function showToast(opts: ToastOptions): void {
   const close = document.createElement("button");
   close.className = "close";
   close.type = "button";
-  close.setAttribute("aria-label", "關閉");
+  close.setAttribute("aria-label", t("toastClose"));
   close.textContent = "✕";
   close.addEventListener("click", hideToast);
   box.append(icon, msg, close);

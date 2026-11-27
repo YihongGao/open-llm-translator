@@ -10,6 +10,7 @@
 // Independent from page translation: either can be on without the other.
 
 import { PORT_NAME, type TranslateEvent, type TranslateRequest } from "../../shared/messages";
+import { t } from "../../shared/i18n";
 import { TARGET_LANGUAGES } from "../../shared/settings";
 import {
   YT_COMMAND_EVENT,
@@ -147,7 +148,7 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
       message,
       detail,
       action: settings
-        ? { label: "開啟設定", onClick: () => void chrome.runtime.sendMessage({ type: "llmt-open-options" }) }
+        ? { label: t("openSettings"), onClick: () => void chrome.runtime.sendMessage({ type: "llmt-open-options" }) }
         : undefined,
       autoHideMs: settings ? undefined : 8000,
     });
@@ -165,16 +166,16 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
     const info = await playerInfo();
     if (!active) return;
     if (!info) {
-      notify("無法連接 YouTube 播放器", "重新整理頁面後再開啟雙語字幕。");
+      notify(t("ytPlayerUnavailable"), t("ytReloadRetry"));
       return;
     }
     if (!currentVideoId()) return; // not a video page: wait for navigation
     if (info.isLive) {
-      notify("還不支援直播的字幕");
+      notify(t("ytLiveUnsupported"));
       return;
     }
     if (info.tracks.length === 0) {
-      notify("這部影片沒有字幕");
+      notify(t("ytNoSubtitles"));
       return;
     }
     command({ cmd: "request-captions" });
@@ -183,7 +184,7 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
     waitTimer = window.setTimeout(() => {
       waitTimer = undefined;
       if (active && linesVideo !== expected && lastCapture?.videoId !== expected)
-        notify("沒有收到 YouTube 字幕", "試著在播放器按 CC 開啟字幕，或重新整理頁面。");
+        notify(t("ytNoneReceived"), t("ytNoneReceivedHint"));
     }, CAPTION_WAIT_MS);
   }
 
@@ -205,8 +206,8 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
     if (decision.kind === "already-target") {
       clearLines();
       notify(
-        `字幕已經是${langLabel(targetLang)}，不需要翻譯`,
-        "要翻譯其他語言的字幕，請在 YouTube 的字幕選單選擇該語言。",
+        t("ytAlreadyTarget", langLabel(targetLang)),
+        t("ytAlreadyTargetHint"),
       );
       return;
     }
@@ -215,15 +216,15 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
       const res = await request((id) => ({ cmd: "fetch", id, url: decision.url }));
       if (!active || cap !== lastCapture) return;
       if (res?.type !== "fetched" || res.body === null) {
-        const status = res?.type === "fetched" && res.status ? `（HTTP ${res.status}）` : "";
-        notify(`無法取得原文字幕${status}`, "可在 YouTube 字幕選單改選原文語言後再試一次。");
+        const status = res?.type === "fetched" ? res.status : 0;
+        notify(status ? t("ytFetchFailedHttp", String(status)) : t("ytFetchFailed"), t("ytFetchFailedHint"));
         return;
       }
       body = res.body;
     }
     const sentences = mergeSentences(parseJson3(body));
     if (sentences.length === 0) {
-      notify("字幕內容是空的");
+      notify(t("ytEmpty"));
       return;
     }
     setLines(cap.videoId, sentences);
@@ -331,7 +332,7 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
       }
       if (ev.scope === "page" && !shownErrors.has(ev.message)) {
         shownErrors.add(ev.message);
-        notify(`字幕翻譯失敗：${ev.message}`, "修正後，關閉再開啟雙語字幕即可重試。", ev.settings);
+        notify(t("ytTranslateFailed", ev.message), t("ytRetryHint"), ev.settings);
       }
     }
   }
@@ -433,7 +434,7 @@ export function createSubtitleController(opts: SubtitleOptions = {}): SubtitleCo
     const info = await playerInfo(true);
     if (!active) return;
     if (!info) {
-      notify("無法連接 YouTube 播放器", "重新整理頁面後再開啟雙語字幕。");
+      notify(t("ytPlayerUnavailable"), t("ytReloadRetry"));
       return;
     }
     const id = currentVideoId();

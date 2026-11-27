@@ -18,6 +18,8 @@
 - **YouTube 雙語字幕**：原文和譯文字幕一起顯示在播放器內，全螢幕也看得到。字幕會先合併成完整句子再翻，自動產生的字幕也能翻得通順。
 - **目標語言**：繁體中文（台灣）、简体中文、English、日本語、한국어。
 
+介面提供 English、日本語、简体中文、繁體中文，跟著瀏覽器的語言自動切換；其他語言一律顯示英文。剛安裝時的目標語言也會對應瀏覽器的語言（不在這五種之內就用 English），之後隨時可以更改。
+
 | 工具列選單 | YouTube 雙語字幕 |
 |---|---|
 | ![工具列選單](docs/store-assets/screenshot-1-docs-popup.png) | ![YouTube 雙語字幕](docs/store-assets/screenshot-3-youtube.png) |
@@ -50,7 +52,7 @@ gh attestation verify open-llm-translator-<version>.zip --repo YihongGao/open-ll
 3. 在任何網頁點擴充功能圖示，按「翻譯此頁」，或按快捷鍵 `Alt+A`（macOS 為 `Option+A`）。再按一次就只顯示原文。
 4. 在 YouTube 影片頁，選單會多一個「開啟雙語字幕」，快捷鍵 `Alt+S`（macOS 為 `Option+S`）。字幕和網頁翻譯是兩個獨立開關，可以只翻字幕或只翻留言。在同一分頁換到其他影片時，字幕會繼續作用；重新整理頁面後要再開一次。
 
-目標語言和 model 隨時可以在工具列選單切換，已翻譯的頁面會立即用新設定重翻。快捷鍵可以在 `chrome://extensions/shortcuts` 修改。
+目標語言要和網頁本身的語言不同：目標語言是 English 時，在英文網頁上不會翻譯任何內容，頁面會跳出提示，請到工具列選單的「翻譯成」改選其他語言。目標語言和 model 隨時可以在工具列選單切換，已翻譯的頁面會立即用新設定重翻。快捷鍵可以在 `chrome://extensions/shortcuts` 修改。
 
 翻譯失敗時（例如 API key 沒設定或無效），頁面右上角會出現提示框。點段落旁的 ⚠ 可以看該段失敗的原因；關閉再開啟翻譯，就會重試失敗的段落。
 

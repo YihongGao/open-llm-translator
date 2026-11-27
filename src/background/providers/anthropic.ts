@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { t } from "../../shared/i18n";
 import { SegmentLineParser, buildSystemPrompt, buildUserMessage } from "../protocol";
 import type { ErrorInfo, ProviderEvent, ProviderRequest, TranslationProvider } from "./types";
 
@@ -94,16 +95,16 @@ export async function countSystemPromptTokens(
 /** Maps SDK errors to a short user-facing message. */
 export function describeAnthropicError(err: unknown): ErrorInfo {
   if (err instanceof Anthropic.AuthenticationError)
-    return { message: "Anthropic API key 無效（401），請到設定頁確認", settings: true };
+    return { message: t("errKeyInvalid", "Anthropic"), settings: true };
   if (err instanceof Anthropic.PermissionDeniedError)
-    return { message: "API key 沒有此 model 的權限（403）", settings: true };
+    return { message: t("errAnthropicForbidden"), settings: true };
   if (err instanceof Anthropic.NotFoundError)
-    return { message: "找不到 model（404），請到設定頁確認 model", settings: true };
-  if (err instanceof Anthropic.RateLimitError) return { message: "超過速率限制（429），稍後再試", settings: false };
-  if (err instanceof Anthropic.BadRequestError) return { message: `請求被拒（400）：${err.message}`, settings: false };
+    return { message: t("errAnthropicModelNotFound"), settings: true };
+  if (err instanceof Anthropic.RateLimitError) return { message: t("errAnthropicRateLimit"), settings: false };
+  if (err instanceof Anthropic.BadRequestError) return { message: t("errAnthropicBadRequest", err.message), settings: false };
   if (err instanceof Anthropic.APIError && err.status !== undefined)
-    return { message: `API 錯誤 ${err.status}：${err.message}`, settings: false };
-  if (err instanceof Anthropic.APIConnectionError) return { message: "無法連線到 Anthropic API", settings: false };
+    return { message: t("errAnthropicApi", String(err.status), err.message), settings: false };
+  if (err instanceof Anthropic.APIConnectionError) return { message: t("errConnect", "Anthropic"), settings: false };
   return { message: err instanceof Error ? err.message : String(err), settings: false };
 }
 

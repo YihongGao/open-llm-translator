@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -23,6 +23,57 @@ function check(dir: string) {
 
 afterEach(() => {
   for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
+});
+
+/** A dist with the given locales, each a { key: message } map. */
+function localized(manifest: object, locales: Record<string, Record<string, string>>): string {
+  const dir = dist(manifest);
+  for (const [locale, messages] of Object.entries(locales)) {
+    mkdirSync(path.join(dir, "_locales", locale), { recursive: true });
+    const body = Object.fromEntries(Object.entries(messages).map(([k, message]) => [k, { message }]));
+    writeFileSync(path.join(dir, "_locales", locale, "messages.json"), JSON.stringify(body));
+  }
+  return dir;
+}
+
+describe("check-dist locales", () => {
+  const manifest = { default_locale: "en", description: "__MSG_desc__" };
+
+  it("passes when every locale has every default message", () => {
+    expect(check(localized(manifest, { en: { desc: "a" }, ja: { desc: "b" } })).code).toBe(0);
+  });
+
+  it("rejects a manifest message missing from the default locale", () => {
+    const r = check(localized(manifest, { en: { other: "a" } }));
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("__MSG_desc__");
+  });
+
+  it("rejects a locale that lacks a default message", () => {
+    const r = check(localized(manifest, { en: { desc: "a" }, ja: {} }));
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("_locales/ja lacks message desc");
+  });
+
+  it("ignores stray files in _locales", () => {
+    const dir = localized(manifest, { en: { desc: "a" } });
+    writeFileSync(path.join(dir, "_locales", ".DS_Store"), "");
+    expect(check(dir).code).toBe(0);
+  });
+
+  it("reports a locale folder without messages.json instead of crashing", () => {
+    const dir = localized(manifest, { en: { desc: "a" } });
+    mkdirSync(path.join(dir, "_locales", "ja"));
+    const r = check(dir);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("_locales/ja/messages.json is missing");
+  });
+
+  it("rejects __MSG_ strings without default_locale", () => {
+    const r = check(dist({ description: "__MSG_desc__" }));
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("without default_locale");
+  });
 });
 
 describe("check-dist", () => {

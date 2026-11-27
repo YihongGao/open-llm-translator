@@ -36,6 +36,7 @@ npm run package      # typecheck + test + build + check:dist → release/*.zip
 
 - Unit tests run in Node by default. Tests that touch the DOM need `// @vitest-environment happy-dom` as their first line.
 - Provider tests run against a local mock SSE server, never the real APIs.
+- Tests run under the zh_TW UI language (`tests/helpers/setup-i18n.ts`). A test that replaces `globalThis.chrome` must keep `i18n`: add `i18n: i18nStub()` from `tests/helpers/i18n.ts`, or call `useLocale("ja")` to switch language.
 - A behavior change comes with a test that fails without the change.
 
 ### End-to-end
@@ -68,6 +69,7 @@ The harness and feature recipes are documented in [.claude/skills/verify/SKILL.m
 
 ### Things to keep in step
 
+- **Adding or changing a user-facing string**: the catalog is `public/_locales/{en,ja,zh_CN,zh_TW}/messages.json`. Add the key to all four files (zh_CN is natural mainland wording, not a conversion of zh_TW) (a test fails if one lacks it, or if placeholders differ), then use `t("key", ...subs)` from `src/shared/i18n.ts`, which is the only module that calls `chrome.i18n`. In HTML, put English text in the element with `data-i18n="key"` (also `data-i18n-aria-label` and `data-i18n-title`); `localizePage()` fills it at run time and a test checks the English fallback against the catalog. Use named placeholders (`$provider$` with `"content": "$1"`), numbered in order of first appearance in the English text, and pass substitutions in that order. Write raw UTF-8, never `\uXXXX`. Use full-width punctuation only in ja, zh_CN and zh_TW. Set strings with `textContent` or attributes, never `innerHTML`. Not translated: the LLM prompt in `protocol.ts` and `console.*` logs. Language names in the target-language picker stay in their own language.
 - **Adding or changing a model**: update `MODELS` in `src/shared/settings.ts`, `PRICES` in `src/background/pricing.ts`, and the model table in both `README.md` and `README.zh-TW.md`.
 - **Changing what data is sent or stored**: update [docs/privacy-policy.md](docs/privacy-policy.md).
 - **Store constraints**: the shipped bundle must not contain source maps, `eval(`, `new Function(`, `importScripts(` or remote `import()`, and must not request broad host permissions. `npm run check:dist` enforces this; keep new code and dependencies compatible with it.

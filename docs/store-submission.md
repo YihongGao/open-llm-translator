@@ -13,9 +13,14 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 
 ## Store listing
 
-**Description（manifest，132 字元內）**：取自 `public/manifest.json`
+**Description（manifest，132 字元內）**：manifest 的 `description` 是 `__MSG_extDescription__`，實際文字在 `public/_locales/{en,ja,zh_CN,zh_TW}/messages.json`（`default_locale` 為 `en`）。四個語言各一句：
 
-> 在原文下方顯示 LLM 翻譯（雙語對照）
+> en：Shows LLM translations below the original text (bilingual view)
+> ja：原文の下に LLM 翻訳を表示します（対訳表示）
+> zh_TW：在原文下方顯示 LLM 翻譯（雙語對照）
+> zh_CN：在原文下方显示 LLM 翻译（双语对照）
+
+商店頁的說明文字不讀 `_locales`，要在 Developer Dashboard 分語言各填一份（見下方 Language）。
 
 **Detailed description**
 
@@ -55,7 +60,7 @@ YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標
 
 **Category**：Tools（或 Productivity）
 
-**Language**：Chinese (Traditional)
+**Language**：因為 manifest 的 `default_locale` 是 `en`，Dashboard 的預設語言要設成 English，並提供英文的 Detailed description（下方這份中文要翻成英文）。再另外加 Chinese (Traditional)、Chinese (Simplified) 與 Japanese 的在地化說明（沒補的語言顯示英文說明）。介面語言（en / ja / zh_CN / zh_TW）跟著瀏覽器，其他語言一律顯示英文。
 
 **Graphic assets**
 
@@ -133,18 +138,18 @@ Additional instructions：
 ```
 This extension needs the user's own LLM API key. A test key for Anthropic with a small spend limit is in the Password field.
 
-The UI is in Traditional Chinese; English equivalents are given below.
+The UI follows the browser's language: English, Japanese, Simplified or Traditional Chinese, and English for any other language. The steps below use the English labels; the Traditional Chinese labels are in parentheses.
 
 1. Right-click the toolbar icon and choose "Options" (選項).
-2. In "Model", keep the default "Claude Haiku 5.5".
-3. Paste the key into "Anthropic API key", click 儲存 (Save), then 測試連線 (Test connection). A sample translation appears next to the buttons.
+2. In "Model", keep the default "Claude Haiku 5.5". Set "Target language" to "繁體中文（台灣）" (a fresh install starts on the browser's language, English here, and an English page is not translated into English).
+3. Paste the key into "Anthropic API key", click "Save" (儲存), then "Test connection" (測試連線). A sample translation appears next to the buttons.
 4. Open an English article, for example https://kubernetes.io/docs/concepts/overview/
-5. Click the toolbar icon and press 翻譯此頁 (Translate this page), or press Alt+A (Option+A on macOS).
+5. Click the toolbar icon and press "Translate this page" (翻譯此頁), or press Alt+A (Option+A on macOS).
    Traditional Chinese translations appear below each paragraph as they stream in.
-6. The popup button now reads 顯示原文 (Show original). Press it, or the shortcut, to hide the translations.
+6. The popup button now reads "Show original" (顯示原文). Press it, or the shortcut, to hide the translations.
 7. To test YouTube subtitles, open https://www.youtube.com/watch?v=arj7oStGLkU (a TED talk with English subtitles).
-8. Click the toolbar icon and press 開啟雙語字幕 (Turn on bilingual subtitles), or press Alt+S (Option+S on macOS).
+8. Click the toolbar icon and press "Turn on bilingual subtitles" (開啟雙語字幕), or press Alt+S (Option+S on macOS).
    The English subtitles and their Traditional Chinese translation appear at the bottom of the player.
 
-Without an API key, the popup shows "尚未設定 Anthropic（Claude） 的 API key。" (Anthropic API key not set), and the page shows the same notice with a 開啟設定 (Open settings) button.
+Without an API key, the popup shows "No API key set for Anthropic (Claude)." (尚未設定 Anthropic（Claude） 的 API key。), and the page shows the same notice with an "Open settings" (開啟設定) button.
 ```

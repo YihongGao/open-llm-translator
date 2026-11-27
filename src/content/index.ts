@@ -2,6 +2,8 @@
 // toggle. Owns DOM scanning, viewport scheduling and rendering; all network
 // work happens in the background worker over a Port.
 
+import { t } from "../shared/i18n";
+import { TARGET_LANGUAGES } from "../shared/settings";
 import {
   PORT_NAME,
   type ContentMessage,
@@ -232,8 +234,9 @@ function main(): void {
    * same text (framework re-render), retire every other segment under `root`
    * (text changed in place, run extended), and register new ones.
    */
-  function scan(root: Element): void {
-    const candidates = collectSegments(root, { targetLang });
+  function scan(root: Element): { candidates: number; alreadyTarget: number } {
+    const stats = { alreadyTarget: 0 };
+    const candidates = collectSegments(root, { targetLang, stats });
     const kept = new Set<SegState>();
     const unmatched = new Set<SegmentCandidate>();
     for (const c of candidates) {
@@ -283,6 +286,7 @@ function main(): void {
       byId.set(seg.id, seg);
       observe(seg);
     }
+    return { candidates: candidates.length, alreadyTarget: stats.alreadyTarget };
   }
 
   /** Moves a segment onto a rebuilt run with identical text. */
@@ -407,7 +411,7 @@ function main(): void {
         } else {
           seg.status = "error";
           render(seg);
-          seg.node?.setAttribute("title", "與背景程式的連線中斷");
+          seg.node?.setAttribute("title", t("contentConnectionLost"));
         }
       }
     });
@@ -470,7 +474,7 @@ function main(): void {
         if (!seg) continue;
         seg.status = "error";
         render(seg);
-        seg.node?.setAttribute("title", `翻譯失敗：${ev.message}（點一下看說明）`);
+        seg.node?.setAttribute("title", t("contentSegmentFailed", ev.message));
         seg.node?.setAttribute("data-llmt-error", ev.message);
       }
       // Every remaining segment will fail the same way, so say it once per
@@ -486,10 +490,10 @@ function main(): void {
 
   function showErrorToast(message: string, settings: boolean, autoHide: boolean): void {
     showToast({
-      message: `翻譯失敗：${message}`,
-      detail: "修正後，關閉再開啟翻譯即可重試失敗的段落。",
+      message: t("toastTranslationFailed", message),
+      detail: t("toastRetryHint"),
       action: settings
-        ? { label: "開啟設定", onClick: () => void chrome.runtime.sendMessage({ type: "llmt-open-options" }) }
+        ? { label: t("openSettings"), onClick: () => void chrome.runtime.sendMessage({ type: "llmt-open-options" }) }
         : undefined,
       autoHideMs: autoHide ? 8000 : undefined,
     });
@@ -503,7 +507,7 @@ function main(): void {
       if (!marker) return;
       e.preventDefault();
       e.stopPropagation();
-      showErrorToast(marker.getAttribute("data-llmt-error") ?? "未知錯誤", false, true);
+      showErrorToast(marker.getAttribute("data-llmt-error") ?? t("toastUnknownError"), false, true);
     },
     true,
   );
@@ -541,8 +545,14 @@ function main(): void {
       seg.retries = 0;
       observe(seg);
     }
-    scan(document.body);
+    const { candidates, alreadyTarget } = scan(document.body);
     mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+    // Nothing to translate because the page is already in the target language:
+    // say so, or the toggle looks broken.
+    if (candidates === 0 && alreadyTarget > 0) {
+      const label = TARGET_LANGUAGES.find((l) => l.tag === targetLang)?.label ?? targetLang;
+      showToast({ message: t("toastPageAlreadyTarget", label), detail: t("toastPageAlreadyTargetHint"), autoHideMs: 8000 });
+    }
   }
 
   function deactivate(): void {

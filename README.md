@@ -18,7 +18,7 @@ Bring your own API key for Anthropic (Claude), OpenAI (GPT) or Google (Gemini). 
 - **YouTube bilingual subtitles**: original and translated captions together in the player, including full screen. Captions are merged into full sentences first, so auto-generated captions translate cleanly.
 - **Target languages**: Traditional Chinese (Taiwan), Simplified Chinese, English, Japanese, Korean.
 
-The extension's interface is currently in Traditional Chinese.
+The interface is available in English, Japanese, Simplified Chinese and Traditional Chinese and follows your browser's language; any other language shows English. A fresh install also starts with the target language matching your browser's language (English if it is not one of the five), and you can change it any time.
 
 | Toolbar menu | YouTube subtitles |
 |---|---|
@@ -48,11 +48,11 @@ gh attestation verify open-llm-translator-<version>.zip --repo YihongGao/open-ll
    - Google Gemini: [aistudio.google.com](https://aistudio.google.com/apikey)
 
    Worried about your key being stolen? Web pages, other extensions and the developer cannot read it, and it never leaves your computer except to go to the provider. See [How your API key is protected](docs/api-key-security.md) for what is and is not covered. As an extra safeguard, create a key just for this extension and set a spending limit with the provider ([Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google](https://aistudio.google.com/spend)), so even a leaked key cannot cost much.
-2. Right-click the extension icon and choose **Options** (選項). Pick a model, paste the key for that provider, and click **測試連線** (Test connection).
-3. On any page, click the extension icon and press **翻譯此頁** (Translate this page), or press `Alt+A` (`Option+A` on macOS). Press it again to show only the original.
-4. On a YouTube video, the menu also offers **開啟雙語字幕** (Turn on bilingual subtitles), shortcut `Alt+S` (`Option+S` on macOS). Subtitles and page translation are separate switches, so you can translate only the subtitles or only the comments. Subtitles stay on when you move to another video in the same tab; after a page reload, turn them on again.
+2. Right-click the extension icon and choose **Options**. Pick a model, paste the key for that provider, and click **Test connection**.
+3. On any page, click the extension icon and press **Translate this page**, or press `Alt+A` (`Option+A` on macOS). Press it again to show only the original.
+4. On a YouTube video, the menu also offers **Turn on bilingual subtitles**, shortcut `Alt+S` (`Option+S` on macOS). Subtitles and page translation are separate switches, so you can translate only the subtitles or only the comments. Subtitles stay on when you move to another video in the same tab; after a page reload, turn them on again.
 
-You can change the target language and model from the toolbar menu at any time; a translated page is re-translated right away. Shortcuts can be changed at `chrome://extensions/shortcuts`.
+The target language must differ from the page's own language: on an English page with English as the target nothing is translated, and a notice tells you to pick another language under **Translate to** in the toolbar menu. You can change the target language and model from the toolbar menu at any time; a translated page is re-translated right away. Shortcuts can be changed at `chrome://extensions/shortcuts`.
 
 If something fails (for example, a missing or invalid key), a notice appears in the top-right corner of the page. Click the ⚠ next to a paragraph to see why that paragraph failed; turning translation off and on again retries it.
 

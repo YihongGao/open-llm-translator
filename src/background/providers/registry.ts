@@ -1,6 +1,7 @@
 // Picks the provider implementation for the configured model.
 
-import { apiKeyFor, providerOf, type Settings } from "../../shared/settings";
+import { t } from "../../shared/i18n";
+import { apiKeyFor, providerLabel, providerOf, type Settings } from "../../shared/settings";
 import { AnthropicProvider, describeAnthropicError, isAbort as isAnthropicAbort } from "./anthropic";
 import { GeminiProvider } from "./gemini";
 import { describeHttpError } from "./http";
@@ -45,7 +46,7 @@ export function isAbort(err: unknown): boolean {
   return isAnthropicAbort(err) || (err instanceof DOMException && err.name === "AbortError");
 }
 
-/** e.g. "尚未設定 OpenAI API key". */
+/** e.g. "No API key set for OpenAI (GPT)". */
 export function missingKeyMessage(settings: Settings): string {
-  return `尚未設定 ${providerOf(settings.model).label} 的 API key`;
+  return t("errMissingKey", providerLabel(providerOf(settings.model)));
 }

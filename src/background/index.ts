@@ -10,6 +10,7 @@ import {
   type TranslateEvent,
   type TranslateRequest,
 } from "../shared/messages";
+import { t } from "../shared/i18n";
 import { TARGET_LANGUAGES, loadSettings } from "../shared/settings";
 import { toggleTab } from "../shared/tab-control";
 import { isYouTubeUrl } from "../shared/youtube-bridge";
@@ -203,7 +204,7 @@ chrome.commands.onCommand.addListener((command, tab) => {
 });
 
 // ---------------------------------------------------------------------------
-// Options page "測試連線".
+// Options page "Test connection".
 
 chrome.runtime.onMessage.addListener(
   (msg: TestConnectionMessage | OpenOptionsMessage, _sender, sendResponse) => {
@@ -232,7 +233,7 @@ async function testConnection(): Promise<TestConnectionResult> {
     )) {
       if (ev.kind === "segment") return { ok: true, sample: ev.text };
     }
-    return { ok: false, message: "API 有回應，但沒有解析到譯文" };
+    return { ok: false, message: t("errNoTranslationParsed") };
   } catch (err) {
     return { ok: false, message: redactSecrets(setup.describeError(err).message) };
   }

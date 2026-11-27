@@ -203,6 +203,8 @@ export interface CollectOptions {
   displayOf?: (el: Element) => string;
   /** Injected for tests; defaults to isSelfHidden. */
   hiddenOf?: (el: Element) => boolean;
+  /** Filled in by the scan: how many runs were skipped only because they already look like `targetLang`. */
+  stats?: { alreadyTarget: number };
 }
 
 export function collectSegments(root: Element, opts: CollectOptions): SegmentCandidate[] {
@@ -230,6 +232,8 @@ export function collectSegments(root: Element, opts: CollectOptions): SegmentCan
     const text = normalizeText(run.map(textOf).join(""));
     if (isTranslatable(text, opts.targetLang)) {
       out.push({ container, nodes: run, anchor: run[run.length - 1]!, text });
+    } else if (opts.stats && isWorthTranslating(text) && looksLikeTarget(text, opts.targetLang)) {
+      opts.stats.alreadyTarget++;
     }
   };
 
@@ -278,9 +282,12 @@ export { normalizeText };
 const LETTER = /\p{L}/u;
 
 export function isTranslatable(text: string, targetLang: string): boolean {
-  if (text.length < 2 || !LETTER.test(text)) return false;
-  if (looksLikeIdentifier(text)) return false;
-  return !looksLikeTarget(text, targetLang);
+  return isWorthTranslating(text) && !looksLikeTarget(text, targetLang);
+}
+
+/** Real text, not a stray character, number or code-like token. */
+function isWorthTranslating(text: string): boolean {
+  return text.length >= 2 && LETTER.test(text) && !looksLikeIdentifier(text);
 }
 
 /**

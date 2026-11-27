@@ -10,7 +10,7 @@ Your key is saved in the extension's own storage, [`chrome.storage.local`](https
 
 - It is **not encrypted**. Chrome keeps it as plain text in your Chrome profile folder.
 - It is **not synced**: the extension does not use `chrome.storage.sync`, so the key never goes to your Google account or your other devices.
-- You can **delete it at any time** with the **清除** (Clear) button next to each key on the options page. Removing the extension also deletes it. Clearing browsing data does not.
+- You can **delete it at any time** with the **Clear** button next to each key on the options page. Removing the extension also deletes it. Clearing browsing data does not.
 
 Only the extension's own background service worker and pages can read the key. It is sent only to the provider you selected (`api.anthropic.com`, `api.openai.com` or `generativelanguage.googleapis.com`), over HTTPS. Once saved, it is never shown again: the options page shows only its last four characters, so it cannot be copied from there.
 
@@ -39,7 +39,7 @@ These steps limit the damage even if your key is stolen:
 
 1. **Create a key only for this extension.** Do not reuse a key from other projects. You can then see this extension's usage on its own and revoke the key without breaking anything else.
 2. **Set a spending limit with your provider**: [Anthropic](https://console.anthropic.com/settings/limits), [OpenAI](https://platform.openai.com/settings/organization/limits), [Google AI Studio](https://aistudio.google.com/spend). Prepaid credit with automatic top-up turned off is a hard ceiling too: when the balance reaches zero, requests stop.
-3. **Revoke the key** on the provider's site if you think it leaked, then create a new one. The old key then stops working. Deleting it from the extension (**清除** on the options page) is not enough on its own, because a copy that was already stolen keeps working until you revoke it.
+3. **Revoke the key** on the provider's site if you think it leaked, then create a new one. The old key then stops working. Deleting it from the extension (**Clear** on the options page) is not enough on its own, because a copy that was already stolen keeps working until you revoke it.
 4. Keep your computer free of malware: this is the one case the extension cannot protect against.
 
 ## Check it yourself

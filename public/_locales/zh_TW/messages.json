@@ -1,0 +1,447 @@
+{
+  "extDescription": {
+    "message": "在原文下方顯示 LLM 翻譯（雙語對照）"
+  },
+  "cmdTogglePage": {
+    "message": "切換此頁翻譯"
+  },
+  "cmdToggleSubtitles": {
+    "message": "切換 YouTube 雙語字幕"
+  },
+  "pageLang": {
+    "message": "zh-TW"
+  },
+  "labelModel": {
+    "message": "Model"
+  },
+  "openSettings": {
+    "message": "開啟設定"
+  },
+  "providerLabel": {
+    "message": "$name$（$product$）",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "product": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelOption": {
+    "message": "$name$（$note$）",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "note": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelNoteDefaultFast": {
+    "message": "預設，便宜、快"
+  },
+  "modelNoteSmoother": {
+    "message": "較通順"
+  },
+  "modelNoteBestPriciest": {
+    "message": "品質最高、最貴"
+  },
+  "modelNoteCheapFast": {
+    "message": "便宜、快"
+  },
+  "modelNoteBalanced": {
+    "message": "平衡"
+  },
+  "modelNoteFlagshipPriciest": {
+    "message": "旗艦、最貴"
+  },
+  "modelNoteFlagship": {
+    "message": "旗艦"
+  },
+  "keyHintSaved": {
+    "message": "已儲存，要更換請貼上新的 key"
+  },
+  "keyHintSavedTail": {
+    "message": "已儲存（$tail$），要更換請貼上新的 key",
+    "placeholders": {
+      "tail": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupWarnNoKey": {
+    "message": "尚未設定 API key。"
+  },
+  "popupWarnNoKeyFor": {
+    "message": "尚未設定 $provider$ 的 API key。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupTranslateTo": {
+    "message": "翻譯成"
+  },
+  "popupTranslatePage": {
+    "message": "翻譯此頁"
+  },
+  "popupShowOriginal": {
+    "message": "顯示原文"
+  },
+  "popupSubsOn": {
+    "message": "開啟雙語字幕"
+  },
+  "popupSubsOff": {
+    "message": "關閉雙語字幕"
+  },
+  "popupWithShortcut": {
+    "message": "$label$（$shortcut$）",
+    "placeholders": {
+      "label": {
+        "content": "$1"
+      },
+      "shortcut": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSettings": {
+    "message": "⚙ 設定"
+  },
+  "popupShortcuts": {
+    "message": "快捷鍵"
+  },
+  "popupCannotTranslate": {
+    "message": "此頁面無法翻譯"
+  },
+  "popupNoteRestrictedPages": {
+    "message": "瀏覽器內建頁面與 Chrome 線上應用程式商店不開放擴充功能存取。"
+  },
+  "popupNoteNotAllowed": {
+    "message": "Chrome 不允許擴充功能在這個頁面執行。"
+  },
+  "popupNoteNoShortcut": {
+    "message": "尚未設定快捷鍵，可在「快捷鍵」中設定。"
+  },
+  "popupNoteNewModel": {
+    "message": "新的 model 會用在之後翻譯的段落。"
+  },
+  "optionsTitle": {
+    "message": "Open LLM Translator 設定"
+  },
+  "optionsModelHint": {
+    "message": "只需要填所選 model 那一家的 API key。"
+  },
+  "optionsClear": {
+    "message": "清除"
+  },
+  "optionsClearAria": {
+    "message": "清除 $key$",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyStorageHint": {
+    "message": "API key 只存在這台電腦的 chrome.storage.local，不會經由 Chrome Sync 同步。儲存後不會再顯示完整的 key，也無法從這裡複製；要更換請直接貼上新的 key，欄位留空則保留原本的 key。"
+  },
+  "optionsLimitsLead": {
+    "message": "建議為這個擴充功能另建專用的 API key，並在服務商那邊設定用量上限："
+  },
+  "optionsListSeparator": {
+    "message": "、"
+  },
+  "optionsLimitsEnd": {
+    "message": "。"
+  },
+  "optionsDataNotice": {
+    "message": "翻譯時，畫面上要翻譯的段落文字、頁面標題和網址（只含網域與路徑，不含查詢字串）會用您的 API key 送到所選 model 的服務商（Anthropic、OpenAI 或 Google），依該服務商的 API 條款處理。譯文會快取在這台電腦，不會送到其他地方。"
+  },
+  "optionsTargetLang": {
+    "message": "目標語言"
+  },
+  "optionsSave": {
+    "message": "儲存"
+  },
+  "optionsTest": {
+    "message": "測試連線"
+  },
+  "optionsUsage": {
+    "message": "使用方式：點擴充功能圖示開啟選單，或直接按快捷鍵（預設 Alt/Option+A）切換翻譯。快捷鍵可在 chrome://extensions/shortcuts 修改。"
+  },
+  "optionsActiveKeyLabel": {
+    "message": "（目前使用）"
+  },
+  "optionsSaved": {
+    "message": "已儲存（已開啟的頁面需重新切換翻譯才會套用新語言）"
+  },
+  "optionsConfirmDeleteKey": {
+    "message": "確定要刪除 $provider$ 的 API key？刪除後要重新貼上才能使用。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyDeleted": {
+    "message": "已刪除 $provider$ 的 API key",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTesting": {
+    "message": "測試中…"
+  },
+  "optionsTestOk": {
+    "message": "成功：$sample$",
+    "placeholders": {
+      "sample": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTestFail": {
+    "message": "失敗：$reason$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "errMissingKey": {
+    "message": "尚未設定 $provider$ 的 API key",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errNoTranslationParsed": {
+    "message": "API 有回應，但沒有解析到譯文"
+  },
+  "errKeyInvalid": {
+    "message": "$provider$ API key 無效（401），請到設定頁確認",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errForbidden": {
+    "message": "$provider$ API key 沒有此 model 的權限（403）：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errModelNotFound": {
+    "message": "$provider$ 找不到 model（404），請到設定頁確認 model",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errRateLimit": {
+    "message": "$provider$ 超過速率限制或額度（429），稍後再試",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errBadRequest": {
+    "message": "$provider$ 請求被拒（400）：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errStreamInterrupted": {
+    "message": "$provider$ 串流中斷：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errApi": {
+    "message": "$provider$ API 錯誤 $status$：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "status": {
+        "content": "$2"
+      },
+      "detail": {
+        "content": "$3"
+      }
+    }
+  },
+  "errConnect": {
+    "message": "無法連線到 $provider$ API",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errEmptyResponse": {
+    "message": "回應沒有內容"
+  },
+  "errStreamEndedEarly": {
+    "message": "串流在完成前結束"
+  },
+  "errAnthropicForbidden": {
+    "message": "API key 沒有此 model 的權限（403）"
+  },
+  "errAnthropicModelNotFound": {
+    "message": "找不到 model（404），請到設定頁確認 model"
+  },
+  "errAnthropicRateLimit": {
+    "message": "超過速率限制（429），稍後再試"
+  },
+  "errAnthropicBadRequest": {
+    "message": "請求被拒（400）：$detail$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errAnthropicApi": {
+    "message": "API 錯誤 $status$：$detail$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errMissedComplete": {
+    "message": "模型漏翻了這一段"
+  },
+  "errMissedMaxTokens": {
+    "message": "輸出超過長度上限，這一段被截斷"
+  },
+  "errMissedRefusal": {
+    "message": "模型拒絕翻譯這一段內容"
+  },
+  "contentConnectionLost": {
+    "message": "與背景程式的連線中斷"
+  },
+  "contentSegmentFailed": {
+    "message": "翻譯失敗：$message$（點一下看說明）",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastTranslationFailed": {
+    "message": "翻譯失敗：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastPageAlreadyTarget": {
+    "message": "此頁面似乎已經是$language$",
+    "description": "language is the target language's own name, e.g. English or 日本語",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastPageAlreadyTargetHint": {
+    "message": "若要翻譯，請在工具列彈出視窗的「翻譯成」中選擇其他語言。"
+  },
+  "toastRetryHint": {
+    "message": "修正後，關閉再開啟翻譯即可重試失敗的段落。"
+  },
+  "toastUnknownError": {
+    "message": "未知錯誤"
+  },
+  "toastClose": {
+    "message": "關閉"
+  },
+  "ytPlayerUnavailable": {
+    "message": "無法連接 YouTube 播放器"
+  },
+  "ytReloadRetry": {
+    "message": "重新整理頁面後再開啟雙語字幕。"
+  },
+  "ytLiveUnsupported": {
+    "message": "還不支援直播的字幕"
+  },
+  "ytNoSubtitles": {
+    "message": "這部影片沒有字幕"
+  },
+  "ytNoneReceived": {
+    "message": "沒有收到 YouTube 字幕"
+  },
+  "ytNoneReceivedHint": {
+    "message": "試著在播放器按 CC 開啟字幕，或重新整理頁面。"
+  },
+  "ytAlreadyTarget": {
+    "message": "字幕已經是$language$，不需要翻譯",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytAlreadyTargetHint": {
+    "message": "要翻譯其他語言的字幕，請在 YouTube 的字幕選單選擇該語言。"
+  },
+  "ytFetchFailed": {
+    "message": "無法取得原文字幕"
+  },
+  "ytFetchFailedHttp": {
+    "message": "無法取得原文字幕（HTTP $status$）",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytFetchFailedHint": {
+    "message": "可在 YouTube 字幕選單改選原文語言後再試一次。"
+  },
+  "ytEmpty": {
+    "message": "字幕內容是空的"
+  },
+  "ytTranslateFailed": {
+    "message": "字幕翻譯失敗：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytRetryHint": {
+    "message": "修正後，關閉再開啟雙語字幕即可重試。"
+  }
+}
