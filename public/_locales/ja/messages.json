@@ -177,7 +177,7 @@
     }
   },
   "optionsUiLangHint": {
-    "message": "すぐに反映されます。chrome://extensions/shortcuts のショートカットの説明と Chrome ウェブストアの説明は、常にブラウザの言語で表示されます。"
+    "message": "すぐに反映されます。すでに翻訳中のタブは、次に切り替えたとき、またはエラーが出たときに切り替わります。chrome://extensions と Chrome ウェブストアでの拡張機能の説明、および chrome://extensions/shortcuts のショートカットの説明は、常にブラウザの言語で表示されます。"
   },
   "optionsSave": {
     "message": "保存"

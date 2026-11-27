@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 // The UI language setting: Follow browser ("auto") or a fixed catalog, resolved by our own t().
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { UI_LOCALES, currentLocale, expand, localeFor, parseUiLanguage, setUiLanguage, t } from "../src/shared/i18n";
+import { UI_LOCALES, currentLocale, expand, localeFor, parseUiLanguage, setUiLanguage, t, type UiLanguageSetting } from "../src/shared/i18n";
 import { defaultSettings, loadSettings } from "../src/shared/settings";
 import { setTabLanguage, toggleTab } from "../src/shared/tab-control";
+import type { TranslateEvent } from "../src/shared/messages";
 import { h, loadContent, scrollAllIntoView, tell } from "./helpers/content-harness";
 import { i18nStub, useLocale } from "./helpers/i18n";
 
@@ -114,23 +115,47 @@ describe("the content script gets the UI language in its messages (it cannot rea
 });
 
 describe("content script strings", () => {
-  const pageError = (message: string) => {
+  const pageError = (message: string, ev: { uiLanguage?: UiLanguageSetting } = {}) => {
     const batch = h.posted[0]!;
-    h.toPage({ type: "segment-error", batchId: batch.batchId, ids: batch.segments.map((s) => s.id), message, scope: "page", settings: false });
+    h.toPage({
+      type: "segment-error",
+      batchId: batch.batchId,
+      ids: batch.segments.map((s) => s.id),
+      message,
+      scope: "page",
+      settings: false,
+      ...ev,
+    } as TranslateEvent);
     return [...document.querySelectorAll("llmt-toast")].at(-1)!.shadowRoot!.querySelector(".msg")!.textContent;
   };
-
-  it("render in the language the toggle message names, not the browser's", async () => {
+  const start = async (uiLanguage: UiLanguageSetting) => {
     await loadContent("<p>Hello world, this is a paragraph.</p>");
-    expect(tell({ type: "llmt-set-lang", targetLang: "zh-TW", uiLanguage: "ja" })).toMatchObject({ active: true });
+    tell({ type: "llmt-set-lang", targetLang: "zh-TW", uiLanguage });
     await scrollAllIntoView();
-    expect(pageError("x")).toBe("翻訳に失敗しました：x");
+  };
+
+  it("render in the language the segment-error names", async () => {
+    await start("ja");
+    expect(pageError("x", { uiLanguage: "ja" })).toBe("翻訳に失敗しました：x");
   });
 
-  it("follow the browser when the message says auto (or omits it)", async () => {
-    await loadContent("<p>Hello world, this is a paragraph.</p>");
-    tell({ type: "llmt-set-lang", targetLang: "zh-TW", uiLanguage: "auto" });
-    await scrollAllIntoView();
+  it("adopt the language a segment-error names over the one injected with (a stale tab)", async () => {
+    await start("ja");
+    expect(pageError("x", { uiLanguage: "en" })).toBe("Translation failed: x");
+  });
+
+  it("follow the browser when the segment-error says auto", async () => {
+    await start("ja");
+    expect(pageError("x", { uiLanguage: "auto" })).toBe("翻譯失敗：x");
+  });
+
+  it("follow the browser when the segment-error omits uiLanguage", async () => {
+    await start("ja");
     expect(pageError("x")).toBe("翻譯失敗：x");
+  });
+
+  it("follow the browser when the toggle message says auto", async () => {
+    await start("auto");
+    expect(pageError("x", { uiLanguage: "auto" })).toBe("翻譯失敗：x");
   });
 });

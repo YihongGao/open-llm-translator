@@ -177,7 +177,7 @@
     }
   },
   "optionsUiLangHint": {
-    "message": "立即生效。chrome://extensions/shortcuts 的快捷鍵說明和 Chrome 線上應用程式商店的說明，一律跟隨瀏覽器的語言。"
+    "message": "立即生效。已在翻譯的分頁會在下次切換翻譯或出現錯誤時更新。chrome://extensions 和 Chrome 線上應用程式商店中的擴充功能說明，以及 chrome://extensions/shortcuts 的快捷鍵說明，一律跟隨瀏覽器的語言。"
   },
   "optionsSave": {
     "message": "儲存"

@@ -2,7 +2,7 @@
 // Its only chrome.* use is chrome.i18n.getUILanguage through t(); everything else is injected
 // (deps) so it can be unit-tested with fakes.
 
-import { t, type MessageKey } from "../shared/i18n";
+import { t, type MessageKey, type UiLanguageSetting } from "../shared/i18n";
 import type { TranslateEvent, TranslateRequest } from "../shared/messages";
 import type { TokenUsage, TranslationProvider } from "./providers/types";
 import { redactSecrets } from "./redact";
@@ -41,6 +41,8 @@ export interface BatchDeps {
   targetLang: string;
   /** Model the request asks for (part of the cache key). */
   model: string;
+  /** Language the service worker's own error text is written in; sent with every segment-error. */
+  uiLanguage: UiLanguageSetting;
   emit(event: TranslateEvent): void;
   describeError(err: unknown): { message: string; settings: boolean };
   isAbort(err: unknown): boolean;
@@ -94,7 +96,7 @@ export async function runBatch(
   const emitError = (texts: readonly string[], message: string, scope: "page" | "segment", settings = false) => {
     const ids = texts.flatMap((t) => idsByText.get(t) ?? []);
     stats.failed += texts.length;
-    if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message: redactSecrets(message), scope, settings });
+    if (ids.length) deps.emit({ type: "segment-error", batchId, ids, message: redactSecrets(message), scope, settings, uiLanguage: deps.uiLanguage });
   };
   const finish = (): BatchStats => {
     deps.emit({

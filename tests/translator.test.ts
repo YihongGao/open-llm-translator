@@ -43,6 +43,7 @@ async function run(r: TranslateRequest, provider: TranslationProvider, cache = m
       cache,
       targetLang: "zh-TW",
       model: MODEL,
+      uiLanguage: "auto",
       emit: (e) => events.push(e),
       describeError: (e) => ({ message: e instanceof Error ? e.message : "?", settings: false }),
       isAbort: () => false,
@@ -139,6 +140,7 @@ describe("runBatch", () => {
       message: "輸出超過長度上限，這一段被截斷",
       scope: "segment",
       settings: false,
+      uiLanguage: "auto",
     });
     expect(events.at(-1)).toMatchObject({ type: "batch-done", batchId: "b1" });
   });
@@ -153,10 +155,35 @@ describe("runBatch", () => {
     const { events, cache } = await run(req(["a", "b"]), provider);
     expect(events).toEqual([
       { type: "segment", batchId: "b1", id: "s0", text: "A", source: "api" },
-      { type: "segment-error", batchId: "b1", ids: ["s1"], message: "boom", scope: "page", settings: false },
+      { type: "segment-error", batchId: "b1", ids: ["s1"], message: "boom", scope: "page", settings: false, uiLanguage: "auto" },
       { type: "batch-done", batchId: "b1" },
     ]);
     expect(cache.store.get("k:a")).toEqual({ text: "A", model: MODEL });
+  });
+
+  it("stamps segment-error with the language its text was written in", async () => {
+    const provider: TranslationProvider = {
+      // eslint-disable-next-line require-yield
+      async *translate() {
+        throw new Error("boom");
+      },
+    };
+    const events: TranslateEvent[] = [];
+    await runBatch(
+      req(["a"]),
+      {
+        provider,
+        cache: memoryCache(),
+        targetLang: "zh-TW",
+        model: MODEL,
+        uiLanguage: "ja",
+        emit: (e) => events.push(e),
+        describeError: () => ({ message: "x", settings: false }),
+        isAbort: () => false,
+      },
+      new AbortController().signal,
+    );
+    expect(events.find((e) => e.type === "segment-error")).toMatchObject({ uiLanguage: "ja" });
   });
 
   it("redacts API keys echoed in provider error text before emitting segment-error", async () => {
@@ -189,6 +216,7 @@ describe("runBatch", () => {
         cache: memoryCache(),
         targetLang: "zh-TW",
         model: MODEL,
+        uiLanguage: "auto",
         emit: (e) => events.push(e),
         describeError: () => ({ message: "x", settings: false }),
         isAbort: () => false,

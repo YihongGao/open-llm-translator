@@ -56,6 +56,12 @@ export type TranslateEvent =
       scope: "page" | "segment";
       /** The fix is in the options page (offer an "open settings" action). */
       settings: boolean;
+      /**
+       * UI language `message` was written in. The content script may have been
+       * injected before the user changed the setting, so it adopts this before
+       * wrapping the message, keeping the outer text in the message's language.
+       */
+      uiLanguage: UiLanguageSetting;
     }
   | {
       type: "batch-done";

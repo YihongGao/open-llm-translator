@@ -21,6 +21,11 @@ const JA = {
   modelOption: "GPT-6 Luna（低価格で高速）",
   toastPrefix: "翻訳に失敗しました：",
   toastKeyInvalid: "API キーが無効です（401）",
+  testFailPrefix: "失敗：",
+};
+const EN = {
+  toastPrefix: "Translation failed: ",
+  toastKeyInvalid: "API key is invalid (401)",
 };
 const ZH = {
   h1: "Open LLM Translator 設定",
@@ -64,6 +69,13 @@ try {
   await opt.locator("#model").selectOption("claude-haiku-5-5");
   await opt.locator("#openaiApiKey").fill("");
 
+  // "Test connection" runs in the service worker (testConnection), which applies the setting itself.
+  await opt.locator("#test").click();
+  await opt.waitForFunction(() => document.querySelector("#status").textContent.includes("401"));
+  const testText = await opt.locator("#status").textContent();
+  check("[ja] test-connection status has the Japanese prefix", testText.startsWith(JA.testFailPrefix), testText);
+  check("[ja] test-connection error text is Japanese", testText.includes(JA.toastKeyInvalid), testText);
+
   // --- popup and page toast in Japanese ----------------------------------------------
   const page = await run.newPage(run.fixture("article.html"));
   const popup = await run.openPopup();
@@ -79,6 +91,26 @@ try {
   // That text came from the service worker's t(), which applied the setting for this request.
   check("[ja] the service worker's error text is Japanese", s.toast.message.includes(JA.toastKeyInvalid), s.toast);
   await run.screenshot(page, "toast-ja.png");
+
+  // --- a tab injected before the language changed follows the service worker's language --
+  // `page` still runs the content script that was told "ja". Switch to English, then let
+  // new content fail: the toast's outer text must match the (English) service worker message.
+  await opt.bringToFront();
+  await opt.locator("#uiLanguage").selectOption("en");
+  await opt.waitForFunction(() => document.documentElement.lang === "en");
+  await page.bringToFront();
+  await page.evaluate(() => {
+    const p = document.createElement("p");
+    p.textContent = "A freshly loaded paragraph that the extension has not translated yet, with enough words.";
+    document.body.prepend(p);
+  });
+  const stale = await waitForPage(page, (st) => (st.toast?.message?.startsWith(EN.toastPrefix) ? st : null), {
+    label: "401 toast after switching to English",
+  });
+  check("[stale tab] outer text and service worker text are both English", stale.toast.message.includes(EN.toastKeyInvalid), stale.toast);
+  await opt.bringToFront();
+  await opt.locator("#uiLanguage").selectOption("ja");
+  await opt.waitForFunction((t) => document.querySelector("h1").textContent === t, JA.h1);
 
   // --- back to Follow browser ---------------------------------------------------------
   await opt.bringToFront();

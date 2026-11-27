@@ -100,6 +100,7 @@ async function handleTranslate(
       message: missingKeyMessage(settings),
       scope: "page",
       settings: true,
+      uiLanguage: settings.uiLanguage,
     });
     emit({ type: "batch-done", batchId: req.batchId });
     return;
@@ -117,6 +118,7 @@ async function handleTranslate(
         provider,
         targetLang,
         model: settings.model,
+        uiLanguage: settings.uiLanguage,
         cache: {
           key: (text) => cacheKey(origin, settings.model, targetLang, text),
           getMany: cacheGetMany,

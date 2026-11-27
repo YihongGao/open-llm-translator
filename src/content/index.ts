@@ -469,6 +469,8 @@ function main(): void {
       }
       render(seg);
     } else if (ev.type === "segment-error") {
+      // The message is in the language the service worker used; match the strings we wrap it in.
+      setUiLanguage(parseUiLanguage(ev.uiLanguage));
       for (const id of ev.ids) {
         const seg = byId.get(id);
         if (!seg) continue;
