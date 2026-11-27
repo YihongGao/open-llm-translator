@@ -1,4 +1,4 @@
-// UI strings. The catalog is public/_locales/{en,ja,zh_TW}/messages.json and
+// UI strings. The catalog is public/_locales/{en,ja,zh_CN,zh_TW}/messages.json and
 // Chrome picks the locale from the browser UI language (fallback: en, the
 // manifest's default_locale). This is the only module that touches chrome.i18n.
 
@@ -24,11 +24,11 @@ export function uiLanguage(): string {
  * `data-i18n-aria-label` and `data-i18n-title` set those attributes. The
  * HTML keeps the English text as a fallback. Also sets <html lang> to the language of the catalog in use.
  */
-export function localizePage(root: ParentNode = document): void {
+export function localizePage(): void {
   document.documentElement.lang = t("pageLang");
-  for (const el of root.querySelectorAll<HTMLElement>("[data-i18n]")) el.textContent = t(el.dataset.i18n as MessageKey);
-  for (const el of root.querySelectorAll<HTMLElement>("[data-i18n-aria-label]"))
+  for (const el of document.querySelectorAll<HTMLElement>("[data-i18n]")) el.textContent = t(el.dataset.i18n as MessageKey);
+  for (const el of document.querySelectorAll<HTMLElement>("[data-i18n-aria-label]"))
     el.setAttribute("aria-label", t(el.dataset.i18nAriaLabel as MessageKey));
-  for (const el of root.querySelectorAll<HTMLElement>("[data-i18n-title]"))
+  for (const el of document.querySelectorAll<HTMLElement>("[data-i18n-title]"))
     el.setAttribute("title", t(el.dataset.i18nTitle as MessageKey));
 }

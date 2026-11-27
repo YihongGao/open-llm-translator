@@ -46,7 +46,6 @@ async function shortcutLabels(): Promise<{ page: string; subtitles: string }> {
   return { page: of("toggle-translation"), subtitles: of("toggle-subtitles") };
 }
 
-/** A button label followed by its shortcut, when one is set. */
 const withShortcut = (label: string, shortcut: string) => (shortcut ? t("popupWithShortcut", label, shortcut) : label);
 
 async function init(): Promise<void> {

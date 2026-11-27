@@ -1,5 +1,6 @@
 // Per-batch pipeline: dedupe -> cache lookup -> provider stream -> cache write.
-// Kept free of chrome.* APIs so it can be unit-tested with fakes.
+// Its only chrome.* use is chrome.i18n through t(); everything else is injected
+// (deps) so it can be unit-tested with fakes.
 
 import { t, type MessageKey } from "../shared/i18n";
 import type { TranslateEvent, TranslateRequest } from "../shared/messages";
