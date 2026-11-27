@@ -69,7 +69,7 @@ The harness and feature recipes are documented in [.claude/skills/verify/SKILL.m
 
 ### Things to keep in step
 
-- **Adding or changing a user-facing string**: the catalog is `public/_locales/{en,ja,zh_TW}/messages.json`. Add the key to all three files (a test fails if one lacks it, or if placeholders differ), then use `t("key", ...subs)` from `src/shared/i18n.ts`, which is the only module that calls `chrome.i18n`. In HTML, put English text in the element with `data-i18n="key"` (also `data-i18n-aria-label` and `data-i18n-title`); `localizePage()` fills it at run time and a test checks the English fallback against the catalog. Use named placeholders (`$provider# Contributing
+- **Adding or changing a user-facing string**: the catalog is `public/_locales/{en,ja,zh_CN,zh_TW}/messages.json`. Add the key to all four files (zh_CN is natural mainland wording, not a conversion of zh_TW) (a test fails if one lacks it, or if placeholders differ), then use `t("key", ...subs)` from `src/shared/i18n.ts`, which is the only module that calls `chrome.i18n`. In HTML, put English text in the element with `data-i18n="key"` (also `data-i18n-aria-label` and `data-i18n-title`); `localizePage()` fills it at run time and a test checks the English fallback against the catalog. Use named placeholders (`$provider# Contributing
 
 Thanks for helping. Issues and pull requests are welcome in English or Chinese.
 
@@ -139,7 +139,7 @@ The harness and feature recipes are documented in [.claude/skills/verify/SKILL.m
 
 ### Things to keep in step
 
- with `"content": "$1"`), numbered in order of first appearance in the English text, and pass substitutions in that order. Write raw UTF-8, never `\uXXXX`. Use full-width punctuation only in ja and zh_TW. Set strings with `textContent` or attributes, never `innerHTML`. Not translated: the LLM prompt in `protocol.ts` and `console.*` logs. Language names in the target-language picker stay in their own language.
+ with `"content": "$1"`), numbered in order of first appearance in the English text, and pass substitutions in that order. Write raw UTF-8, never `\uXXXX`. Use full-width punctuation only in ja, zh_CN and zh_TW. Set strings with `textContent` or attributes, never `innerHTML`. Not translated: the LLM prompt in `protocol.ts` and `console.*` logs. Language names in the target-language picker stay in their own language.
 - **Adding or changing a model**: update `MODELS` in `src/shared/settings.ts`, `PRICES` in `src/background/pricing.ts`, and the model table in both `README.md` and `README.zh-TW.md`.
 - **Changing what data is sent or stored**: update [docs/privacy-policy.md](docs/privacy-policy.md).
 - **Store constraints**: the shipped bundle must not contain source maps, `eval(`, `new Function(`, `importScripts(` or remote `import()`, and must not request broad host permissions. `npm run check:dist` enforces this; keep new code and dependencies compatible with it.

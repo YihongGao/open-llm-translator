@@ -5,7 +5,7 @@ This directory is the maintained source for verifying the user-facing behavior o
 ## Baseline preconditions
 
 - `npm run build:e2e` has run after the last change. `node .claude/skills/verify/scripts/doctor.mjs` exits 0.
-- Each journey calls `launch({ name })`, which creates a fresh profile. That means empty settings and an empty translation cache, plus the defaults: mock key, `claude-haiku-5-5`, `zh-TW`, and browser UI language `zh-TW` (`launch({ locale })`), so the Chinese UI strings in these recipes hold on any OS.
+- Each journey calls `launch({ name })`, which creates a fresh profile. That means empty settings and an empty translation cache, plus the defaults: mock key, `claude-haiku-5-5`, stored target language `zh-TW`, and browser UI language `zh-TW` (`launch({ locale })`), so the Chinese UI strings in these recipes hold on any OS. Pass `settings: { targetLang: null }` to leave the language unstored: a fresh install's target follows the UI language.
 - The default API mock is `"ok"`: every segment `[n] text` comes back as `〔譯〕text`.
 - Pages come from `run.fixture()` (`fixtures/article.html`), except YouTube, which needs the live site.
 - Never drive the user's own Chrome or a profile a different run created.
@@ -42,5 +42,5 @@ Each feature file starts with an H1 title and one paragraph describing the user-
 - [Popup language and model](./popup-language-model.md): switch target language (re-translates the open page) and model (key warning, persisted).
 - [Error notices](./error-notices.md): missing key, invalid key, rate limit. Covers the toast, the ⚠ markers and retry on re-toggle.
 - [Options page](./options-page.md): write-only API key fields, 清除, model, language, 儲存, 測試連線. Proven by `scripts/journey-options-write-only-keys.mjs` and `scripts/journey-options-clear-key.mjs`.
-- [UI language](./ui-locale.md): popup, options page, toasts and command descriptions in en / ja / zh_TW by browser language, English for the rest. Proven by `scripts/journey-ui-locale.mjs`.
+- [UI language](./ui-locale.md): popup, options page, toasts and command descriptions in en / ja / zh_CN / zh_TW by browser language, English for the rest. Proven by `scripts/journey-ui-locale.mjs`.
 - [YouTube bilingual subtitles](./youtube-subtitles.md): subtitle overlay on `youtube.com/watch`. Needs the live site and is not yet proven by a run.

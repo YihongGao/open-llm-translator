@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Chrome MV3 extension that inserts LLM translations next to the original text (bilingual view), plus bilingual YouTube subtitles. Users bring their own Anthropic / OpenAI / Gemini API key. `docs/architecture.md` has the per-file responsibility table, design decisions, and hidden-text filtering limits; read it before structural changes. `README.md` (English) and `README.zh-TW.md` are for users, and `CONTRIBUTING.md` for contributors; keep the two READMEs in sync. User-facing strings live in `public/_locales/{en,ja,zh_TW}/messages.json` (en is the default locale; the UI follows the browser language and any other language shows English). Never hard-code them; see CONTRIBUTING.md.
+Chrome MV3 extension that inserts LLM translations next to the original text (bilingual view), plus bilingual YouTube subtitles. Users bring their own Anthropic / OpenAI / Gemini API key. `docs/architecture.md` has the per-file responsibility table, design decisions, and hidden-text filtering limits; read it before structural changes. `README.md` (English) and `README.zh-TW.md` are for users, and `CONTRIBUTING.md` for contributors; keep the two READMEs in sync. User-facing strings live in `public/_locales/{en,ja,zh_CN,zh_TW}/messages.json` (en is the default locale; the UI follows the browser language and any other language shows English; a fresh install's target language also follows it, see `defaultSettings()`). Never hard-code them; see CONTRIBUTING.md.
 
 ## Commands
 

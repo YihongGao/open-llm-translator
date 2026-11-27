@@ -13,11 +13,12 @@ Developer Dashboard 各欄位要填的內容。理由類欄位用英文寫，給
 
 ## Store listing
 
-**Description（manifest，132 字元內）**：manifest 的 `description` 是 `__MSG_extDescription__`，實際文字在 `public/_locales/{en,ja,zh_TW}/messages.json`（`default_locale` 為 `en`）。三個語言各一句：
+**Description（manifest，132 字元內）**：manifest 的 `description` 是 `__MSG_extDescription__`，實際文字在 `public/_locales/{en,ja,zh_CN,zh_TW}/messages.json`（`default_locale` 為 `en`）。四個語言各一句：
 
 > en：Shows LLM translations below the original text (bilingual view)
 > ja：原文の下に LLM 翻訳を表示します（対訳表示）
 > zh_TW：在原文下方顯示 LLM 翻譯（雙語對照）
+> zh_CN：在原文下方显示 LLM 翻译（双语对照）
 
 商店頁的說明文字不讀 `_locales`，要在 Developer Dashboard 分語言各填一份（見下方 Language）。
 
@@ -59,7 +60,7 @@ YouTube 與 Gemini 是 Google LLC 的商標，Claude 是 Anthropic PBC 的商標
 
 **Category**：Tools（或 Productivity）
 
-**Language**：因為 manifest 的 `default_locale` 是 `en`，Dashboard 的預設語言要設成 English，並提供英文的 Detailed description（下方這份中文要翻成英文）。再另外加 Chinese (Traditional) 與 Japanese 的在地化說明（日文可晚點補，沒補就顯示英文）。介面語言（en / ja / zh_TW）跟著瀏覽器，其他語言一律顯示英文。
+**Language**：因為 manifest 的 `default_locale` 是 `en`，Dashboard 的預設語言要設成 English，並提供英文的 Detailed description（下方這份中文要翻成英文）。再另外加 Chinese (Traditional)、Chinese (Simplified) 與 Japanese 的在地化說明（沒補的語言顯示英文說明）。介面語言（en / ja / zh_CN / zh_TW）跟著瀏覽器，其他語言一律顯示英文。
 
 **Graphic assets**
 
@@ -137,7 +138,7 @@ Additional instructions：
 ```
 This extension needs the user's own LLM API key. A test key for Anthropic with a small spend limit is in the Password field.
 
-The UI follows the browser's language: English, Japanese or Traditional Chinese, and English for any other language. The steps below use the English labels; the Traditional Chinese labels are in parentheses.
+The UI follows the browser's language: English, Japanese, Simplified or Traditional Chinese, and English for any other language. The steps below use the English labels; the Traditional Chinese labels are in parentheses.
 
 1. Right-click the toolbar icon and choose "Options" (選項).
 2. In "Model", keep the default "Claude Haiku 5.5".

@@ -12,6 +12,7 @@ const EN = {
   ui: "en",
   htmlLang: "en",
   title: "Open LLM Translator Settings",
+  translateTo: "Translate to",
   toggle: "Translate this page",
   warn: "No API key set for Anthropic (Claude).",
   settings: "⚙ Settings",
@@ -33,6 +34,7 @@ const JA = {
   ui: "ja",
   htmlLang: "ja",
   title: "Open LLM Translator の設定",
+  translateTo: "翻訳先",
   toggle: "このページを翻訳",
   warn: "Anthropic（Claude）の API キーが未設定です。",
   settings: "⚙ 設定",
@@ -50,10 +52,35 @@ const JA = {
   description: "原文の下に LLM 翻訳を表示します（対訳表示）",
   statusSaved: "保存しました（すでに開いているページでは、翻訳をいったんオフにしてからオンにすると新しい言語が反映されます）",
 };
+const ZH_CN = {
+  ui: "zh-CN",
+  htmlLang: "zh-CN",
+  title: "Open LLM Translator 设置",
+  translateTo: "翻译为",
+  toggle: "翻译此页",
+  warn: "尚未设置 Anthropic（Claude） 的 API 密钥。",
+  settings: "⚙ 设置",
+  shortcuts: "快捷键",
+  save: "保存",
+  test: "测试连接",
+  clear: "清除",
+  clearAria: "清除 Anthropic API key",
+  activeLabel: "（当前使用）",
+  modelOption: "Claude Haiku 5.5（默认，便宜、快速）",
+  toast: "翻译失败：尚未设置 Anthropic（Claude） 的 API 密钥",
+  toastAction: "打开设置",
+  cmdPage: "切换此页翻译",
+  cmdSubs: "切换 YouTube 双语字幕",
+  description: "在原文下方显示 LLM 翻译（双语对照）",
+  statusSaved: "已保存（已打开的页面需要重新切换翻译才会应用新语言）",
+  leak: /儲存|設定|翻譯|目標語言|測試連線/,
+};
+// What a fresh profile's "Translate to" picker starts on, by UI language.
 const CASES = [
-  { locale: "en", expect: EN },
-  { locale: "ja", expect: JA },
-  { locale: "fr", expect: { ...EN, ui: "fr" } }, // no French catalog: falls back to en
+  { locale: "en", expect: EN, target: "en" },
+  { locale: "ja", expect: JA, target: "ja" },
+  { locale: "zh-CN", expect: ZH_CN, target: "zh-CN" },
+  { locale: "fr", expect: { ...EN, ui: "fr" }, target: "en" }, // no French catalog: falls back to en
 ];
 
 const results = [];
@@ -63,8 +90,8 @@ const check = (name, ok, detail) => {
 };
 const eq = (name, actual, expected) => check(name, actual === expected, { actual, expected });
 
-async function drive({ locale, expect: x }) {
-  const run = await launch({ name: `ui-locale-${locale}`, locale, settings: { anthropicApiKey: "" } });
+async function drive({ locale, expect: x, target }) {
+  const run = await launch({ name: `ui-locale-${locale}`, locale, settings: { anthropicApiKey: "", targetLang: null } });
   const tag = (s) => `[${locale}] ${s}`;
   try {
     // Chromium really runs in this UI language (not just Playwright's navigator.language).
@@ -80,6 +107,8 @@ async function drive({ locale, expect: x }) {
     const page = await run.newPage(run.fixture("article.html"));
     const popup = await run.openPopup();
     const ps = await popup.state();
+    eq(tag("fresh profile starts on the UI language as target"), ps.targetLang, target);
+    eq(tag("popup 'Translate to' label"), await popup.text('label[for="targetLang"]'), x.translateTo);
     check(tag("popup toggle label"), ps.toggle.startsWith(x.toggle), ps.toggle);
     eq(tag("popup key warning"), ps.warn, x.warn);
     eq(tag("popup settings link"), await popup.text("#settings"), x.settings);
@@ -88,6 +117,8 @@ async function drive({ locale, expect: x }) {
     check(tag("popup model option"), (await popup.eval((w, doc) => [...doc.querySelectorAll("#model option")].map((o) => o.textContent))).includes(x.modelOption));
     await run.writeJson(`popup-${locale}.json`, ps);
 
+    // English pages are not translated into English, so move off the default to get a translation attempt.
+    if (target === "en") await popup.select("#targetLang", "ko");
     // Missing-key toast in the page, produced by the content script + service worker.
     await popup.click("#toggle");
     const s = await waitForPage(page, (st) => st.toast?.message, { label: "missing-key toast" });
@@ -116,9 +147,10 @@ async function drive({ locale, expect: x }) {
     await opt.locator('button[type="submit"]').click();
     await opt.waitForFunction(() => document.querySelector("#status").textContent !== "");
     eq(tag("options saved status"), await opt.locator("#status").textContent(), x.statusSaved);
-    // Language-neutral guard: the Chinese UI must not leak into en/ja/fr.
-    const leaked = await opt.evaluate(() =>
-      [...document.querySelectorAll("h1, label, button, p")].map((e) => e.textContent).filter((t) => /儲存|目標語言|測試連線|清除/.test(t)),
+    // Language-neutral guard: the Chinese UI must not leak into the other languages.
+    const leaked = await opt.evaluate(
+      (re) => [...document.querySelectorAll("h1, label, button, p")].map((e) => e.textContent).filter((t) => new RegExp(re).test(t)),
+      (x.leak ?? /儲存|目標語言|測試連線|清除/).source,
     );
     check(tag("no Traditional Chinese UI text on the options page"), leaked.length === 0, leaked);
   } catch (err) {
@@ -130,6 +162,31 @@ async function drive({ locale, expect: x }) {
 }
 
 for (const c of CASES) await drive(c);
+
+// zh-HK has no catalog of its own. Observed on Chromium 2026-11: Chrome serves zh_TW for it (not English).
+// Asserted here so a change in that fallback shows up.
+{
+  const run = await launch({ name: "ui-locale-zh-HK", locale: "zh-HK", settings: { anthropicApiKey: "", targetLang: null } });
+  try {
+    const page = await run.newPage(run.fixture("article.html"));
+    const popup = await run.openPopup();
+    const opt = await run.newPage(`chrome-extension://${run.extId}/options.html`);
+    await opt.waitForFunction(() => document.querySelector("h1").textContent !== "");
+    const observed = {
+      uiLanguage: await run.sw.evaluate(() => chrome.i18n.getUILanguage()),
+      popupToggle: (await popup.state()).toggle,
+      popupTargetLang: (await popup.state()).targetLang,
+      optionsTitle: await opt.locator("h1").textContent(),
+      optionsHtmlLang: await opt.evaluate(() => document.documentElement.lang),
+    };
+    console.log(`INFO zh-HK observed: ${JSON.stringify(observed)}`);
+    await run.writeJson("observed-zh-HK.json", observed);
+    eq("[zh-HK] options page is Traditional Chinese (zh_TW fallback)", observed.optionsTitle, "Open LLM Translator 設定");
+    eq("[zh-HK] fresh profile starts on zh-TW", observed.popupTargetLang, "zh-TW");
+  } finally {
+    await run.close();
+  }
+}
 
 const failed = results.filter((r) => !r.ok);
 console.log(failed.length ? `${failed.length} check(s) failed` : "all checks passed");

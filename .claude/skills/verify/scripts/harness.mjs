@@ -227,7 +227,7 @@ export async function waitForPage(page, predicate, { timeout = 15000, label = "p
  *   locale: the browser UI language (chrome.i18n), default "zh-TW" so the Chinese assertions hold on any OS.
  *     Set through --lang: Chromium on Windows ignores Playwright's `locale` option for chrome.i18n (it only
  *     changes navigator.language and Accept-Language), and otherwise follows the OS language. Any tag works, e.g. "ja", "fr".
- *   settings: written to chrome.storage.local before any page loads.
+ *   settings: (null = leave unstored) written to chrome.storage.local before any page loads.
  *   Default: mock key + claude-haiku-5-5 + zh-TW. Pass { anthropicApiKey: "" } for the no-key path.
  */
 export async function launch({ name, mock = "ok", settings = {}, headed = !!process.env.HEADED, locale = "zh-TW" } = {}) {
@@ -277,6 +277,8 @@ export async function launch({ name, mock = "ok", settings = {}, headed = !!proc
     const calls = [];
     await installMock(ctx, mock, calls);
     const stored = { anthropicApiKey: mock === false ? "" : "sk-ant-verify-mock", model: "claude-haiku-5-5", targetLang: "zh-TW", ...settings };
+    // A null setting means "not stored": the extension's own default applies (targetLang follows the UI language).
+    for (const [k, v] of Object.entries(stored)) if (v === null) delete stored[k];
     await sw.evaluate((s) => chrome.storage.local.set(s), stored);
 
     // Helper tab for driving the popup (see popupHandle): any extension page
