@@ -75,7 +75,7 @@
     "message": "尚未设置 API 密钥。"
   },
   "popupWarnNoKeyFor": {
-    "message": "尚未设置 $provider$ 的 API 密钥。",
+    "message": "尚未设置 $provider$的 API 密钥。",
     "placeholders": {
       "provider": {
         "content": "$1"
@@ -215,7 +215,7 @@
     }
   },
   "errMissingKey": {
-    "message": "尚未设置 $provider$ 的 API 密钥",
+    "message": "尚未设置 $provider$的 API 密钥",
     "placeholders": {
       "provider": {
         "content": "$1"
@@ -308,7 +308,7 @@
     "message": "响应没有内容"
   },
   "errStreamEndedEarly": {
-    "message": "流在完成前就结束了"
+    "message": "流式传输在完成前就结束了"
   },
   "errAnthropicForbidden": {
     "message": "API 密钥没有此模型的权限（403）"
@@ -385,7 +385,7 @@
     "message": "暂不支持直播字幕"
   },
   "ytNoSubtitles": {
-    "message": "这个视频没有字幕"
+    "message": "此视频没有字幕"
   },
   "ytNoneReceived": {
     "message": "没有收到 YouTube 字幕"
