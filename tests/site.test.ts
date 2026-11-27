@@ -8,6 +8,7 @@ const SITE = "https://yihonggao.github.io/open-llm-translator/";
 // The root page only redirects; the two language versions are the real pages.
 const LANG_PAGES = { "zh-Hant-TW": "zh-tw/index.html", en: "en/index.html" } as const;
 const PAGES = ["index.html", ...Object.values(LANG_PAGES)];
+const PRIVACY = "privacy/index.html";
 
 const read = (page: string) => readFileSync(posix.join("dist-site", page), "utf8");
 const attrs = (html: string, re: RegExp) => [...html.matchAll(re)].map((m) => m[1] ?? "");
@@ -48,7 +49,7 @@ describe("landing page build", () => {
     execFileSync(process.execPath, ["scripts/build-site.mjs"]);
   });
 
-  it.each(PAGES)("%s ships every local file it references", (page) => {
+  it.each([...PAGES, PRIVACY])("%s ships every local file it references", (page) => {
     const html = read(page);
     const refs = [...attrs(html, /\b(?:href|src)="([^"#][^"]*)"/g), ...attrs(html, /\bfrom "(\.[^"]+)"/g)].filter(
       (r) => !/^(?:https?:|mailto:)/.test(r),
@@ -78,6 +79,19 @@ describe("landing page build", () => {
       [...read(page).matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map((m) => [m[1], m[2]]),
     );
     expect(alternates).toEqual({ "zh-Hant-TW": `${SITE}zh-tw/`, en: `${SITE}en/`, "x-default": SITE });
+  });
+
+  it("publishes docs/privacy-policy.md as a page with both languages", () => {
+    const policy = readFileSync("docs/privacy-policy.md", "utf8");
+    const html = read(PRIVACY);
+    expect(html).toContain('<article id="en" lang="en">');
+    expect(html).toContain('<article id="zh-tw" lang="zh-Hant-TW">');
+    const updated = /_(Last updated: [^_]+)_/.exec(policy)?.[1];
+    expect(updated).toBeDefined();
+    expect(html).toContain(updated);
+    // No Markdown left in the rendered text.
+    const text = html.slice(html.indexOf("<main>")).replace(/<[^>]*>/g, "\n");
+    expect(text).not.toMatch(/\*\*|\]\(|`|^\s*\|/m);
   });
 
   it("gives both language versions the same structure", () => {
