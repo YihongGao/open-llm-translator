@@ -6,6 +6,7 @@ The user turns on translation for the current tab. Each visible text block gets 
 
 - `page-on` turns translation on from the popup's 翻譯此頁 and translates the first screen.
 - `page-layout` renders short segments inline (`llmt-inline`) and long ones as a block (`llmt-block`); single-link segments get the translation inside the link.
+- `page-br-paragraphs` splits paragraphs written as text separated by `<br><br>` (no `<p>`, as on forum posts) into one segment each, with the translation between the two breaks. Journey: `journey-br-paragraphs.mjs` on `fixtures/forum-br.html`.
 - `page-skip` leaves `<button>`, `<pre>` and `[translate=no]` untranslated and unsent.
 - `page-lazy` translates off-screen blocks only after they scroll into view.
 - `page-off` hides translations from the popup's 顯示原文 (`html.llmt-hidden`).
