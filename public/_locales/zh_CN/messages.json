@@ -1,0 +1,435 @@
+{
+  "extDescription": {
+    "message": "在原文下方显示 LLM 翻译（双语对照）"
+  },
+  "cmdTogglePage": {
+    "message": "切换此页翻译"
+  },
+  "cmdToggleSubtitles": {
+    "message": "切换 YouTube 双语字幕"
+  },
+  "pageLang": {
+    "message": "zh-CN"
+  },
+  "labelModel": {
+    "message": "模型"
+  },
+  "openSettings": {
+    "message": "打开设置"
+  },
+  "providerLabel": {
+    "message": "$name$（$product$）",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "product": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelOption": {
+    "message": "$name$（$note$）",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "note": {
+        "content": "$2"
+      }
+    }
+  },
+  "modelNoteDefaultFast": {
+    "message": "默认，便宜、快速"
+  },
+  "modelNoteSmoother": {
+    "message": "更通顺"
+  },
+  "modelNoteBestPriciest": {
+    "message": "质量最高、最贵"
+  },
+  "modelNoteCheapFast": {
+    "message": "便宜、快速"
+  },
+  "modelNoteBalanced": {
+    "message": "均衡"
+  },
+  "modelNoteFlagshipPriciest": {
+    "message": "旗舰、最贵"
+  },
+  "modelNoteFlagship": {
+    "message": "旗舰"
+  },
+  "keyHintSaved": {
+    "message": "已保存，要更换请粘贴新的密钥"
+  },
+  "keyHintSavedTail": {
+    "message": "已保存（$tail$），要更换请粘贴新的密钥",
+    "placeholders": {
+      "tail": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupWarnNoKey": {
+    "message": "尚未设置 API 密钥。"
+  },
+  "popupWarnNoKeyFor": {
+    "message": "尚未设置 $provider$ 的 API 密钥。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupTranslateTo": {
+    "message": "翻译为"
+  },
+  "popupTranslatePage": {
+    "message": "翻译此页"
+  },
+  "popupShowOriginal": {
+    "message": "显示原文"
+  },
+  "popupSubsOn": {
+    "message": "开启双语字幕"
+  },
+  "popupSubsOff": {
+    "message": "关闭双语字幕"
+  },
+  "popupWithShortcut": {
+    "message": "$label$（$shortcut$）",
+    "placeholders": {
+      "label": {
+        "content": "$1"
+      },
+      "shortcut": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSettings": {
+    "message": "⚙ 设置"
+  },
+  "popupShortcuts": {
+    "message": "快捷键"
+  },
+  "popupCannotTranslate": {
+    "message": "此页面无法翻译"
+  },
+  "popupNoteRestrictedPages": {
+    "message": "浏览器内置页面和 Chrome 网上应用店不允许扩展程序访问。"
+  },
+  "popupNoteNotAllowed": {
+    "message": "Chrome 不允许扩展程序在此页面上运行。"
+  },
+  "popupNoteNoShortcut": {
+    "message": "尚未设置快捷键，可在“快捷键”中设置。"
+  },
+  "popupNoteNewModel": {
+    "message": "新的模型将用于之后翻译的段落。"
+  },
+  "optionsTitle": {
+    "message": "Open LLM Translator 设置"
+  },
+  "optionsModelHint": {
+    "message": "只需填写所选模型对应服务商的 API 密钥。"
+  },
+  "optionsClear": {
+    "message": "清除"
+  },
+  "optionsClearAria": {
+    "message": "清除 $key$",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyStorageHint": {
+    "message": "API 密钥只保存在这台电脑的 chrome.storage.local 中，不会通过 Chrome 同步。保存后不会再显示完整的密钥，也无法从这里复制；要更换请直接粘贴新的密钥，留空则保留原有密钥。"
+  },
+  "optionsLimitsLead": {
+    "message": "建议为此扩展程序单独创建一个专用的 API 密钥，并在服务商处设置用量上限："
+  },
+  "optionsListSeparator": {
+    "message": "、"
+  },
+  "optionsLimitsEnd": {
+    "message": "。"
+  },
+  "optionsDataNotice": {
+    "message": "翻译时，页面上要翻译的段落文字、页面标题和网址（只包含域名与路径，不含查询字符串）会使用您的 API 密钥发送给所选模型的服务商（Anthropic、OpenAI 或 Google），并按该服务商的 API 条款处理。译文会缓存在这台电脑上，不会发送到其他地方。"
+  },
+  "optionsTargetLang": {
+    "message": "目标语言"
+  },
+  "optionsSave": {
+    "message": "保存"
+  },
+  "optionsTest": {
+    "message": "测试连接"
+  },
+  "optionsUsage": {
+    "message": "使用方法：点击扩展程序图标打开菜单，或直接按快捷键（默认 Alt/Option+A）切换翻译。快捷键可在 chrome://extensions/shortcuts 中修改。"
+  },
+  "optionsActiveKeyLabel": {
+    "message": "（当前使用）"
+  },
+  "optionsSaved": {
+    "message": "已保存（已打开的页面需要重新切换翻译才会应用新语言）"
+  },
+  "optionsConfirmDeleteKey": {
+    "message": "确定要删除 $provider$ 的 API 密钥吗？删除后需要重新粘贴才能使用。",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsKeyDeleted": {
+    "message": "已删除 $provider$ 的 API 密钥",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTesting": {
+    "message": "测试中…"
+  },
+  "optionsTestOk": {
+    "message": "成功：$sample$",
+    "placeholders": {
+      "sample": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTestFail": {
+    "message": "失败：$reason$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "errMissingKey": {
+    "message": "尚未设置 $provider$ 的 API 密钥",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errNoTranslationParsed": {
+    "message": "API 有响应，但没有解析到译文"
+  },
+  "errKeyInvalid": {
+    "message": "$provider$ API 密钥无效（401），请到设置页确认",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errForbidden": {
+    "message": "$provider$ API 密钥没有此模型的权限（403）：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errModelNotFound": {
+    "message": "$provider$ 找不到模型（404），请到设置页确认模型",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errRateLimit": {
+    "message": "$provider$ 超出速率限制或额度（429），请稍后再试",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errBadRequest": {
+    "message": "$provider$ 请求被拒绝（400）：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errStreamInterrupted": {
+    "message": "$provider$ 流式传输中断：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errApi": {
+    "message": "$provider$ API 错误 $status$：$detail$",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      },
+      "status": {
+        "content": "$2"
+      },
+      "detail": {
+        "content": "$3"
+      }
+    }
+  },
+  "errConnect": {
+    "message": "无法连接到 $provider$ API",
+    "placeholders": {
+      "provider": {
+        "content": "$1"
+      }
+    }
+  },
+  "errEmptyResponse": {
+    "message": "响应没有内容"
+  },
+  "errStreamEndedEarly": {
+    "message": "流在完成前就结束了"
+  },
+  "errAnthropicForbidden": {
+    "message": "API 密钥没有此模型的权限（403）"
+  },
+  "errAnthropicModelNotFound": {
+    "message": "找不到模型（404），请到设置页确认模型"
+  },
+  "errAnthropicRateLimit": {
+    "message": "超出速率限制（429），请稍后再试"
+  },
+  "errAnthropicBadRequest": {
+    "message": "请求被拒绝（400）：$detail$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "errAnthropicApi": {
+    "message": "API 错误 $status$：$detail$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "errMissedComplete": {
+    "message": "模型漏译了这一段"
+  },
+  "errMissedMaxTokens": {
+    "message": "输出超出长度上限，这一段被截断"
+  },
+  "errMissedRefusal": {
+    "message": "模型拒绝翻译这一段内容"
+  },
+  "contentConnectionLost": {
+    "message": "与后台程序的连接已中断"
+  },
+  "contentSegmentFailed": {
+    "message": "翻译失败：$message$（点击查看说明）",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastTranslationFailed": {
+    "message": "翻译失败：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRetryHint": {
+    "message": "修复后，关闭再重新开启翻译即可重试失败的段落。"
+  },
+  "toastUnknownError": {
+    "message": "未知错误"
+  },
+  "toastClose": {
+    "message": "关闭"
+  },
+  "ytPlayerUnavailable": {
+    "message": "无法连接到 YouTube 播放器"
+  },
+  "ytReloadRetry": {
+    "message": "刷新页面后再开启双语字幕。"
+  },
+  "ytLiveUnsupported": {
+    "message": "暂不支持直播字幕"
+  },
+  "ytNoSubtitles": {
+    "message": "这个视频没有字幕"
+  },
+  "ytNoneReceived": {
+    "message": "没有收到 YouTube 字幕"
+  },
+  "ytNoneReceivedHint": {
+    "message": "请尝试在播放器中点击 CC 开启字幕，或刷新页面。"
+  },
+  "ytAlreadyTarget": {
+    "message": "字幕已经是$language$，无需翻译",
+    "placeholders": {
+      "language": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytAlreadyTargetHint": {
+    "message": "要翻译其他语言的字幕，请在 YouTube 的字幕菜单中选择该语言。"
+  },
+  "ytFetchFailed": {
+    "message": "无法获取原文字幕"
+  },
+  "ytFetchFailedHttp": {
+    "message": "无法获取原文字幕（HTTP $status$）",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytFetchFailedHint": {
+    "message": "可在 YouTube 字幕菜单中改选原文语言后再试一次。"
+  },
+  "ytEmpty": {
+    "message": "字幕内容为空"
+  },
+  "ytTranslateFailed": {
+    "message": "字幕翻译失败：$message$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "ytRetryHint": {
+    "message": "修复后，关闭再重新开启双语字幕即可重试。"
+  }
+}
